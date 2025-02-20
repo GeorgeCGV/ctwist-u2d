@@ -274,8 +274,6 @@ public class ColorBlock : BasicBlock
         AudioManager.Instance.PlaySfx(SfxOnAttach);
 
         GameObject efx = Instantiate(EfxOnAttach, transform.position, Quaternion.identity);
-        ParticleSystem.MainModule mainModule = efx.GetComponent<ParticleSystem>().main;
-        mainModule.startColor = UnityColorFromBlockColor(color);
         efx.GetComponent<ParticleSystem>().Play();
 
         // run match check and scoring
