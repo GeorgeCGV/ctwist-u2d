@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(Canvas))]
 public class UILevelController : MonoBehaviour
 {
     public static event Action OnGameStarAllAnimationsDone;
@@ -100,11 +101,12 @@ public class UILevelController : MonoBehaviour
         scoreLabel.text = obj.ToString();
     }
 
-#region LevelStartup
+    #region LevelStartup
     private void HandleBeforeGameStarts(Data.LevelData data)
     {
         // set goals
-        if (data.goalScore != 0) {
+        if (data.goalScore != 0)
+        {
             goalPanel.GetComponent<GoalPanel>().InitScoreGoal(data.goalScore);
         }
         // set limits
@@ -120,7 +122,8 @@ public class UILevelController : MonoBehaviour
     private IEnumerator StartLevel(Animator animator)
     {
         animator.SetTrigger("ShadeOff");
-        for(int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 3; i++)
+        {
             countdownLabel.text = i.ToString();
             countdownLabel.enabled = true;
             AudioManager.Instance.PlaySfx(SfxOnCountdown);
@@ -131,9 +134,7 @@ public class UILevelController : MonoBehaviour
 
         OnGameStarAllAnimationsDone?.Invoke();
     }
-#endregion
-
-
+    #endregion
 
     public void OnPause()
     {

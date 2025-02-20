@@ -25,6 +25,20 @@ namespace InputSamples.Drawing
 #endif
     public class PointerInputComposite : InputBindingComposite<PointerInput>
     {
+
+#if UNITY_EDITOR
+        static PointerInputComposite()
+        {
+            Register();
+        }
+#endif
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Register()
+        {
+            InputSystem.RegisterBindingComposite<PointerInputComposite>();
+        }
+
         /// <summary>
         /// Required in Editor v6
         /// </summary>
@@ -47,20 +61,6 @@ namespace InputSamples.Drawing
                 InputId = context.ReadValue<int>(InputId),
                 Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position),
             };
-        }
-
-#if UNITY_EDITOR
-        static PointerInputComposite()
-        {
-            Register();
-        }
-
-#endif
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Register()
-        {
-            InputSystem.RegisterBindingComposite<PointerInputComposite>();
         }
     }
 }
