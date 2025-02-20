@@ -9,9 +9,10 @@ public class CountScore : MonoBehaviour
     private float elapsedTime = 0f;
     private int currentValue;
 
-    private TextMeshProUGUI label;
+    [SerializeField]
+    private AudioClip sfxScoring;
 
-    [SerializeField] AudioClip sfxScoring;
+    private TextMeshProUGUI label;
 
     private bool startedCounting;
 

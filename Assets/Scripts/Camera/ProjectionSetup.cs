@@ -3,9 +3,13 @@ using UnityEngine;
 
 public class CameraInit : MonoBehaviour
 {
-    public float currentAspect = 0;
+    [SerializeField]
+    private float currentAspect;
+
     private int lastScreenWidth;
+
     private int lastScreenHeight;
+
     private Coroutine screenChangeCoroutine;
 
     void Start()
@@ -42,37 +46,62 @@ public class CameraInit : MonoBehaviour
         // round to 3 decimal places, not very precise
         float roundedAspect = Mathf.Round(currentAspect * 1000f) / 1000f;
 
-        if (Screen.width > Screen.height) {
+        if (Screen.width > Screen.height)
+        {
             // landscape
             Camera.main.orthographicSize = 5f;
-        } else {
+        }
+        else
+        {
             // portrait mode
-            if (Mathf.Approximately(roundedAspect, 0.361f)) {
+            if (Mathf.Approximately(roundedAspect, 0.361f))
+            {
                 Camera.main.orthographicSize = 13.68f;
-            } else if (Mathf.Approximately(roundedAspect, 0.409f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.409f))
+            {
                 Camera.main.orthographicSize = 13.6f;
-            } else if (Mathf.Approximately(roundedAspect, 0.455f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.455f))
+            {
                 Camera.main.orthographicSize = 10.85f;
-            } else if (Mathf.Approximately(roundedAspect, 0.462f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.462f))
+            {
                 Camera.main.orthographicSize = 10.7f;
-            } else if (Mathf.Approximately(roundedAspect, 0.474f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.474f))
+            {
                 Camera.main.orthographicSize = 10.39f;
-            } else if (Mathf.Approximately(roundedAspect, 0.486f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.486f))
+            {
                 Camera.main.orthographicSize = 10.15f;
-            } else if (Mathf.Approximately(roundedAspect, 0.562f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.562f))
+            {
                 Camera.main.orthographicSize = 8.8f;
-            } else if (Mathf.Approximately(roundedAspect, 0.6f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.6f))
+            {
                 Camera.main.orthographicSize = 8.26f;
-            } else if (Mathf.Approximately(roundedAspect, 0.625f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.625f))
+            {
                 Camera.main.orthographicSize = 7.9f;
-            } else if (Mathf.Approximately(roundedAspect, 0.698f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.698f))
+            {
                 Camera.main.orthographicSize = 7.1f;
-            } else if (Mathf.Approximately(roundedAspect, 0.75f)) {
+            }
+            else if (Mathf.Approximately(roundedAspect, 0.75f))
+            {
                 Camera.main.orthographicSize = 6.6f;
             }
-
-
+            else
+            {
+                Logger.Debug($"Not supported aspect {currentAspect} rounded to {roundedAspect}");
+            }
         }
-
     }
 }
