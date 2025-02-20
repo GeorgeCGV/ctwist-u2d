@@ -134,7 +134,7 @@ public class ColorBlock : BasicBlock
 
             // float distance = HandleUtility.DistancePointLine(midPoint, edge.Item1, edge.Item2);
             float distance = DistancePointToLineSegment(midPoint, edge.Item1, edge.Item2);
-            // Debug.Log($"DST {distance}, {distance2}");
+            // Logger.Debug($"DST {distance}, {distance2}");
             // if (distance != distance2) {
             //     Debug.DebugBreak();
             // }
@@ -232,7 +232,7 @@ public class ColorBlock : BasicBlock
 
         Vector2 otherEdgeMidpoint = (otherBlockEdge.Item1 + otherBlockEdge.Item2) / 2;
         EdgeIndex idx = FindEdgeIndex(other.gameObject.GetComponent<PolygonCollider2D>(), otherEdgeMidpoint);
-        Debug.Log("side (our) " + thisBlockEdge.Item3 + " their (from edge): " + otherBlockEdge.Item3 + " their computed: " + idx);
+        Logger.Debug("side (our) " + thisBlockEdge.Item3 + " their (from edge): " + otherBlockEdge.Item3 + " their computed: " + idx);
 
         // Rotation can be calculated by taking vectors
         // (grey edge midpoint - grey hex position) and (blue hex position - blue edge midpoint),
@@ -243,7 +243,7 @@ public class ColorBlock : BasicBlock
         float angle11 = Mathf.Atan2(dir1.y, dir1.x) * Mathf.Rad2Deg;
         float angle22 = Mathf.Atan2(dir2.y, dir2.x) * Mathf.Rad2Deg;
         float rotationDifference = angle22 - angle11;
-        Debug.Log("rotationDifference " + rotationDifference + " rotationDifference " + rotationDifference);
+        Logger.Debug("rotationDifference " + rotationDifference + " rotationDifference " + rotationDifference);
         transform.Rotate(0, 0, rotationDifference);
 
         // otherBlockEdge = FindEdgeByIndex(other.gameObject.GetComponent<PolygonCollider2D>(), otherBlockEdge.Item3);// FindClosestEdge(other.gameObject.GetComponent<PolygonCollider2D>(), otherEdgeMidpoint);

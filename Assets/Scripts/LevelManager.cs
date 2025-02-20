@@ -334,7 +334,7 @@ public class LevelManager : MonoBehaviour
         }
 
         int matchedAmount = matches.Count;
-        Debug.Log($"Got {matchedAmount} matches");
+        Logger.Debug($"Got {matchedAmount} matches");
 
         if (matchedAmount >= 3)
         {
@@ -417,7 +417,7 @@ public class LevelManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log($"Failed to convert {colorStr} to block color, skip");
+                    Logger.Debug($"Failed to convert {colorStr} to block color, skip");
                 }
             }
         }
@@ -500,7 +500,7 @@ public class LevelManager : MonoBehaviour
             newBlock.gameObject.layer = blocksLayer;
 
 
-            Debug.Log($"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
+            Logger.Debug($"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
 
             // begin from root
             block = root;

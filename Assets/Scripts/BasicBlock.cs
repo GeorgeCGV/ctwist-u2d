@@ -96,7 +96,7 @@ public class BasicBlock : MonoBehaviour
 
             // float distance = HandleUtility.DistancePointLine(point, edge.Item1, edge.Item2);
             float distance = DistancePointToLineSegment(point, edge.Item1, edge.Item2);
-            // Debug.Log($"DST {distance}, {distance2}");
+            // Logger.Debug($"DST {distance}, {distance2}");
             // if (distance != distance2) {
             //     Debug.DebugBreak();
             // }
@@ -281,10 +281,10 @@ public class BasicBlock : MonoBehaviour
             Debug.DrawRay(start, dir, Color.yellow, 2);
 
             RaycastHit2D hit = Physics2D.Raycast(start, dir, neighbourRange, 1 << layer);
-            Debug.Log("raycast from: " + start.ToString() + " dir: " + dir.ToString() + " len: " + neighbourRange);
+            Logger.Debug("raycast from: " + start.ToString() + " dir: " + dir.ToString() + " len: " + neighbourRange);
             if (hit.collider != null)
             {
-                Debug.Log("hit: " + hit.collider.gameObject.name);
+                Logger.Debug("hit: " + hit.collider.gameObject.name);
                 Debug.DrawLine(start, hit.point, Color.red, 4);
 
                 var neighbourClosestEdge = FindClosestEdge(hit.collider.gameObject.GetComponent<PolygonCollider2D>(),
@@ -308,7 +308,7 @@ public class BasicBlock : MonoBehaviour
                         System.Diagnostics.Debugger.Break();
                     }
 #endif
-                    Debug.Log("unexpected edge conflic on collision");
+                    Logger.Debug("unexpected edge conflic on collision");
                     neighbours.Clear();
                     break;
                 }

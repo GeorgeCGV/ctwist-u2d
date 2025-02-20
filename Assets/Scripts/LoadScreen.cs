@@ -115,7 +115,7 @@ public class LoadScreen : MonoBehaviour
         }
         catch (Exception err)
         {
-            Debug.Log(err);
+            Logger.Debug(err.Message);
         }
         finally
         {

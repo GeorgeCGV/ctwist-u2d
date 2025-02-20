@@ -76,7 +76,7 @@ public class InputManager : MonoBehaviour
             return;
         }
         Vector2 dir = (pointerPressEndPos - pointerPressStartPos).normalized;
-        Debug.Log($"Swipe distance {swipeDistance} duration {duration} dir {dir}");
+        Logger.Debug($"Swipe distance {swipeDistance} duration {duration} dir {dir}");
 
         if ((swipeDistance >= minSwipeDistance) &&
             (duration > 0) && (duration <= maxSwipeDuration))
@@ -101,7 +101,7 @@ public class InputManager : MonoBehaviour
             float speedChange = swipeDistance / duration * speedMultiplier / massFactor;
             speedChange = Mathf.Clamp(speedChange, 0, 1500);
 
-            Debug.Log($"speedChange {speedChange}, mass: {massFactor}, duration {duration}");
+            Logger.Debug($"speedChange {speedChange}, mass: {massFactor}, duration {duration}");
 
             // determine left & right dir
             if (Vector2.Dot(dir, Vector2.left) > swipeDirectionThreshold)
@@ -189,7 +189,7 @@ public class InputManager : MonoBehaviour
             activeInputId = input.InputId;
             pointerPressStartPos = input.Position;
             dragging = true;
-            Debug.Log($"Started dragging at {pointerPressStartPos}");
+            Logger.Debug($"Started dragging at {pointerPressStartPos}");
         }
         else if (input.Contact && dragging)
         {
@@ -203,7 +203,7 @@ public class InputManager : MonoBehaviour
             if (activeInputId != input.InputId) {
                 return;
             }
-            Debug.Log($"Done dragging at {pointerPressEndPos}");
+            Logger.Debug($"Done dragging at {pointerPressEndPos}");
 
             AdaptSpeed(Time.time - dragStartTime);
             dragging = false;
