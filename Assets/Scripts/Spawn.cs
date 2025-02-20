@@ -8,6 +8,9 @@ public class Spawn : MonoBehaviour
     public AudioClip SfxOnSpawn;
     public GameObject ColorBlockPrefab;
 
+    private static int animatorTriggerSpawn = Animator.StringToHash("Spawn");
+    private static int animatorTriggerStop = Animator.StringToHash("Stop");
+
     private float currentTimeInSeconds;
     private float targetTimeInSeconds;
 
@@ -47,7 +50,7 @@ public class Spawn : MonoBehaviour
         // start spriteRenderer and light2D, begin to animate
         spriteRenderer.enabled = true;
         light2D.enabled = true;
-        animatorCtrl.SetTrigger("Spawn");
+        animatorCtrl.SetTrigger(animatorTriggerSpawn);
 
         return true;
     }
@@ -74,7 +77,7 @@ public class Spawn : MonoBehaviour
                 {
                     spriteRenderer.enabled = false;
                     light2D.enabled = false;
-                    animatorCtrl.SetTrigger("Stop");
+                    animatorCtrl.SetTrigger(animatorTriggerStop);
                     done = true;
                 }
             }
@@ -88,10 +91,11 @@ public class Spawn : MonoBehaviour
 
                 AudioManager.Instance.PlaySfx(SfxOnSpawn);
 
-                GameObject block = BlocksFactory.Instance.NewColorBlock(spawnColor);
-                block.transform.position = transform.position;
-                block.GetComponent<BasicBlock>().startForce = Random.Range(3, 8);
-                block.GetComponent<BasicBlock>().stepForce = Random.Range(2, 5);
+                GameObject obj = BlocksFactory.Instance.NewColorBlock(spawnColor);
+                obj.transform.position = transform.position;
+                BasicBlock block = obj.GetComponent<BasicBlock>();
+                block.startForce = Random.Range(3, 8);
+                block.stepForce = Random.Range(2, 5);
             }
         }
     }

@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 /// Within the level scene it is expected that there is a <see>LevelManager</see>
 /// that takes the control over.
 /// </summary>
+[RequireComponent(typeof(Animator), typeof(Canvas))]
 public class LoadScreen : MonoBehaviour
 {
     public static LoadScreen Instance { get; private set; }
@@ -16,8 +17,14 @@ public class LoadScreen : MonoBehaviour
     private static int ABORTED_SCEME_IDX = -100;
     private static int LOADED_SCEME_IDX = -1;
 
+    private static int animatorTriggerOpen = Animator.StringToHash("Open");
+    private static int animatorTriggerClose = Animator.StringToHash("Close");
+
     private int scene_idx;
     private Data.LevelData levelData;
+
+    private Animator animator;
+    private Canvas canvas;
 
     private void Awake()
     {
@@ -31,6 +38,9 @@ public class LoadScreen : MonoBehaviour
             Instance = this;
             // prevent destruction
             DontDestroyOnLoad(this);
+
+            animator = GetComponent<Animator>();
+            canvas = GetComponent<Canvas>();
         }
     }
 
@@ -50,8 +60,8 @@ public class LoadScreen : MonoBehaviour
     public void LoadLevel(int idx = 1)
     {
         scene_idx = idx;
-        GetComponent<Canvas>().enabled = true;
-        GetComponent<Animator>().SetTrigger("Open");
+        canvas.enabled = true;
+        animator.SetTrigger(animatorTriggerOpen);
     }
 
     public void OnLoadSceenAppearAnimationDone()
@@ -60,10 +70,11 @@ public class LoadScreen : MonoBehaviour
         {
             // load level data
             levelData = LoadLevelData(scene_idx - 1);
-            if (levelData == null) {
+            if (levelData == null)
+            {
                 // abort, hide load screen
                 scene_idx = ABORTED_SCEME_IDX;
-                GetComponent<Animator>().SetTrigger("Close");
+                animator.SetTrigger(animatorTriggerClose);
                 return;
             }
 
@@ -76,13 +87,13 @@ public class LoadScreen : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
 
-        Debug.Log("Scene Loaded Completely!");
+        Logger.Debug("Scene Loaded Completely!");
 
         // as we are done with the loading
         // clear the index
         scene_idx = LOADED_SCEME_IDX;
         AudioManager.Instance.StopMusic();
-        GetComponent<Animator>().SetTrigger("Close");
+        animator.SetTrigger(animatorTriggerClose);
     }
 
     public void OnLoadSceenDisappearAnimationDone()
@@ -94,12 +105,14 @@ public class LoadScreen : MonoBehaviour
         // the scene idx won't be LOADED_SCEME_IDX.
         if (scene_idx == LOADED_SCEME_IDX)
         {
-            GetComponent<Canvas>().enabled = false;
+            canvas.enabled = false;
             // pass control to level manager
             LevelManager.Instance.OnLevelSceneLoaded(gameObject, levelData);
-        } else if (scene_idx == ABORTED_SCEME_IDX) {
+        }
+        else if (scene_idx == ABORTED_SCEME_IDX)
+        {
             // failed to load the scene
-            GetComponent<Canvas>().enabled = false;
+            canvas.enabled = false;
         }
     }
 

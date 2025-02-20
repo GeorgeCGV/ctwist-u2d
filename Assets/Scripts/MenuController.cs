@@ -2,8 +2,13 @@ using UnityEngine;
 
 public class MenuController : MonoBehaviour
 {
-    public AudioClip BackgroundMusic;
-    public GameObject optionsPanel;
+    private static int animatorTriggerOpen = Animator.StringToHash("Open");
+    private static int animatorTriggerClose = Animator.StringToHash("Close");
+
+    [SerializeField]
+    private AudioClip BackgroundMusic;
+    [SerializeField]
+    private GameObject optionsPanel;
 
     void Start() {
         AudioManager.Instance.PlayMusic(BackgroundMusic);
@@ -11,13 +16,13 @@ public class MenuController : MonoBehaviour
 
     public void OnOptionsOpen() {
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
-        optionsPanel.GetComponent<Animator>().SetTrigger("Open");
+        optionsPanel.GetComponent<Animator>().SetTrigger(animatorTriggerOpen);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogAppear);
     }
 
     public void OnOptionsClose() {
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
-        optionsPanel.GetComponent<Animator>().SetTrigger("Close");
+        optionsPanel.GetComponent<Animator>().SetTrigger(animatorTriggerClose);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
     }
 
