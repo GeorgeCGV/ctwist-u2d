@@ -5,27 +5,42 @@ using UnityEngine.Assertions;
 [RequireComponent(typeof(Animator))]
 public class ColorBlock : BasicBlock
 {
-    public enum EBlockColor {
-            Blue,
-            Red,
-            Yellow,
-            Green,
-            White,
+    public static Color RED = new Color32(255, 165, 163, 255);
+    public static Color BLUE = new Color32(112, 225, 255, 255);
+    public static Color WHITE = new Color32(231, 231, 231, 255);
+
+    public enum EBlockColor
+    {
+        Blue,
+        Red,
+        Yellow,
+        Green,
+        White,
+        Purple,
+        Pink,
+        Black
     }
 
     public static Color UnityColorFromBlockColor(EBlockColor value)
     {
-        switch(value) {
+        switch (value)
+        {
             case EBlockColor.Red:
-                return Color.red;
+                return RED;
             case EBlockColor.Blue:
-                return Color.blue;
+                return BLUE;
             case EBlockColor.White:
-                return Color.white;
+                return WHITE;
             case EBlockColor.Yellow:
                 return Color.yellow;
-            case EBlockColor.Green:
-                return Color.green;
+            // case EBlockColor.Green:
+            //     return Color.green;
+            // case EBlockColor.Purple:
+            //     return Color.purple;
+            // case EBlockColor.Pink:
+            //     return Color.pink;
+            // case EBlockColor.Black:
+            //     return Color.black;
             default:
                 throw new NotImplementedException("not supported");
         }
@@ -42,15 +57,16 @@ public class ColorBlock : BasicBlock
         set
         {
             int animatorTriggerValue;
-            switch (value) {
-            case EBlockColor.Red:
-                animatorTriggerValue = 0;
-                break;
-            case EBlockColor.Blue:
-                animatorTriggerValue = 1;
-                break;
-            default:
-                throw new NotImplementedException("not supported");
+            switch (value)
+            {
+                case EBlockColor.Red:
+                    animatorTriggerValue = 0;
+                    break;
+                case EBlockColor.Blue:
+                    animatorTriggerValue = 1;
+                    break;
+                default:
+                    throw new NotImplementedException("not supported");
             }
 
             GetComponent<Animator>().SetInteger("Color", animatorTriggerValue);
@@ -67,12 +83,14 @@ public class ColorBlock : BasicBlock
 
     public override bool MatchesWith(GameObject obj)
     {
-        if (base.MatchesWith(obj)) {
+        if (base.MatchesWith(obj))
+        {
             return true;
         }
 
         ColorBlock other = obj.GetComponent<ColorBlock>();
-        if (other == null) {
+        if (other == null)
+        {
             return false;
         }
 
@@ -254,7 +272,8 @@ public class ColorBlock : BasicBlock
 
         int linkedNeighboursCount = LinkWithNeighbours(blocksLayer);
 
-        if (linkedNeighboursCount == 0) {
+        if (linkedNeighboursCount == 0)
+        {
             // not able to attach, revert block state
             transform.parent = initialParent;
             transform.position = initialPosition;
