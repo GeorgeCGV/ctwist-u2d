@@ -1,0 +1,24 @@
+{
+    "colorsInLevel": ["Pink", "Black", "White", "Purple", "Blue", "Red", "Green", "Yellow"],
+    "startBlocksNum": 14,
+    "goalScore": 4000,
+    "limitTime": 80,
+    "limitMove": 0,
+    "spawn": {
+        "timeMin": 1,
+        "timeMax": 5,
+        "timeDecreasePerTimePercent": 25,
+        "timeDecreaseByTimePercent": 10
+    },
+    "block": {
+        "speedMin": 5,
+        "speedMax": 5,
+        "speedIncreasePerTimePercent": 10,
+        "speedIncreaseBySpeedPercent": 15
+    },
+    "starRewards": [
+        1200,
+        2000,
+        3000
+    ]
+}

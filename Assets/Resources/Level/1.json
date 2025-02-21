@@ -1,0 +1,24 @@
+{
+    "colorsInLevel": ["Green", "Yellow", "Red"],
+    "startBlocksNum": 5,
+    "goalScore": 1600,
+    "limitTime": 0,
+    "limitMove": 0,
+    "spawn": {
+        "timeMin": 2,
+        "timeMax": 4,
+        "timeDecreasePerTimePercent": 25,
+        "timeDecreaseByTimePercent": 5
+    },
+    "block": {
+        "speedMin": 5,
+        "speedMax": 5,
+        "speedIncreasePerTimePercent": 10,
+        "speedIncreaseBySpeedPercent": 15
+    },
+    "starRewards": [
+        1600,
+        1600,
+        1650
+    ]
+}

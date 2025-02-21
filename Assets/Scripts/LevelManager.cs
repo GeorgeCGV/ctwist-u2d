@@ -11,7 +11,7 @@ public class LevelManager : MonoBehaviour
     public static event Action<string, Vector2> OnAnnounce;
 
     public static event Action<int, int> OnTimeLeftUpdate;
-    public static event Action<Data.GameOverResults> OnGameOver;
+    public static event Action<Data.LevelData, Data.GameOverResults> OnGameOver;
     public static event Action<Data.LevelData> OnBeforeGameStarts;
 
     [SerializeField]
@@ -144,7 +144,7 @@ public class LevelManager : MonoBehaviour
             AudioManager.Instance.PlaySfx(SfxOnLost);
         }
 
-        OnGameOver?.Invoke(new Data.GameOverResults(score, won));
+        OnGameOver?.Invoke(level, new Data.GameOverResults(score, won));
     }
 
     void Update()
