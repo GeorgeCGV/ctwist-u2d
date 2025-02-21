@@ -5,9 +5,16 @@ using UnityEngine.Assertions;
 [RequireComponent(typeof(Animator))]
 public class ColorBlock : BasicBlock
 {
-    public static Color RED = new Color32(255, 165, 163, 255);
-    public static Color BLUE = new Color32(112, 225, 255, 255);
-    public static Color WHITE = new Color32(231, 231, 231, 255);
+    private static int animatorColorIntParam = Animator.StringToHash("Color");
+
+    public static Color red = new Color32(255, 165, 163, 255);
+    public static Color blue = new Color32(112, 225, 255, 255);
+    public static Color white = new Color32(231, 231, 231, 255);
+    public static Color black = new Color32(96, 96, 96, 255);
+    public static Color yellow = new Color32(239, 227, 115, 255);
+    public static Color green = new Color32(99, 236, 124, 255);
+    public static Color pink = new Color32(255, 133, 228, 255);
+    public static Color purple = new Color32(185, 112, 255, 255);
 
     public enum EBlockColor
     {
@@ -26,26 +33,27 @@ public class ColorBlock : BasicBlock
         switch (value)
         {
             case EBlockColor.Red:
-                return RED;
+                return red;
             case EBlockColor.Blue:
-                return BLUE;
+                return blue;
             case EBlockColor.White:
-                return WHITE;
+                return white;
             case EBlockColor.Yellow:
-                return Color.yellow;
-            // case EBlockColor.Green:
-            //     return Color.green;
-            // case EBlockColor.Purple:
-            //     return Color.purple;
-            // case EBlockColor.Pink:
-            //     return Color.pink;
-            // case EBlockColor.Black:
-            //     return Color.black;
+                return yellow;
+            case EBlockColor.Green:
+                return green;
+            case EBlockColor.Purple:
+                return purple;
+            case EBlockColor.Pink:
+                return pink;
+            case EBlockColor.Black:
+                return black;
             default:
                 throw new NotImplementedException("not supported");
         }
     }
 
+    [SerializeField]
     private EBlockColor color;
 
     public EBlockColor ColorType
@@ -65,11 +73,29 @@ public class ColorBlock : BasicBlock
                 case EBlockColor.Blue:
                     animatorTriggerValue = 1;
                     break;
+                case EBlockColor.White:
+                    animatorTriggerValue = 2;
+                    break;
+                case EBlockColor.Black:
+                    animatorTriggerValue = 3;
+                    break;
+                case EBlockColor.Green:
+                    animatorTriggerValue = 4;
+                    break;
+                case EBlockColor.Yellow:
+                    animatorTriggerValue = 5;
+                    break;
+                case EBlockColor.Pink:
+                    animatorTriggerValue = 6;
+                    break;
+                case EBlockColor.Purple:
+                    animatorTriggerValue = 7;
+                    break;
                 default:
                     throw new NotImplementedException("not supported");
             }
 
-            GetComponent<Animator>().SetInteger("Color", animatorTriggerValue);
+            GetComponent<Animator>().SetInteger(animatorColorIntParam, animatorTriggerValue);
             color = value;
         }
     }
