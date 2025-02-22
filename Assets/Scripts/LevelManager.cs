@@ -52,11 +52,16 @@ public class LevelManager : MonoBehaviour
     private List<ColorBlock.EBlockColor> availableColors;
 
     #region Spawn
-    private float spawnTime;
+    [SerializeField]
+    private float nextSpawnTime;
+    private ProgressiveValueTimer nextSpawnTimeTimer;
     private float spawmTimer;
-    private float spawnDecreseTimer;
-    private float decreaseSpawnTimeEverySeconds;
-    private float increaseBlockSpeedEverySeconds;
+    #endregion
+    #region SpawnSpeed
+    [SerializeField]
+    private float blockSpeed;
+    private ProgressiveValueTimer blockSpeedTimer;
+    #endregion
     #region Multiplier
     private MultiplierHandler multiplier;
     #endregion
@@ -192,33 +197,21 @@ public class LevelManager : MonoBehaviour
             OnTimeLeftUpdate?.Invoke(minutes, seconds);
         }
 
-        // update spawner
-        if (spawnTime > level.spawn.timeMin)
-        {
-            spawnDecreseTimer += Time.deltaTime;
-            if (spawnDecreseTimer >= decreaseSpawnTimeEverySeconds)
-            {
-                spawnDecreseTimer = 0;
+        // update block speed, increases from min to max
+        blockSpeedTimer.Update(Time.deltaTime);
 
-                //decrease spawn timer by X percent of current spawnTime time
-                float val = spawnTime * level.spawn.timeDecreaseByTimePercent * 0.01f;
-                spawnTime -= val;
+        // update next spawn time, decreases from max to min
+        nextSpawnTimeTimer.Update(Time.deltaTime);
 
-                if (spawnTime < level.spawn.timeMin)
-                {
-                    spawnTime = level.spawn.timeMin;
-                }
-            }
-        }
-
-        // check if we have to spawn
+        // check if must spawn
         spawmTimer += Time.deltaTime;
-        if (spawmTimer >= spawnTime)
+        if (spawmTimer >= nextSpawnTime)
         {
+            // try to spawn
             ColorBlock.EBlockColor colorToSpawn = GetRandomColorFromAvailable();
 
             // reset spawn timer if spawned, otherwise repeat on the next update
-            if (SpawnNodes[UnityEngine.Random.Range(0, SpawnNodes.Count)].SpawnColorBlock(colorToSpawn, SpawnInSeconds))
+            if (SpawnNodes[UnityEngine.Random.Range(0, SpawnNodes.Count)].SpawnColorBlock(colorToSpawn, nextSpawnTime, blockSpeed))
             {
                 spawmTimer = 0;
             }
@@ -292,7 +285,8 @@ public class LevelManager : MonoBehaviour
     {
         // game over for now
         // protect against subsequent calls due to called from blocks update
-        if (isGameOver) {
+        if (isGameOver)
+        {
             return;
         }
 
@@ -427,15 +421,38 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        spawnTime = level.spawn.timeMax;
-        spawmTimer = 0;
-        spawnDecreseTimer = 0;
-        decreaseSpawnTimeEverySeconds = level.limitTime * level.spawn.timeDecreaseByTimePercent * 0.01f;
+        float decreaseSpawnTimeEverySeconds;
+        float blockSpeedIncreaseEverySeconds;
+        if (level.limitTime <= 0)
+        {
+            // no time limit, use actual seconds
+            decreaseSpawnTimeEverySeconds = level.spawn.timeDecreasePerTimeSeconds;
+            blockSpeedIncreaseEverySeconds = level.block.speedIncreasePerTimeSeconds;
+        }
+        else
+        {
+            decreaseSpawnTimeEverySeconds = level.limitTime * level.spawn.timeDecreasePerTimeLimitPercent * 0.01f;
+            blockSpeedIncreaseEverySeconds = level.limitTime * level.block.speedIncreasePerTimeLimitPercent * 0.01f;
+        }
 
-        increaseBlockSpeedEverySeconds = level.limitTime * level.block.speedIncreasePerTimePercent * 0.01f;
+        // spawn time goes from max to min
+        nextSpawnTime = level.spawn.timeMax;
+        nextSpawnTimeTimer = new ProgressiveValueTimer(nextSpawnTime, level.spawn.timeMin, level.spawn.timeDecreaseByTimePercent * 0.01f,
+                                                       decreaseSpawnTimeEverySeconds,
+                                                       delegate (float value) { nextSpawnTime = value; },
+                                                       new ProgressiveValueTimer.DecrementalOperation());
+
+        // speed goes from min to max
+        blockSpeed = level.block.speedMin;
+        blockSpeedTimer = new ProgressiveValueTimer(blockSpeed, level.block.speedMax, level.block.speedIncreaseBySpeedPercent * 0.01f,
+                                                    blockSpeedIncreaseEverySeconds,
+                                                    delegate (float value) { blockSpeed = value; },
+                                                    new ProgressiveValueTimer.IncrementalOperation());
+
+
+        multiplier.Init(level.multiplier);
 
         CreateStartupBlocks(level.startBlocksNum, null);
-
         OnBeforeGameStarts?.Invoke(level);
     }
 
