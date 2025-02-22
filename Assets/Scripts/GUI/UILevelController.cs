@@ -139,7 +139,7 @@ public class UILevelController : MonoBehaviour
         {
             countdownLabel.text = i.ToString();
             countdownLabel.enabled = true;
-            AudioManager.Instance.PlaySfx(SfxOnCountdown);
+            AudioManager.Instance.PlaySfxPausable(SfxOnCountdown);
             yield return new WaitForSeconds(.5f);
             countdownLabel.enabled = false;
             yield return new WaitForSeconds(.5f);
@@ -169,6 +169,7 @@ public class UILevelController : MonoBehaviour
     {
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.StopSfxPausable();
         SceneManager.LoadSceneAsync(0);
         LevelManager.Instance.SetPaused(false);
     }
