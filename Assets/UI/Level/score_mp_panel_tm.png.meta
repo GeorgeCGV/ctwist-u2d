@@ -8,6 +8,9 @@ TextureImporter:
   - first:
       213: -4178662533967333866
     second: score_mp_panel_tm_1
+  - first:
+      213: 5023334279104182281
+    second: score_mp_panel_tm_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -54,9 +57,9 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 96
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 1
+  spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -120,11 +123,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 130
+        y: 158
         width: 426
-        height: 126
+        height: 98
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -141,13 +144,13 @@ TextureImporter:
       name: score_mp_panel_tm_1
       rect:
         serializedVersion: 2
-        x: 4
-        y: 65
-        width: 349
-        height: 18
+        x: 33
+        y: 78
+        width: 63
+        height: 58
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 1, y: 0, z: 0, w: 1}
       customData: 
       outline: []
       physicsShape: []
@@ -159,11 +162,33 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: score_mp_panel_tm_2
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 27
+        width: 395
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9083c0e79e776b540800000000000000
+      internalID: 5023334279104182281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: f7bf5b0c00857764e84636b4844ecf2d
     internalID: 0
     vertices: []
     indices: 
@@ -175,6 +200,7 @@ TextureImporter:
     nameFileIdTable:
       score_mp_panel_tm_0: 6699913258423226510
       score_mp_panel_tm_1: -4178662533967333866
+      score_mp_panel_tm_2: 5023334279104182281
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

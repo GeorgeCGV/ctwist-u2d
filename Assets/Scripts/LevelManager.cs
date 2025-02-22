@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+[RequireComponent(typeof(MultiplierHandler))]
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
     public static event Action<int> OnScoreUpdate;
+
     public static event Action<string, Vector2> OnAnnounce;
 
     public static event Action<int, int> OnTimeLeftUpdate;
@@ -23,8 +25,8 @@ public class LevelManager : MonoBehaviour
     public AudioClip SfxOnWin;
 
     public List<AudioClip> SfxBlocksClear;
-    private int sfxBlocksClearIdx;
 
+    [SerializeField]
     public List<Spawn> SpawnNodes;
 
     private Data.LevelData level;
@@ -55,6 +57,8 @@ public class LevelManager : MonoBehaviour
     private float spawnDecreseTimer;
     private float decreaseSpawnTimeEverySeconds;
     private float increaseBlockSpeedEverySeconds;
+    #region Multiplier
+    private MultiplierHandler multiplier;
     #endregion
 
     protected int Score
@@ -80,11 +84,11 @@ public class LevelManager : MonoBehaviour
         else
         {
             Instance = this;
+            multiplier = GetComponent<MultiplierHandler>();
             isLevelStarted = false;
             isGameOver = false;
             Score = 0;
             timePassedInSeconds = 0;
-            sfxBlocksClearIdx = 0;
         }
     }
 
@@ -361,22 +365,21 @@ public class LevelManager : MonoBehaviour
                     break;
             }
 
+            matchScore *= multiplier.Multiplier;
+
             IncrementScore(matchScore);
             OnAnnounce?.Invoke("+" + matchScore, active.transform.position);
 
-            AudioManager.Instance.PlaySfx(SfxBlocksClear[sfxBlocksClearIdx++]);
-            if (sfxBlocksClearIdx > SfxBlocksClear.Count - 1)
-            {
-                sfxBlocksClearIdx = 0;
-            }
+            int sfxBlockClearIdx = Math.Clamp(multiplier.Multiplier - 1, 0, SfxBlocksClear.Count - 1);
+            AudioManager.Instance.PlaySfx(SfxBlocksClear[sfxBlockClearIdx]);
 
             // find floating/disconnected blocks
             List<GameObject> floatingBlocks = GetFloatingBlocks();
-            int floatingScore = ScorePerFloating * floatingBlocks.Count;
+            int floatingScore = scoreConfig.ScorePerFloating * floatingBlocks.Count * multiplier.Multiplier;
             if (floatingScore != 0)
             {
                 IncrementScore(floatingScore);
-                // OnAnnounce?.Invoke("+" + floatingScore, floatingBlocks[0].transform.position);
+                OnAnnounce?.Invoke("+" + floatingScore, floatingBlocks[0].transform.position);
             }
 
             for (int i = floatingBlocks.Count - 1; i >= 0; i--)
@@ -385,6 +388,8 @@ public class LevelManager : MonoBehaviour
                 block.GetComponent<BasicBlock>().Destroy();
                 Destroy(block);
             }
+
+            multiplier.Increment();
         }
     }
 
