@@ -18,6 +18,7 @@ public class Spawn : MonoBehaviour
     private bool done = false;
 
     private ColorBlock.EBlockColor spawnColor;
+    private float spawnSpeed;
 
     private Animator animatorCtrl;
     private SpriteRenderer spriteRenderer;
@@ -30,7 +31,7 @@ public class Spawn : MonoBehaviour
         light2D = GetComponent<Light2D>();
     }
 
-    public bool SpawnColorBlock(ColorBlock.EBlockColor color, float spawnInSeconds)
+    public bool SpawnColorBlock(ColorBlock.EBlockColor color, float spawnInSeconds, float speed)
     {
         if (busy)
         {
@@ -42,6 +43,7 @@ public class Spawn : MonoBehaviour
         targetTimeInSeconds = spawnInSeconds;
         currentTimeInSeconds = 0;
         spawnColor = color;
+        spawnSpeed = speed;
 
         // colorize the spwan node sprite
         spriteRenderer.color = ColorBlock.UnityColorFromBlockColor(spawnColor);
@@ -94,8 +96,8 @@ public class Spawn : MonoBehaviour
                 GameObject obj = BlocksFactory.Instance.NewColorBlock(spawnColor);
                 obj.transform.position = transform.position;
                 BasicBlock block = obj.GetComponent<BasicBlock>();
-                block.startForce = Random.Range(3, 8);
-                block.stepForce = Random.Range(2, 5);
+                block.GravityStrength = spawnSpeed;
+                // block.stepForce = spawnSpeed * .25f;
             }
         }
     }

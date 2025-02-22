@@ -34,14 +34,17 @@ public class BasicBlock : MonoBehaviour
         {EdgeIndex.Top, new Vector2(.0f, .4f)},
     };
 
-    public float neighbourRange = .36f;
+    [SerializeField]
+    protected float neighbourRange = .36f;
 
-    public float edgeAttachPositionOffset = .85f;
+    [SerializeField]
+    protected float edgeAttachPositionOffset = .85f;
 
-    public Vector2 targetPoint = Vector2.zero;
+    [SerializeField]
+    protected Vector2 gravityPoint = Vector2.zero;
 
-    public float startForce = 1.0f;
-    public float stepForce = float.NaN;
+    [SerializeField]
+    public float GravityStrength = 1;
 
     public bool attached = false;
     public bool destroyed = false;
@@ -122,10 +125,10 @@ public class BasicBlock : MonoBehaviour
         return dir * edgeAttachPositionOffset;
     }
 
-    protected Vector2 GetTargetPointDirection()
+    protected Vector2 GetGravityDirection()
     {
         // Vector3 AB = B - A. Destination - Origin.
-        return (targetPoint - (Vector2)transform.position).normalized;
+        return (gravityPoint - (Vector2)transform.position).normalized;
     }
 
     public SerializedDictionary<EdgeIndex, AnchoredJoint2D> links = new SerializedDictionary<EdgeIndex, AnchoredJoint2D>()
@@ -208,15 +211,6 @@ public class BasicBlock : MonoBehaviour
         return GetLinkNeighbour(links[edge]);
     }
 
-    protected virtual void Start()
-    {
-        if (!float.IsNaN(startForce))
-        {
-            GetComponent<Rigidbody2D>().AddForce(GetTargetPointDirection() * startForce);
-            GetComponent<Rigidbody2D>().AddTorque(UnityEngine.Random.Range(-10, 11), ForceMode2D.Force);
-        }
-    }
-
     protected virtual void Update()
     {
 
@@ -236,7 +230,6 @@ public class BasicBlock : MonoBehaviour
                 // and consider this block as collided
                 LevelManager.Instance.OnBlocksObstructionCollision(gameObject);
             }
-
         }
 
         // intentionally blank
@@ -252,10 +245,8 @@ public class BasicBlock : MonoBehaviour
     {
         if (!attached)
         {
-            if (!float.IsNaN(stepForce))
-            {
-                GetComponent<Rigidbody2D>().AddForce(GetTargetPointDirection() * stepForce);
-            }
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            rb.AddForce(GetGravityDirection() * GravityStrength, ForceMode2D.Force);
         }
     }
 

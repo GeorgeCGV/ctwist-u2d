@@ -4,11 +4,6 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class CentralBlock : BasicBlock
 {
-    protected override void Start()
-    {
-        // override, do nothing
-    }
-
     protected override void Update()
     {
         PolygonCollider2D collider = GetComponent<PolygonCollider2D>();

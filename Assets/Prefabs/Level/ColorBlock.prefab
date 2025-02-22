@@ -276,10 +276,10 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 0.5
+  m_Mass: 1
   m_LinearDamping: 0.5
   m_AngularDamping: 0.5
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -305,9 +305,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbourRange: 0.35
   edgeAttachPositionOffset: 0.4
-  targetPoint: {x: 0, y: 0}
-  startForce: 1
-  stepForce: 0.2
+  gravityPoint: {x: 0, y: 0}
+  GravityStrength: 1
   attached: 0
   destroyed: 0
   links:
@@ -319,6 +318,7 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
+  color: 0
   EfxOnDestroy: {fileID: 6527478309959237573, guid: f3238e63ad3f06040adb8200b72b545d, type: 3}
   EfxOnAttach: {fileID: 1605965853912247789, guid: 7c12143598071014590d5c589c3719f1, type: 3}
   SfxOnAttach: {fileID: 8300000, guid: 17633b5b36f16704b8a0eb3d5f410bb7, type: 3}
