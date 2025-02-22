@@ -23,6 +23,8 @@ public class LevelManager : MonoBehaviour
     public AudioClip SfxOnStart;
     public AudioClip SfxOnLost;
     public AudioClip SfxOnWin;
+    public AudioClip SfxOnAlmostTimeout;
+    private bool sfxOnAlmostTimeoutStarted;
 
     public List<AudioClip> SfxBlocksClear;
 
@@ -186,6 +188,13 @@ public class LevelManager : MonoBehaviour
                 float timeDiffInSeconds = level.limitTime - timePassedInSeconds;
                 seconds = Mathf.FloorToInt(timeDiffInSeconds % 60);
                 minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
+
+                // 10 seconds clip
+                if (!sfxOnAlmostTimeoutStarted && (timeDiffInSeconds <= 10.15f))
+                {
+                    sfxOnAlmostTimeoutStarted = true;
+                    AudioManager.Instance.PlaySfxPausable(SfxOnAlmostTimeout);
+                }
             }
 
             OnTimeLeftUpdate?.Invoke(minutes, seconds);
