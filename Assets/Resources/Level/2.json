@@ -4,16 +4,24 @@
     "goalScore": 1600,
     "limitTime": 35,
     "limitMove": 0,
+    "multiplier": {
+        "decayTime": 1.5,
+        "decayRate": 0.5,
+        "max": 6
+    },
     "spawn": {
-        "timeMin": 3,
+        "spawnerAnimation": 10,
+        "timeMin": 2,
         "timeMax": 5,
-        "timeDecreasePerTimePercent": 25,
+        "timeDecreasePerTimeLimitPercent": 25,
+        "timeDecreasePerTimeSeconds": 2,
         "timeDecreaseByTimePercent": 5
     },
     "block": {
         "speedMin": 5,
         "speedMax": 5,
-        "speedIncreasePerTimePercent": 10,
+        "speedIncreasePerTimeLimitPercent": 10,
+        "speedIncreasePerTimeSeconds": 3,
         "speedIncreaseBySpeedPercent": 15
     },
     "starRewards": [

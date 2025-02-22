@@ -19,24 +19,35 @@ namespace Data
         public int limitMove;
         public Spawn spawn;
         public Block block;
+        public Multiplier multiplier;
         public int[] starRewards;
     }
 
     [Serializable]
-    public class Spawn
+    public struct Multiplier
+    {
+        public float decayTime;
+        public float decayRate;
+        public int max;
+    }
+
+    [Serializable]
+    public struct Spawn
     {
         public float timeMin;
         public float timeMax;
-        public int timeDecreasePerTimePercent;
+        public int timeDecreasePerTimeLimitPercent;
+        public float timeDecreasePerTimeSeconds;
         public int timeDecreaseByTimePercent;
     }
 
     [Serializable]
-    public class Block
+    public struct Block
     {
         public int speedMin;
         public int speedMax;
-        public int speedIncreasePerTimePercent;
+        public int speedIncreasePerTimeLimitPercent;
+        public float speedIncreasePerTimeSeconds;
         public int speedIncreaseBySpeedPercent;
     }
 
