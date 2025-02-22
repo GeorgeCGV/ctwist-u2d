@@ -15,6 +15,13 @@ public class UIGoalPanel : MonoBehaviour
     [SerializeField]
     private TMP_Text scoreGoalLabel;
 
+    private Image fillBar;
+
+    void Awake()
+    {
+        fillBar = transform.Find("GoalFiller").GetComponent<Image>();
+    }
+
     private void OnDisable()
     {
         switch (type)
@@ -34,7 +41,6 @@ public class UIGoalPanel : MonoBehaviour
         if (goal <= 0) {
             return;
         }
-        Image fillBar = transform.Find("GoalFiller").GetComponent<Image>();
         fillBar.fillAmount = score / goal;
     }
 

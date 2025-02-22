@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ResultsMenuAnimationEventsHandler : MonoBehaviour
+public class UIResultsMenuAnimationEventsHandler : MonoBehaviour
 {
     public AudioClip sfxStarAppear;
 
