@@ -31,15 +31,8 @@ public class LevelManager : MonoBehaviour
 
     private Data.LevelData level;
 
-    public float SpawnInSeconds = 10;
-
-
-    public int ScorePerSecond = 5;
-    public int ScorePerAttach = 50;
-    public int ScorePerMatch3 = 250;
-    public int ScorePerMatch4 = 1000;
-    public int ScorePerMatchMore = 5000;
-    public int ScorePerFloating = 250;
+    [SerializeField]
+    private ScoreConfig scoreConfig;
 
     private bool isLevelStarted;
 
@@ -346,16 +339,16 @@ public class LevelManager : MonoBehaviour
             switch (matchedAmount)
             {
                 case 3:
-                    matchScore = ScorePerMatch3;
+                    matchScore = scoreConfig.ScorePerMatch3;
                     break;
                 case 4:
-                    matchScore = ScorePerMatch4;
+                    matchScore = scoreConfig.ScorePerMatch4;
                     break;
                 case 5:
-                    matchScore = ScorePerMatchMore;
+                    matchScore = scoreConfig.ScorePerMatchMore;
                     break;
                 default:
-                    matchScore = ScorePerMatch3 + (matchedAmount - 5) * ScorePerMatch3;
+                    matchScore = scoreConfig.ScorePerMatch3 + (matchedAmount - 5) * scoreConfig.ScorePerMatch3;
                     break;
             }
 
