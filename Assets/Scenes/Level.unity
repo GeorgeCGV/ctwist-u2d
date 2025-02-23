@@ -21939,7 +21939,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e9f894c9d0e22c4aa547a226e3733f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreMultiplier: 0
+  scoreMultiplier: 1
   scoreMultiplierDecayTime: 1
   scoreMultiplierDecayRate: 0.25
   scoreMultiplierMax: 6
