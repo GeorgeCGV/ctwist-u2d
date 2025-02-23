@@ -23,8 +23,17 @@ public class LevelManager : MonoBehaviour
     public AudioClip SfxOnStart;
     public AudioClip SfxOnLost;
     public AudioClip SfxOnWin;
-    public AudioClip SfxOnAlmostTimeout;
-    private bool sfxOnAlmostTimeoutStarted;
+    public AudioClip SfxOnNearTimeout;
+
+#region NearTimeout
+    [SerializeField]
+    private float nearTimeoutTime = 10.15f;
+
+    [SerializeField]
+    private Animator envAnimator;
+
+    private bool onNearTimeoutStarted;
+#endregion
 
     public List<AudioClip> SfxBlocksClear;
 
@@ -151,8 +160,21 @@ public class LevelManager : MonoBehaviour
         OnGameOver?.Invoke(level, new Data.GameOverResults(score, won));
     }
 
+    // float pass = 0;
+    // bool started1 = false;
+    // bool started2 = false;
     void Update()
     {
+        // pass += Time.deltaTime;
+        // if (pass > 3 && !started1) {
+        //     started1 = true;
+        //     AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
+        // }
+
+        // if (pass > 6 && !started2) {
+        //     started2 = true;
+        //     AudioManager.Instance.PlaySfxPausable(SfxOnWin);
+        // }
         if (!IsRunning())
         {
             return;
@@ -189,10 +211,12 @@ public class LevelManager : MonoBehaviour
                 minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
 
                 // 10 seconds clip
-                if (!sfxOnAlmostTimeoutStarted && (timeDiffInSeconds <= 10.15f))
+                if (!onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
                 {
-                    sfxOnAlmostTimeoutStarted = true;
-                    AudioManager.Instance.PlaySfxPausable(SfxOnAlmostTimeout);
+                    onNearTimeoutStarted = true;
+                    AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
+                    envAnimator.SetFloat("NearTimeoutSpeed", Utils.GetAnimatorClipLength(envAnimator, "NearTimeout") / nearTimeoutTime);
+                    envAnimator.SetTrigger("NearTimeout");
                 }
             }
 
