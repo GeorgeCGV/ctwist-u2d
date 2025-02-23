@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -68,6 +69,14 @@ public class LevelManager : MonoBehaviour
     #endregion
     #region Multiplier
     private MultiplierHandler multiplier;
+    #endregion
+    #region Obstruction
+    [SerializeField]
+    private GameObject obstructionTmParent;
+    [SerializeField]
+    private List<AudioClip> SfxOnObstruction;
+    [SerializeField]
+    private ObstructionPrefabsConfig obstructionTilemaps;
     #endregion
 
     protected int Score
@@ -142,9 +151,9 @@ public class LevelManager : MonoBehaviour
         return IsStarted() && !IsPaused() && !isGameOver;
     }
 
-    protected void GameOver(bool won)
+    protected IEnumerator GameOverDelay(bool won)
     {
-        isGameOver = true;
+        yield return new WaitForSeconds(0.5f);
 
         AudioManager.Instance.StopMusic();
 
@@ -158,6 +167,13 @@ public class LevelManager : MonoBehaviour
         }
 
         OnGameOver?.Invoke(level, new Data.GameOverResults(score, won));
+    }
+
+    protected void GameOver(bool won)
+    {
+        isGameOver = true;
+
+        StartCoroutine(GameOverDelay(won));
     }
 
     // float pass = 0;
@@ -316,7 +332,27 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        GameOver(false);
+        if (SfxOnObstruction != null) {
+            AudioManager.Instance.PlaySfx(SfxOnObstruction[UnityEngine.Random.Range(0, SfxOnObstruction.Count)]);
+        }
+
+        // ParticleSystem efx = active.GetComponent<BasicBlock>().NewDestroyEfx();
+        // if (efx != null) {
+        //     efx.Play();
+        // }
+
+        // GameOver(false);
+
+        active.GetComponent<BasicBlock>().Destroy();
+        Destroy(active);
+
+        List<GameObject> floatingBlocks = GetFloatingBlocks();
+        for (int i = floatingBlocks.Count - 1; i >= 0; i--)
+        {
+            GameObject block = floatingBlocks[i];
+            block.GetComponent<BasicBlock>().Destroy();
+            Destroy(block);
+        }
     }
 
     public void OnBlocksAttach(GameObject active)
@@ -421,6 +457,11 @@ public class LevelManager : MonoBehaviour
     {
         // disable blocks layer render
         Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
+
+        // create obstructions
+        if (data.obstructionIdx >= 0) {
+            Instantiate(obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx], obstructionTmParent.transform);
+        }
 
         UILevelController.OnGameStarAllAnimationsDone += OnLevelStart;
 

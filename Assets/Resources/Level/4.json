@@ -1,32 +1,32 @@
 {
-    "colorsInLevel": ["Pink", "Black", "White", "Yellow"],
-    "obstructionIdx": 2,
-    "startBlocksNum": 14,
+    "colorsInLevel": ["Red", "White", "Purple", "Green", "Yellow"],
+    "obstructionIdx": 3,
+    "startBlocksNum": 3,
     "goalScore": 3000,
-    "limitTime": 80,
+    "limitTime": 90,
     "limitMove": 0,
     "multiplier": {
         "decayTime": 1,
-        "decayRate": 0.25,
+        "decayRate": 0.1,
         "max": 6
     },
     "spawn": {
         "timeMin": 1.5,
-        "timeMax": 4,
-        "timeDecreasePerTimeLimitPercent": 15,
+        "timeMax": 3,
+        "timeDecreasePerTimeLimitPercent": 30,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 10
+        "timeDecreaseByTimePercent": 25
     },
     "block": {
-        "speedMin": 2,
-        "speedMax": 7,
+        "speedMin": 3,
+        "speedMax": 6,
         "speedIncreasePerTimeLimitPercent": 15,
         "speedIncreasePerTimeSeconds": 3,
         "speedIncreaseBySpeedPercent": 15
     },
     "starRewards": [
         1000,
-        2000,
+        1500,
         3000
     ]
 }

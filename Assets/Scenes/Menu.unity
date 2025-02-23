@@ -2053,6 +2053,51 @@ MonoBehaviour:
   backgroundMusic: {fileID: 8300000, guid: 2d7be52d90d7d7d4bb33b64141fa44dd, type: 3}
   optionsPanel: {fileID: 1469509092}
   levelSelectionPanel: {fileID: 1927330310}
+--- !u!1 &993449425
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 993449427}
+  - component: {fileID: 993449426}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &993449426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993449425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1132016a6f99ed04ea543a134bbdd02c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableLevelsAmount: 5
+--- !u!4 &993449427
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 993449425}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 445.18246, y: 352.59778, z: -2.1675951}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1039712509
 GameObject:
   m_ObjectHideFlags: 0
@@ -8404,6 +8449,7 @@ GameObject:
   - component: {fileID: 1469509095}
   - component: {fileID: 1469509094}
   - component: {fileID: 1469509096}
+  - component: {fileID: 1469509097}
   m_Layer: 5
   m_Name: Options
   m_TagString: Untagged
@@ -8493,6 +8539,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1469509097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469509092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66e321ebd4f7cd04cbaec4e4cc297146, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1489429000
 GameObject:
   m_ObjectHideFlags: 0
@@ -9498,10 +9556,10 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
-        m_MethodName: PlaySfx
-        m_Mode: 3
+      - m_Target: {fileID: 1469509097}
+        m_TargetAssemblyTypeName: UIOptionsCtrl, GameScriptsAssembly
+        m_MethodName: OnMusicValueChanged
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -9510,7 +9568,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &1887174620
 GameObject:
   m_ObjectHideFlags: 0
@@ -9969,7 +10027,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parentForUiLevelSelectPlayLevel: {fileID: 1697910355}
   uiLevelSelectPlayLevelPrefab: {fileID: 4344439963696458021, guid: f0d875019348896448c014b15ec15975, type: 3}
-  amountOfLevels: 4
 --- !u!1 &1943736766
 GameObject:
   m_ObjectHideFlags: 0
@@ -10054,10 +10111,10 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AudioManager, Assembly-CSharp
-        m_MethodName: PlaySfx
-        m_Mode: 3
+      - m_Target: {fileID: 1469509097}
+        m_TargetAssemblyTypeName: UIOptionsCtrl, GameScriptsAssembly
+        m_MethodName: OnSfxValueChanged
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -10066,7 +10123,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &2012328131
 GameObject:
   m_ObjectHideFlags: 0
@@ -10436,3 +10493,4 @@ SceneRoots:
   - {fileID: 1419892648}
   - {fileID: 864214660}
   - {fileID: 798070398}
+  - {fileID: 993449427}

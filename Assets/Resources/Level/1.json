@@ -1,5 +1,6 @@
 {
     "colorsInLevel": ["Green", "Yellow", "Red"],
+    "obstructionIdx": 0,
     "startBlocksNum": 5,
     "goalScore": 1600,
     "limitTime": 0,

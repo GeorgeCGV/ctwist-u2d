@@ -54,9 +54,7 @@ public class BasicBlock : MonoBehaviour
     void Awake()
     {
         GameObject obj = GameObject.FindGameObjectWithTag("obstructions_tilemap");
-        Assert.IsNotNull(obj);
-        obstructionsTilemap = obj.GetComponent<Tilemap>();
-        Assert.IsNotNull(obstructionsTilemap);
+        obstructionsTilemap = obj?.GetComponent<Tilemap>();
     }
 
     public static float DistancePointToLineSegment(Vector2 point, Vector2 lineStart, Vector2 lineEnd)
@@ -176,6 +174,11 @@ public class BasicBlock : MonoBehaviour
         }
     }
 
+    public virtual ParticleSystem NewDestroyEfx()
+    {
+        return null;
+    }
+
     public virtual void Destroy()
     {
         foreach (EdgeIndex edge in links.Keys.ToArray())
@@ -198,6 +201,11 @@ public class BasicBlock : MonoBehaviour
         }
 
         destroyed = true;
+
+        ParticleSystem efx = NewDestroyEfx();
+        if (efx != null) {
+            efx.Play();
+        }
     }
 
     public virtual bool MatchesWith(GameObject obj)
@@ -215,7 +223,7 @@ public class BasicBlock : MonoBehaviour
     {
 
         // attached blocks shall check if they collide with obstruction
-        if (attached)
+        if ((obstructionsTilemap != null) && attached)
         {
             // Convert world position to tile coordinates
             Vector3Int tilePos = obstructionsTilemap.WorldToCell(transform.position);

@@ -6,6 +6,7 @@ namespace Data
     public class LevelData
     {
         public int id;
+        public int obstructionIdx;
         public string[] colorsInLevel;
         public int startBlocksNum;
         public int goalScore;

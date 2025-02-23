@@ -123,14 +123,17 @@ public class ColorBlock : BasicBlock
         return other.color == color;
     }
 
-    public override void Destroy()
+    public override ParticleSystem NewDestroyEfx()
     {
-        base.Destroy();
+        ParticleSystem particleSystem;
 
         GameObject efx = Instantiate(EfxOnDestroy, transform.position, Quaternion.identity);
-        ParticleSystem.MainModule mainModule = efx.GetComponent<ParticleSystem>().main;
+        particleSystem = efx.GetComponent<ParticleSystem>();
+
+        ParticleSystem.MainModule mainModule = particleSystem.main;
         mainModule.startColor = UnityColorFromBlockColor(color);
-        efx.GetComponent<ParticleSystem>().Play();
+
+        return particleSystem;
     }
 
     protected override void Update()
