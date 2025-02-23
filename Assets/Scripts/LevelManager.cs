@@ -112,7 +112,6 @@ public class LevelManager : MonoBehaviour
     public void SetPaused(bool value)
     {
         Time.timeScale = value ? 0 : 1;
-        AudioManager.Instance.PauseSfx(value);
     }
 
     public bool IsPaused()
@@ -142,11 +141,11 @@ public class LevelManager : MonoBehaviour
 
         if (won)
         {
-            AudioManager.Instance.PlayMusic(SfxOnWin);
+            AudioManager.Instance.PlaySfxPausable(SfxOnWin);
         }
         else
         {
-            AudioManager.Instance.PlayMusic(SfxOnLost);
+            AudioManager.Instance.PlaySfxPausable(SfxOnLost);
         }
 
         OnGameOver?.Invoke(level, new Data.GameOverResults(score, won));

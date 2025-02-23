@@ -32,7 +32,8 @@ public class AudioManager : MonoBehaviour
         // prevent mutliple instances
         if (Instance != null && Instance != this)
         {
-            Destroy(this);
+            // destroy script and the entire object that has audio sources
+            Destroy(gameObject);
         }
         else
         {
@@ -54,7 +55,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void PauseSfx(bool paused)
+    public void PausableSfxPause(bool paused)
     {
         if (paused)
         {
@@ -74,6 +75,7 @@ public class AudioManager : MonoBehaviour
         }
 
         source.clip = audio;
+        source.time = 0;
         source.Play();
     }
 

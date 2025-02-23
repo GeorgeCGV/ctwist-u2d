@@ -151,6 +151,7 @@ public class UILevelController : MonoBehaviour
 
     public void OnPause()
     {
+        AudioManager.Instance.PausableSfxPause(true);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
         LevelManager.Instance.SetPaused(true);
         pauseMenu.SetActive(true);
@@ -163,6 +164,7 @@ public class UILevelController : MonoBehaviour
         pauseMenu.SetActive(false);
         LevelManager.Instance.SetPaused(false);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.PausableSfxPause(false);
     }
 
     public void OnQuit()
