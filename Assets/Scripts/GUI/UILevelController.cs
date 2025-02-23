@@ -87,20 +87,11 @@ public class UILevelController : MonoBehaviour
         }
         resultsMenu.GetComponent<Animator>().SetInteger("Stars", starsEarned);
 
-        // update current level index
-        int persistedLevelIndex = PlayerPrefs.GetInt("currentLevel", 0);
-        if (level.id == persistedLevelIndex)
-        {
-            // if we played currentLevel (the last unlocked)
-            // then increment idx by 1 to unlock the next level
-            PlayerPrefs.SetInt("currentLevel", persistedLevelIndex + 1);
-        }
+        GameManager.Instance.SetLevelStars(level.id, starsEarned);
 
-        // update level stars, but only if earned more than before
-        int lastAmountOfStars = PlayerPrefs.GetInt("stars" + level.id, 0);
-        if (starsEarned > lastAmountOfStars)
-        {
-            PlayerPrefs.SetInt("stars" + level.id, starsEarned);
+        // unlock next level
+        if (result.Won) {
+            GameManager.Instance.UnlockNextLevel(level.id);
         }
 
         UICounterAnimate counter = resultsMenu.GetComponentInChildren<UICounterAnimate>();
@@ -165,6 +156,14 @@ public class UILevelController : MonoBehaviour
         LevelManager.Instance.SetPaused(false);
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
         AudioManager.Instance.PausableSfxPause(false);
+    }
+    public void OnNext()
+    {
+        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.StopSfxPausable();
+        LoadScreen.Instance.LoadLevel(PlayerPrefs.GetInt("currentLevel", 0));
+        LevelManager.Instance.SetPaused(false);
     }
 
     public void OnQuit()

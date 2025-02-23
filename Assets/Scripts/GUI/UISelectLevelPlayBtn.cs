@@ -21,21 +21,24 @@ public class UISelectLevelPlayBtn : MonoBehaviour
 
         highlight = transform.Find("UISelectLevelBtnCurrentBcg").gameObject;
 
-        // activate/deactivate play button based on current player level index
-        int currentLevel = PlayerPrefs.GetInt("currentLevel", 0);
+        bool unlocked = GameManager.Instance.IsLevelUnlocked(id);
+
+        // activate/deactivate play button if level is unlocked/locked
         GameObject playBtn = transform.Find("PlayBtn").gameObject;
-        playBtn.GetComponent<Button>().interactable = id <= currentLevel;
+        playBtn.GetComponent<Button>().interactable = unlocked;
 
         GameObject label = playBtn.transform.Find("Label").gameObject;
         label.GetComponent<TextMeshProUGUI>().text = (id + 1).ToString();
 
-        // highlight current level
-        highlight.SetActive(id == currentLevel);
+        if (unlocked) {
+            // get level stars
+            int starsAmount = GameManager.Instance.GetLevelStars(id);
+            for (int i = 0; i < starsAmount; i++) {
+                stars[i].SetActive(true);
+            }
 
-        // check how many stars player earned for that level
-        int starsAmount = PlayerPrefs.GetInt("stars" + id, 0);
-        for (int i = 0; i < starsAmount; i++) {
-            stars[i].SetActive(true);
+            // highlight level that is unlocked and has no stars
+            highlight.SetActive(starsAmount == 0);
         }
     }
 

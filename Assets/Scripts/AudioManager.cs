@@ -67,18 +67,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    private void PlayPausableClip(AudioClip audio, AudioSource source)
-    {
-        if (source.isPlaying)
-        {
-            source.Stop();
-        }
-
-        source.clip = audio;
-        source.time = 0;
-        source.Play();
-    }
-
     private void StopAudioSource(AudioSource source)
     {
         if (source.isPlaying)
@@ -92,9 +80,29 @@ public class AudioManager : MonoBehaviour
         StopAudioSource(musicSource);
     }
 
+    public void PlayMusic()
+    {
+        if (musicSource.clip != null)
+        {
+            musicSource.Play();
+        }
+    }
+
     public void PlayMusic(AudioClip audio)
     {
-        PlayPausableClip(audio, musicSource);
+        if (musicSource.isPlaying)
+        {
+            musicSource.Stop();
+        }
+
+        // set the clip for potential music enable
+        musicSource.clip = audio;
+        musicSource.time = 0;
+
+        if (GameManager.Instance.IsMusicOn())
+        {
+            musicSource.Play();
+        }
     }
 
     public void StopSfxPausable()
@@ -104,7 +112,14 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySfxPausable(AudioClip audio)
     {
-        PlayPausableClip(audio, sfxPausableSource);
+        if (sfxPausableSource.isPlaying)
+        {
+            sfxPausableSource.Stop();
+        }
+
+        sfxPausableSource.clip = audio;
+        sfxPausableSource.time = 0;
+        sfxPausableSource.Play();
     }
 
     public void PlaySfx(AudioClip audio)
@@ -132,5 +147,11 @@ public class AudioManager : MonoBehaviour
         }
 
         sfxSource.PlayOneShot(clip);
+    }
+
+    public void MuteSfx(bool value)
+    {
+        sfxSource.mute = value;
+        sfxPausableSource.mute = value;
     }
 }
