@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(Animator))]
 public class ColorBlock : BasicBlock
@@ -96,6 +97,10 @@ public class ColorBlock : BasicBlock
             }
 
             GetComponent<Animator>().SetInteger(animatorColorIntParam, animatorTriggerValue);
+            Light2D light = GetComponent<Light2D>();
+            if (light != null) {
+                light.color = UnityColorFromBlockColor(value);
+            }
             color = value;
         }
     }
@@ -318,6 +323,11 @@ public class ColorBlock : BasicBlock
 
         // mark as attached
         attached = true;
+
+        Light2D light = GetComponent<Light2D>();
+        if (light != null) {
+            Destroy(light);
+        }
 
         AudioManager.Instance.PlaySfx(SfxOnAttach);
 
