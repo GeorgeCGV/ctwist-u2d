@@ -19510,13 +19510,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725672724}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: -0.15005296, w: 0.9886779}
+  m_LocalRotation: {x: 0, y: 0, z: -0.6472554, w: 0.7622732}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1453179008}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -17.26}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -80.67}
 --- !u!114 &725672726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21576,13 +21576,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35bc1a6f6d513284588c434e6a444129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedDecayFactor: 1
-  speedMultiplier: 1
-  swipeDirectionThreshold: 0.6
+  sensitivity: 0.6
   minSwipeDistance: 0.2
   maxSwipeDuration: 1
-  speed: 0
-  speedChange: 0
+  decayRate: 4
+  minAngularVelocity: 0.01
+  swipeSpeedLimit: 30
 --- !u!114 &1608167287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21649,35 +21648,11 @@ MonoBehaviour:
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1608167286}
-        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
-        m_MethodName: OnPress
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_ActionId: 72bded2b-74c6-4c31-8328-bd2cb1a15281
     m_ActionName: 'Player/Press[/Mouse/press]'
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1608167286}
-        m_TargetAssemblyTypeName: InputManager, Assembly-CSharp
-        m_MethodName: OnTouchscreenInput
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_ActionId: caf23798-6bb3-4e4a-9ecc-0200abcf5ee3
     m_ActionName: 'Player/OnTouchscreen[/Device Simulator Touchscreen/touch0/press,/Simulated
       Touchscreen/touch0/press,/Device Simulator Touchscreen/touch0/position,/Simulated

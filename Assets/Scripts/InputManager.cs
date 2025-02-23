@@ -1,30 +1,33 @@
 using InputSamples.Drawing;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 
-public class InputManager : MonoBehaviour
+public sealed class InputManager : MonoBehaviour
 {
+    /// <summary>
+    /// Swipe sensitivity.
+    /// </summary>
     [SerializeField, Min(0.1f)]
-    private float speedDecayFactor = 1.0f;
+    private float sensitivity = 0.6f;
 
-    [SerializeField, Min(0.1f)]
-    private float speedMultiplier = 1.0f;
-
-    [SerializeField, Min(0.1f)]
-    private float swipeDirectionThreshold = 0.6f;
-
+    /// <summary>
+    /// Minimum distance threshold between end and start positions
+    /// to be considered as valid swipe motion.
+    /// </summary>
     [SerializeField]
     private float minSwipeDistance = 0.2f;
 
+    /// <summary>
+    /// Maximum time threshold between gesture end and start time
+    /// to be considered as valid swipe motion.
+    /// </summary>
     [SerializeField]
     private float maxSwipeDuration = 1.0f;
 
-    private PlayerInput playerInput;
-
+    /// <summary>
+    /// Object to apply rotation to.
+    /// </summary>
     private GameObject activeBlocks;
-
-    private float speed;
 
     /// <summary>
     /// Tap/Click start position in world coordinates.
@@ -36,176 +39,169 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private Vector2 pointerPressEndPos;
 
+    /// <summary>
+    /// Input ID.
+    /// </summary>
+    private int activeInputId;
+    /// <summary>
+    /// Is dragging the pointer flag.
+    /// Active when holding a finger or a mouse button.
+    /// </summary>
+    private bool dragging;
+    /// <summary>
+    /// Drag start time.
+    /// </summary>
+    private float dragStartTime;
+
+    /// <summary>
+    /// Current rotational speed.
+    /// </summary>
+    private float angularVelocity = 0.0f;
+    /// <summary>
+    /// How fast angular velicoty slows down / decays.
+    /// </summary>
+    [SerializeField, Min(0.1f)]
+    private float decayRate = 4.0f;
+    /// <summary>
+    /// Minimum velocity to stop.
+    /// </summary>
+    [SerializeField, Min(0.01f)]
+    private float minAngularVelocity = 0.01f;
+    /// <summary>
+    /// Speed limit one factor used to compute new angular velocity.
+    /// /// Computed from swipe's distance divided by its duration.
+    /// </summary>
+    [SerializeField, Min(0)]
+    private float swipeSpeedLimit = 30.0f;
+
     private void Awake()
     {
         activeBlocks = GameObject.FindGameObjectWithTag("active_blocks");
-        playerInput = GetComponent<PlayerInput>();
-        // playerInput.currentActionMap.
     }
 
+    /// <summary>
+    /// Checks that position doesn't contain nan or infinite values.
+    /// That might happen on clicks picked up outside of the view.
+    /// </summary>
+    /// <param name="pos">Vector2</param>
+    /// <returns>True if position values are set.</returns>
+    public static bool IsScreenPositionValid(Vector2 pos)
+    {
+        return !(float.IsNaN(pos.x) || float.IsInfinity(pos.x) || float.IsNaN(pos.y) || float.IsInfinity(pos.y));
+    }
+
+    /// <summary>
+    /// Controls activeBlocks rotation and velocity decay.
+    /// </summary>
     void Update()
     {
-        float absSpeed = Mathf.Abs(speed);
+        float absVelocity = Mathf.Abs(angularVelocity);
 
-        // apply rotation
-        activeBlocks.transform.Rotate(speed < 0 ? Vector3.forward : Vector3.back, absSpeed * Time.deltaTime);
-
-        // decrease the speed
-        if (speed > 0)
-        {
-            speed -= absSpeed * speedDecayFactor * Time.deltaTime;
-        }
-        else if (speed < 0)
-        {
-            speed += absSpeed * speedDecayFactor * Time.deltaTime;
-        }
-
-        // prevent oscilations, stop when withing some deadband
-        if (speed < .2f && speed > -.2f)
-        {
-            speed = .0f;
-        }
-    }
-
-    protected void AdaptSpeed(float duration)
-    {
-        // swipe deadband by distance and time
-        float swipeDistance = Vector3.Distance(pointerPressStartPos, pointerPressEndPos);
-        if (float.IsInfinity(swipeDistance) || float.IsNaN(swipeDistance))
+        // prevent uneccessary updates if reached min threshold
+        if (absVelocity <= minAngularVelocity)
         {
             return;
         }
-        Vector2 dir = (pointerPressEndPos - pointerPressStartPos).normalized;
-        Logger.Debug($"Swipe distance {swipeDistance} duration {duration} dir {dir}");
 
-        if ((swipeDistance >= minSwipeDistance) &&
+        // angular velocity AVnew = AVcurrent + impulse * e^−decay×Δt
+        angularVelocity *= Mathf.Exp(-decayRate * Time.deltaTime);
+
+        // stop AV reached min threshold
+        if (absVelocity <= minAngularVelocity)
+        {
+            angularVelocity = 0;
+        }
+
+        // angle θnew​ = θcurrent​ + AVnew ​* Δt
+        activeBlocks.transform.rotation *= Quaternion.Euler(0, 0, angularVelocity * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// Process possible swipe gesture.
+    /// </summary>
+    /// <param name="duration">Duration between gesture end and start tinme.</param>
+    private void HandlePossibleSwipe(float duration)
+    {
+        float distance = Vector2.Distance(pointerPressEndPos, pointerPressStartPos);
+
+        // prevent possible bad input (sometimes InputSystem feeds values outside of the view)
+        if (float.IsInfinity(distance) || float.IsNaN(distance))
+        {
+            return;
+        }
+
+        Vector2 dir = (pointerPressEndPos - pointerPressStartPos).normalized;
+
+#if DEBUG_LOG_INPUT
+        Logger.Debug($"Swipe distance {distance} duration {duration} dir {dir}");
+#endif // DEBUG_LOG_INPUT
+
+        // swipe is deadbanded by distance and duration
+        if ((distance >= minSwipeDistance) &&
             (duration > 0) && (duration <= maxSwipeDuration))
         {
-            var screenWorldEndPos = Camera.main.ScreenToWorldPoint(pointerPressEndPos);
-            Debug.DrawLine(Camera.main.ScreenToWorldPoint(pointerPressStartPos), Camera.main.ScreenToWorldPoint(pointerPressEndPos), Color.green, 5);
+            // compute angle difference and speed
+            Vector2 pivot = activeBlocks.transform.position;
+            float angleDelta = Vector2.SignedAngle(pointerPressStartPos - pivot, pointerPressEndPos - pivot);
+            float speed = distance / duration;
 
-            // depending on where the pointer ends we have to invert
-            // the direction of the wheel; as:
-            // moving blocks to the left when above mid screen - rotates them to the left
-            // moving blocks to the left when below mid screen - rotates them to the right
-            // the same inversion applies for up and down; imagine wheel rotation
-            // PS: our mid screen is (0, 0)
-            bool invertY = screenWorldEndPos.y > 0;
-            bool invertX = screenWorldEndPos.x > 0;
-
-            // make it a bit more interesting, using total blocks amount as the mass
-            // that resists rapid speed change when more blocks are present
-            float massFactor = activeBlocks.transform.childCount;
-
-            // compute speed change
-            float speedChange = swipeDistance / duration * speedMultiplier / massFactor;
-            speedChange = Mathf.Clamp(speedChange, 0, 1500);
-
-            Logger.Debug($"speedChange {speedChange}, mass: {massFactor}, duration {duration}");
-
-            // determine left & right dir
-            if (Vector2.Dot(dir, Vector2.left) > swipeDirectionThreshold)
+            // apply speed limit
+            if (swipeSpeedLimit > 0)
             {
-                if (invertY)
-                {
-                    speed -= speedChange;
-                }
-                else
-                {
-                    speed += speedChange;
-                }
-            }
-            else if (Vector2.Dot(dir, Vector2.right) > swipeDirectionThreshold)
-            {
-                if (invertY)
-                {
-                    speed += speedChange;
-                }
-                else
-                {
-                    speed -= speedChange;
-                }
+                speed = Mathf.Max(speed, swipeSpeedLimit);
             }
 
-            // determine up & down dir
-            if (Vector2.Dot(dir, Vector2.up) > swipeDirectionThreshold)
-            {
-                if (invertX)
-                {
-                    speed -= speedChange;
-                }
-                else
-                {
-                    speed += speedChange;
-                }
-            }
-            else if (Vector2.Dot(dir, Vector2.down) > swipeDirectionThreshold)
-            {
-                if (invertX)
-                {
-                    speed += speedChange;
-                }
-                else
-                {
-                    speed -= speedChange;
-                }
-            }
+            // determine new velocity
+            angularVelocity += angleDelta * speed * sensitivity;
+#if DEBUG_LOG_INPUT
+            Logger.Debug($"Angle delta {angleDelta}, speed {speed}, angularVelocity {angularVelocity}");
+#endif // DEBUG_LOG_INPUT
         }
     }
 
-    public void OnPress(InputAction.CallbackContext ctx)
-    {
-        if (!LevelManager.Instance.IsRunning())
-        {
-            return;
-        }
-
-        if (playerInput.currentControlScheme != "Keyboard&Mouse")
-        {
-            return;
-        }
-
-        if (ctx.started)
-        {
-            pointerPressStartPos = Mouse.current.position.ReadValue();
-        }
-        else if (ctx.canceled)
-        {
-            pointerPressEndPos = Mouse.current.position.ReadValue();
-            AdaptSpeed((float)ctx.duration);
-        }
-    }
-
-    private bool dragging;
-    private float dragStartTime;
-    private int activeInputId;
-    public void OnTouchscreenInput(InputAction.CallbackContext ctx)
+    /// <summary>
+    /// Expects PointerInput composite from the InputSystem on mouse/pointer or touch input.
+    /// </summary>
+    /// <param name="ctx">Context with PointerInput composite value.</param>
+    public void OnPointerInput(InputAction.CallbackContext ctx)
     {
         PointerInput input = ctx.ReadValue<PointerInput>();
+
+        // discard invalid positions
+        if (!IsScreenPositionValid(input.Position))
+        {
+            return;
+        }
 
         if (input.Contact && !dragging)
         {
             dragStartTime = Time.time;
             activeInputId = input.InputId;
-            pointerPressStartPos = input.Position;
+            pointerPressStartPos = Camera.main.ScreenToWorldPoint(input.Position);
             dragging = true;
-            Logger.Debug($"Started dragging at {pointerPressStartPos}");
-        }
-        else if (input.Contact && dragging)
-        {
-            if (activeInputId != input.InputId) {
-                return;
-            }
-            pointerPressEndPos = input.Position;
-        }
-        else
-        {
-            if (activeInputId != input.InputId) {
-                return;
-            }
-            Logger.Debug($"Done dragging at {pointerPressEndPos}");
 
-            AdaptSpeed(Time.time - dragStartTime);
+#if DEBUG_LOG_INPUT
+            Logger.Debug($"{ctx.control.device.name}: started dragging at {pointerPressStartPos}");
+#endif // DEBUG_LOG_INPUT
+
+        }
+        else if (!input.Contact && dragging)
+        {
+            // previous input type changed or it was lost, discard
+            if (activeInputId != input.InputId)
+            {
+                return;
+            }
+
+#if DEBUG_LOG_INPUT
+            Logger.Debug($"{ctx.control.device.name}: done dragging at {pointerPressEndPos}");
+#endif // DEBUG_LOG_INPUT
+
+            pointerPressEndPos = Camera.main.ScreenToWorldPoint(input.Position);
+
+            DebugUtils.DrawLine(pointerPressStartPos, pointerPressEndPos, Color.red, 3);
+
+            HandlePossibleSwipe(Time.time - dragStartTime);
             dragging = false;
         }
     }

@@ -42,7 +42,7 @@ namespace InputSamples.Drawing
         /// <summary>
         /// Required in Editor v6
         /// </summary>
-        public int mode;
+        public int Mode;
 
         [InputControl(layout = "Button")]
         public int Contact;
@@ -50,15 +50,15 @@ namespace InputSamples.Drawing
         [InputControl(layout = "Vector2")]
         public int Position;
 
-        [InputControl(name = "Input Id", layout = "Integer")]
-        public int InputId;
+        [InputControl(layout = "Integer")]
+        public int Id;
 
         public override PointerInput ReadValue(ref InputBindingCompositeContext context)
         {
             return new PointerInput
             {
                 Contact = context.ReadValueAsButton(Contact),
-                InputId = context.ReadValue<int>(InputId),
+                InputId = context.ReadValue<int>(Id),
                 Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position),
             };
         }
