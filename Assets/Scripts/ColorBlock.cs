@@ -146,13 +146,13 @@ public class ColorBlock : BasicBlock
             if (i == points.Length)
             {
                 line = ((Vector2)transform.TransformPoint(points[points.Length - 1]), (Vector2)transform.TransformPoint(points[0]));
-                Debug.DrawLine(line.Item1, line.Item2, Color.green);
+                DebugUtils.DrawLine(line.Item1, line.Item2, Color.green);
                 break;
             }
             else
             {
                 line = ((Vector2)transform.TransformPoint(points[i - 1]), (Vector2)transform.TransformPoint(points[i]));
-                Debug.DrawLine(line.Item1, line.Item2, Color.green);
+                DebugUtils.DrawLine(line.Item1, line.Item2, Color.green);
             }
         }
     }
@@ -253,11 +253,11 @@ public class ColorBlock : BasicBlock
 
         // find this block closest edge
         var thisBlockEdge = FindClosestEdge(GetComponent<PolygonCollider2D>(), other.collider.ClosestPoint(transform.position));
-        Debug.DrawLine(thisBlockEdge.Item1, thisBlockEdge.Item2, Color.red, 10);
+        DebugUtils.DrawLine(thisBlockEdge.Item1, thisBlockEdge.Item2, Color.red, 10);
         var thisBlockEdgeMidpoint = (thisBlockEdge.Item1 + thisBlockEdge.Item2) / 2;
 
         var otherBlockEdge = FindClosestEdge(other.gameObject.GetComponent<PolygonCollider2D>(), other.collider.ClosestPoint(transform.position));
-        Debug.DrawLine(otherBlockEdge.Item1, otherBlockEdge.Item2, Color.red, 3);
+        DebugUtils.DrawLine(otherBlockEdge.Item1, otherBlockEdge.Item2, Color.red, 3);
 
         // check if other block edge is free
         // skip collision processing if it is not
@@ -271,7 +271,7 @@ public class ColorBlock : BasicBlock
         // other.GetContacts(contacts);
         // foreach (ContactPoint2D cp in contacts)
         // {
-        //     Debug.DrawLine(transform.position, cp.point, Color.blue, 3);
+        //     DebugUtils.DrawLine(transform.position, cp.point, Color.blue, 3);
         // }
 
         Vector2 otherEdgeMidpoint = (otherBlockEdge.Item1 + otherBlockEdge.Item2) / 2;

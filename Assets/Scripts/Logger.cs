@@ -7,7 +7,6 @@ using System.Diagnostics;
 /// </summary>
 public static class Logger
 {
-
     [Conditional("ENABLE_LOGS")]
     public static void Debug(string logMsg)
     {

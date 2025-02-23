@@ -14,13 +14,13 @@ public class CentralBlock : BasicBlock
             if (i == points.Length)
             {
                 line = ((Vector2)transform.TransformPoint(points[points.Length - 1]), (Vector2)transform.TransformPoint(points[0]));
-                Debug.DrawLine(line.Item1, line.Item2, Color.green);
+                DebugUtils.DrawLine(line.Item1, line.Item2, Color.green);
                 break;
             }
             else
             {
                 line = ((Vector2)transform.TransformPoint(points[i - 1]), (Vector2)transform.TransformPoint(points[i]));
-                Debug.DrawLine(line.Item1, line.Item2, Color.green);
+                DebugUtils.DrawLine(line.Item1, line.Item2, Color.green);
             }
         }
 

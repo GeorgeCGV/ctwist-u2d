@@ -276,7 +276,7 @@ public class BasicBlock : MonoBehaviour
             if (hit.collider != null)
             {
                 Logger.Debug("hit: " + hit.collider.gameObject.name);
-                Debug.DrawLine(start, hit.point, Color.red, 4);
+                DebugUtils.DrawLine(start, hit.point, Color.red, 4);
 
                 var neighbourClosestEdge = FindClosestEdge(hit.collider.gameObject.GetComponent<PolygonCollider2D>(),
                                                     hit.collider.ClosestPoint(transform.position));
