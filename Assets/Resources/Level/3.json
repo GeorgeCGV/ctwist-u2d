@@ -2,7 +2,7 @@
     "colorsInLevel": ["Pink", "Black", "White", "Yellow"],
     "obstructionIdx": 2,
     "startBlocksNum": 14,
-    "goalScore": 3000,
+    "goalScore": 4000,
     "limitTime": 80,
     "limitMove": 0,
     "multiplier": {
@@ -27,6 +27,6 @@
     "starRewards": [
         1000,
         2000,
-        3000
+        4000
     ]
 }

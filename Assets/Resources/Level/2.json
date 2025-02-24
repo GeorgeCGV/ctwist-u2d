@@ -2,7 +2,7 @@
     "colorsInLevel": ["Blue", "Red", "Green"],
     "obstructionIdx": 1,
     "startBlocksNum": 10,
-    "goalScore": 1600,
+    "goalScore": 2000,
     "limitTime": 35,
     "limitMove": 0,
     "multiplier": {
@@ -26,8 +26,8 @@
         "speedIncreaseBySpeedPercent": 15
     },
     "starRewards": [
-        1600,
-        1600,
-        1650
+        1000,
+        1500,
+        2000
     ]
 }

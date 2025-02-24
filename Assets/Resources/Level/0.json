@@ -2,7 +2,7 @@
     "colorsInLevel": ["Blue","Red"],
     "obstructionIdx": -1,
     "startBlocksNum": 4,
-    "goalScore": 1500,
+    "goalScore": 2000,
     "limitTime": 0,
     "limitMove": 0,
     "multiplier": {
