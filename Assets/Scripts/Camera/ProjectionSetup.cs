@@ -101,6 +101,8 @@ public class CameraInit : MonoBehaviour
             else
             {
                 Logger.Debug($"Not supported aspect {currentAspect} rounded to {roundedAspect}");
+                // try to approximate based on y=a⋅x^b+c
+                Camera.main.orthographicSize = 4.639f * Mathf.Pow(roundedAspect, -1.081f) + 0.202f;
             }
         }
     }
