@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-[RequireComponent(typeof(MultiplierHandler))]
+[RequireComponent(typeof(MultiplierHandler), typeof(Spawner))]
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
@@ -38,9 +38,6 @@ public class LevelManager : MonoBehaviour
 
     public List<AudioClip> SfxBlocksClear;
 
-    [SerializeField]
-    public List<Spawn> SpawnNodes;
-
     private Data.LevelData level;
 
     [SerializeField]
@@ -56,17 +53,6 @@ public class LevelManager : MonoBehaviour
 
     private List<ColorBlock.EBlockColor> availableColors;
 
-    #region Spawn
-    [SerializeField]
-    private float nextSpawnTime;
-    private ProgressiveValueTimer nextSpawnTimeTimer;
-    private float spawmTimer;
-    #endregion
-    #region SpawnSpeed
-    [SerializeField]
-    private float blockSpeed;
-    private ProgressiveValueTimer blockSpeedTimer;
-    #endregion
     #region Multiplier
     private MultiplierHandler multiplier;
     #endregion
@@ -110,7 +96,7 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    protected ColorBlock.EBlockColor GetRandomColorFromAvailable()
+    public ColorBlock.EBlockColor GetRandomColorFromAvailable()
     {
         ColorBlock.EBlockColor ret = ColorBlock.EBlockColor.Red;
 
@@ -251,26 +237,6 @@ public class LevelManager : MonoBehaviour
             }
 
             OnTimeLeftUpdate?.Invoke(minutes, seconds);
-        }
-
-        // update block speed, increases from min to max
-        blockSpeedTimer.Update(Time.deltaTime);
-
-        // update next spawn time, decreases from max to min
-        nextSpawnTimeTimer.Update(Time.deltaTime);
-
-        // check if must spawn
-        spawmTimer += Time.deltaTime;
-        if (spawmTimer >= nextSpawnTime * 0.7f)
-        {
-            // try to spawn
-            ColorBlock.EBlockColor colorToSpawn = GetRandomColorFromAvailable();
-
-            // reset spawn timer if spawned, otherwise repeat on the next update
-            if (SpawnNodes[UnityEngine.Random.Range(0, SpawnNodes.Count)].SpawnColorBlock(colorToSpawn, nextSpawnTime, blockSpeed))
-            {
-                spawmTimer = 0;
-            }
         }
     }
 
@@ -504,34 +470,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        float decreaseSpawnTimeEverySeconds;
-        float blockSpeedIncreaseEverySeconds;
-        if (level.limitTime <= 0)
-        {
-            // no time limit, use actual seconds
-            decreaseSpawnTimeEverySeconds = level.spawn.timeDecreasePerTimeSeconds;
-            blockSpeedIncreaseEverySeconds = level.block.speedIncreasePerTimeSeconds;
-        }
-        else
-        {
-            decreaseSpawnTimeEverySeconds = level.limitTime * level.spawn.timeDecreasePerTimeLimitPercent * 0.01f;
-            blockSpeedIncreaseEverySeconds = level.limitTime * level.block.speedIncreasePerTimeLimitPercent * 0.01f;
-        }
-
-        // spawn time goes from max to min
-        nextSpawnTime = level.spawn.timeMax;
-        nextSpawnTimeTimer = new ProgressiveValueTimer(nextSpawnTime, level.spawn.timeMin, level.spawn.timeDecreaseByTimePercent * 0.01f,
-                                                       decreaseSpawnTimeEverySeconds,
-                                                       delegate (float value) { nextSpawnTime = value; },
-                                                       new ProgressiveValueTimer.DecrementalOperation());
-
-        // speed goes from min to max
-        blockSpeed = level.block.speedMin;
-        blockSpeedTimer = new ProgressiveValueTimer(blockSpeed, level.block.speedMax, level.block.speedIncreaseBySpeedPercent * 0.01f,
-                                                    blockSpeedIncreaseEverySeconds,
-                                                    delegate (float value) { blockSpeed = value; },
-                                                    new ProgressiveValueTimer.IncrementalOperation());
-
+        GetComponent<Spawner>().Init(level);
 
         multiplier.Init(level.multiplier);
 
@@ -603,7 +542,6 @@ public class LevelManager : MonoBehaviour
             Assert.IsTrue(linkedNeighboursCount > 0);
             // add block to the blocks layer to allow raycasting against it
             newBlock.gameObject.layer = blocksLayer;
-
 
             Logger.Debug($"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
 

@@ -44,7 +44,7 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: hex
+  - name: spawn
     uniqueID: 868354889
     locked: 0
   m_RenderingLayers:

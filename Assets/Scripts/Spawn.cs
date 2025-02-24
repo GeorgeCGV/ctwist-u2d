@@ -20,13 +20,16 @@ public class Spawn : MonoBehaviour
     private ColorBlock.EBlockColor spawnColor;
     private float spawnSpeed;
 
-    private Animator animatorCtrl;
+    private Animator animator;
+    private float spawnAnimationClipLength;
+
     private SpriteRenderer spriteRenderer;
     private Light2D light2D;
 
     void Awake()
     {
-        animatorCtrl = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
+        spawnAnimationClipLength = Utils.GetAnimatorClipLength(animator, "Spawn");
         spriteRenderer = GetComponent<SpriteRenderer>();
         light2D = GetComponent<Light2D>();
     }
@@ -46,20 +49,22 @@ public class Spawn : MonoBehaviour
         spawnSpeed = speed;
 
         // colorize the spwan node sprite
-        spriteRenderer.color = ColorBlock.UnityColorFromBlockColor(spawnColor);
-        light2D.color = ColorBlock.UnityColorFromBlockColor(spawnColor);
+        Color unityColor = ColorBlock.UnityColorFromBlockColor(spawnColor);
+        spriteRenderer.color = unityColor;
+        // give some contrast
+        light2D.color = unityColor == ColorBlock.black ? Color.white : unityColor;
 
         // start spriteRenderer and light2D, begin to animate
         spriteRenderer.enabled = true;
         light2D.enabled = true;
-        animatorCtrl.SetTrigger(animatorTriggerSpawn);
+        animator.SetTrigger(animatorTriggerSpawn);
 
         return true;
     }
 
     void Update()
     {
-        AnimatorStateInfo stateInfo = animatorCtrl.GetCurrentAnimatorStateInfo(0);
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
         if (stateInfo.IsName("Spawn"))
         {
             currentTimeInSeconds += Time.deltaTime;
@@ -69,9 +74,9 @@ public class Spawn : MonoBehaviour
             if (remainingTime > 0)
             {
                 // Speed multiplier increases as time gets closer to targetTime
-                float speedMultiplier = 10 / remainingTime;
+                float speedMultiplier = spawnAnimationClipLength / remainingTime;
                 // Prevent extreme values
-                animatorCtrl.speed = Mathf.Clamp(speedMultiplier, 1f, 2f);
+                animator.speed = Mathf.Clamp(speedMultiplier, 1f, 2f);
             }
             else
             {
@@ -79,7 +84,7 @@ public class Spawn : MonoBehaviour
                 {
                     spriteRenderer.enabled = false;
                     light2D.enabled = false;
-                    animatorCtrl.SetTrigger(animatorTriggerStop);
+                    animator.SetTrigger(animatorTriggerStop);
                     done = true;
                 }
             }
@@ -90,6 +95,7 @@ public class Spawn : MonoBehaviour
             {
                 busy = false;
                 done = false;
+                light2D.enabled = false;
 
                 AudioManager.Instance.PlaySfx(SfxOnSpawn);
 
