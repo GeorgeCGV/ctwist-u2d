@@ -316,9 +316,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48719fe9775368d4ab473ceeeb6deab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startValue: 0
-  endValue: 0
-  duration: 1
   sfxScoring: {fileID: 8300000, guid: be911a9c140e0594ba126ad74abcb15f, type: 3}
 --- !u!1001 &36390053
 PrefabInstance:
@@ -18642,7 +18639,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 378946677}
-        m_TargetAssemblyTypeName: UILevelController, Assembly-CSharp
+        m_TargetAssemblyTypeName: UILevelController, GameScriptsAssembly
         m_MethodName: OnQuit
         m_Mode: 1
         m_Arguments:
@@ -21530,7 +21527,7 @@ GameObject:
   - component: {fileID: 1535891021}
   - component: {fileID: 1535891020}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21575,7 +21572,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: quit
+  m_text: home
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -22451,7 +22448,7 @@ GameObject:
   - component: {fileID: 1709017694}
   - component: {fileID: 1709017693}
   m_Layer: 5
-  m_Name: QuitBrn
+  m_Name: LeftBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22521,9 +22518,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 378946677}
-        m_TargetAssemblyTypeName: UILevelController, Assembly-CSharp
-        m_MethodName: OnQuit
+      - m_Target: {fileID: 1075941699}
+        m_TargetAssemblyTypeName: UIResultsMenuAnimationEventsHandler, GameScriptsAssembly
+        m_MethodName: OnLeftBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -27665,7 +27662,7 @@ GameObject:
   - component: {fileID: 1776382554}
   - component: {fileID: 1776382553}
   m_Layer: 5
-  m_Name: NextBtn
+  m_Name: RightBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27735,9 +27732,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 378946677}
-        m_TargetAssemblyTypeName: UILevelController, GameScriptsAssembly
-        m_MethodName: OnNext
+      - m_Target: {fileID: 1075941699}
+        m_TargetAssemblyTypeName: UIResultsMenuAnimationEventsHandler, GameScriptsAssembly
+        m_MethodName: OnRightBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -29544,7 +29541,7 @@ GameObject:
   - component: {fileID: 1970500139}
   - component: {fileID: 1970500138}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30040,51 +30037,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2027213948}
   m_CullTransparentMesh: 1
---- !u!1 &2069239519
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2069239521}
-  - component: {fileID: 2069239520}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2069239520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2069239519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1132016a6f99ed04ea543a134bbdd02c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  availableLevelsAmount: 0
---- !u!4 &2069239521
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2069239519}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 445.18246, y: 352.59778, z: -2.1675951}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2083312080
 GameObject:
   m_ObjectHideFlags: 0
@@ -30426,4 +30378,3 @@ SceneRoots:
   - {fileID: 1617644880}
   - {fileID: 903106091}
   - {fileID: 418289025}
-  - {fileID: 2069239521}

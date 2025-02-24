@@ -14,7 +14,7 @@ public class LevelManager : MonoBehaviour
     public static event Action<string, Vector2> OnAnnounce;
 
     public static event Action<int, int> OnTimeLeftUpdate;
-    public static event Action<Data.LevelData, Data.GameOverResults> OnGameOver;
+    public static event Action<Data.LevelData, Data.LevelResults> OnGameOver;
     public static event Action<Data.LevelData> OnBeforeGameStarts;
 
     [SerializeField]
@@ -166,7 +166,21 @@ public class LevelManager : MonoBehaviour
             AudioManager.Instance.PlaySfxPausable(SfxOnLost);
         }
 
-        OnGameOver?.Invoke(level, new Data.GameOverResults(score, won));
+        // unlock next level
+        int nextLevelId = GameManager.Instance.UnlockNextLevel(level.id);
+        // Determine how many stars were earned
+        int starsEarned = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            starsEarned += score >= level.starRewards[i] ? 1 : 0;
+        }
+        // store earned stars
+        GameManager.Instance.SetLevelStars(level.id, starsEarned);
+
+        OnGameOver?.Invoke(level, new Data.LevelResults(score, won,
+                                                        nextLevelId,
+                                                        GameManager.Instance.IsLastLevel(level.id),
+                                                        starsEarned));
     }
 
     protected void GameOver(bool won)
@@ -247,7 +261,7 @@ public class LevelManager : MonoBehaviour
 
         // check if must spawn
         spawmTimer += Time.deltaTime;
-        if (spawmTimer >= nextSpawnTime)
+        if (spawmTimer >= nextSpawnTime * 0.7f)
         {
             // try to spawn
             ColorBlock.EBlockColor colorToSpawn = GetRandomColorFromAvailable();
@@ -527,7 +541,7 @@ public class LevelManager : MonoBehaviour
 
     private void OnLevelStart()
     {
-        UILevelController.OnGameStarAllAnimationsDone -= OnLevelStart;
+        UILevelController.OnGameStartAllAnimationsDone -= OnLevelStart;
         AudioManager.Instance.PlayMusic(BackgroundMusic);
         AudioManager.Instance.PlaySfx(SfxOnStart);
 

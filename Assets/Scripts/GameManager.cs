@@ -1,4 +1,3 @@
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour, ISettingsStore
@@ -53,13 +52,13 @@ public class GameManager : MonoBehaviour, ISettingsStore
     /// Unlocks next level based on played level id.
     /// </summary>
     /// <param name="playedLevelId">Played level id.</param>
-    /// <returns>True if new level is unlocked, otherwise false.</returns>
-    public bool UnlockNextLevel(int playedLevelId)
+    /// <returns>Unlocked level id or current level id when not unlocked.</returns>
+    public int UnlockNextLevel(int playedLevelId)
     {
         // if it was the last available level,
         // then there is nothing to unlock
         if (IsLastLevel(playedLevelId)) {
-            return false;
+            return playedLevelId;
         }
 
         // get last unlocked lvl id
@@ -68,11 +67,13 @@ public class GameManager : MonoBehaviour, ISettingsStore
         // then unlock the next one
         if (playedLevelId == lastUnlockedLevelId)
         {
-            PlayerPrefs.SetInt("currentLevel", playedLevelId + 1);
+            int nextLevelId = lastUnlockedLevelId + 1;
+            PlayerPrefs.SetInt("currentLevel", nextLevelId);
             PlayerPrefs.Save();
+            return nextLevelId;
         }
 
-        return false;
+        return playedLevelId;
     }
 
     public int GetLevelStars(int levelId)

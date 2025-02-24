@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Canvas))]
@@ -39,20 +41,39 @@ public class UILevelController : MonoBehaviour
     [SerializeField]
     private TMP_Text timeLabel;
 
-    private void OnEnable()
+    private UIResultsMenuView resultsView;
+
+    void Awake()
+    {
+        // init gameover/results menu
+        resultsView = GetComponentInChildren<UIResultsMenuView>(true);
+        Assert.IsNotNull(resultsView);
+        resultsView.Init();
+    }
+
+    void OnEnable()
     {
         LevelManager.OnTimeLeftUpdate += HandleTimeLeftUpdate;
         LevelManager.OnAnnounce += HandleAnnounce;
-        LevelManager.OnGameOver += HandleGameOver;
         LevelManager.OnBeforeGameStarts += HandleBeforeGameStarts;
+        LevelManager.OnGameOver += HandleGameOver;
+
     }
 
-    private void OnDisable()
+    private void HandleGameOver(LevelData data, LevelResults results)
+    {
+        // pause the time
+        LevelManager.Instance.SetPaused(true);
+        // show results view
+        resultsView.Show(results, OnQuit, OnNext);
+    }
+
+    void OnDisable()
     {
         LevelManager.OnTimeLeftUpdate -= HandleTimeLeftUpdate;
         LevelManager.OnAnnounce -= HandleAnnounce;
-        LevelManager.OnGameOver -= HandleGameOver;
         LevelManager.OnBeforeGameStarts -= HandleBeforeGameStarts;
+        LevelManager.OnGameOver -= HandleGameOver;
     }
 
     private void HandleAnnounce(string text, Vector2 pos)
@@ -71,33 +92,6 @@ public class UILevelController : MonoBehaviour
         annoation.transform.SetSiblingIndex(4);
         // Get RectTransform & Set Position
         annoation.GetComponent<RectTransform>().anchoredPosition = uiPosition;
-    }
-
-    private void HandleGameOver(Data.LevelData level, Data.GameOverResults result)
-    {
-        LevelManager.Instance.SetPaused(true);
-
-        resultsMenu.SetActive(true);
-        resultsMenu.GetComponent<Animator>().SetBool("Won", result.Won);
-
-        int starsEarned = 0;
-        for (int i = 0; i < 3; i++)
-        {
-            starsEarned += result.Score >= level.starRewards[i] ? 1 : 0;
-        }
-        resultsMenu.GetComponent<Animator>().SetInteger("Stars", starsEarned);
-
-        GameManager.Instance.SetLevelStars(level.id, starsEarned);
-
-        // unlock next level
-        if (result.Won) {
-            GameManager.Instance.UnlockNextLevel(level.id);
-        }
-
-        UICounterAnimate counter = resultsMenu.GetComponentInChildren<UICounterAnimate>();
-        resultsMenu.GetComponent<Animator>().SetTrigger("Open");
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogAppear);
-        counter.endValue = result.Score;
     }
 
     private void HandleTimeLeftUpdate(int min, int sec)
@@ -126,7 +120,7 @@ public class UILevelController : MonoBehaviour
     private IEnumerator StartLevel(Animator animator)
     {
         animator.SetTrigger("ShadeOff");
-        for (int i = 1; i <= 3; i++)
+        for (int i = 3; i >= 1; i--)
         {
             countdownLabel.text = i.ToString();
             countdownLabel.enabled = true;
@@ -136,7 +130,7 @@ public class UILevelController : MonoBehaviour
             yield return new WaitForSeconds(.5f);
         }
 
-        OnGameStarAllAnimationsDone?.Invoke();
+        OnGameStartAllAnimationsDone?.Invoke();
     }
     #endregion
 
@@ -157,14 +151,6 @@ public class UILevelController : MonoBehaviour
         AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
         AudioManager.Instance.PausableSfxPause(false);
     }
-    public void OnNext()
-    {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
-        AudioManager.Instance.StopSfxPausable();
-        LoadScreen.Instance.LoadLevel(PlayerPrefs.GetInt("currentLevel", 0));
-        LevelManager.Instance.SetPaused(false);
-    }
 
     public void OnQuit()
     {
@@ -174,4 +160,18 @@ public class UILevelController : MonoBehaviour
         SceneManager.LoadSceneAsync(0);
         LevelManager.Instance.SetPaused(false);
     }
+
+    public void OnNext(int nextLevelId, UIResultsMenuView.OnNextAction onNextAction)
+    {
+        if (onNextAction == UIResultsMenuView.OnNextAction.Quit) {
+            OnQuit();
+        } else {
+            AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+            AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+            AudioManager.Instance.StopSfxPausable();
+            LoadScreen.Instance.LoadLevel(nextLevelId);
+            LevelManager.Instance.SetPaused(false);
+        }
+    }
+
 }
