@@ -49,11 +49,12 @@ public class GameManager : MonoBehaviour, ISettingsStore
     }
 
     /// <summary>
-    /// Unlocks next level based on played level id.
+    /// Gets next level based on played level id.
+    /// Unlocks next level if required.
     /// </summary>
     /// <param name="playedLevelId">Played level id.</param>
     /// <returns>Unlocked level id or current level id when not unlocked.</returns>
-    public int UnlockNextLevel(int playedLevelId)
+    public int NextLevel(int playedLevelId)
     {
         // if it was the last available level,
         // then there is nothing to unlock
@@ -73,7 +74,8 @@ public class GameManager : MonoBehaviour, ISettingsStore
             return nextLevelId;
         }
 
-        return playedLevelId;
+        // replaying, simply return the next level id
+        return playedLevelId + 1;
     }
 
     public int GetLevelStars(int levelId)
