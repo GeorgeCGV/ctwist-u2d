@@ -1,8 +1,9 @@
 {
+    "seed": 3,
+    "startBlocksNum": 7,
     "colorsInLevel": ["Red", "White", "Purple", "Green", "Yellow"],
     "obstructionIdx": 3,
-    "startBlocksNum": 3,
-    "goalScore": 3000,
+    "goalScore": 6000,
     "limitTime": 90,
     "limitMove": 0,
     "multiplier": {
@@ -26,7 +27,7 @@
     },
     "starRewards": [
         1000,
-        1500,
-        3000
+        2500,
+        6000
     ]
 }

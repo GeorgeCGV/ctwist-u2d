@@ -1,7 +1,8 @@
 {
+    "seed": 19,
+    "startBlocksNum": 10,
     "colorsInLevel": ["Blue", "Red", "Green"],
     "obstructionIdx": 1,
-    "startBlocksNum": 10,
     "goalScore": 2000,
     "limitTime": 35,
     "limitMove": 0,
@@ -11,7 +12,6 @@
         "max": 6
     },
     "spawn": {
-        "spawnerAnimation": 10,
         "timeMin": 2,
         "timeMax": 5,
         "timeDecreasePerTimeLimitPercent": 25,
@@ -19,8 +19,8 @@
         "timeDecreaseByTimePercent": 5
     },
     "block": {
-        "speedMin": 5,
-        "speedMax": 5,
+        "speedMin": 4,
+        "speedMax": 6,
         "speedIncreasePerTimeLimitPercent": 10,
         "speedIncreasePerTimeSeconds": 3,
         "speedIncreaseBySpeedPercent": 15

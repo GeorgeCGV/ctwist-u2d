@@ -51,6 +51,7 @@ public class LevelManager : MonoBehaviour
 
     private float timePassedInSeconds;
 
+    [SerializeField]
     private List<ColorBlock.EBlockColor> availableColors;
 
     #region Multiplier
@@ -152,8 +153,8 @@ public class LevelManager : MonoBehaviour
             AudioManager.Instance.PlaySfxPausable(SfxOnLost);
         }
 
-        // unlock next level
-        int nextLevelId = GameManager.Instance.UnlockNextLevel(level.id);
+        int nextLevelId = GameManager.Instance.NextLevel(level.id);
+
         // Determine how many stars were earned
         int starsEarned = 0;
         for (int i = 0; i < 3; i++)
@@ -312,7 +313,8 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        if (active.GetComponent<BasicBlock>().destroyed) {
+        if (active.GetComponent<BasicBlock>().destroyed)
+        {
             return;
         }
 
@@ -471,7 +473,7 @@ public class LevelManager : MonoBehaviour
 
         multiplier.Init(level.multiplier);
 
-        CreateStartupBlocks(level.startBlocksNum, null);
+        CreateStartupBlocks(level.seed > 0 ? level.seed : UnityEngine.Random.Range(0, int.MaxValue), level.startBlocksNum, null);
         OnBeforeGameStarts?.Invoke(level);
     }
 
@@ -493,7 +495,7 @@ public class LevelManager : MonoBehaviour
         isLevelStarted = true;
     }
 
-    private void CreateStartupBlocks(int num, GameObject root = null)
+    private void CreateStartupBlocks(int seed, int num, GameObject root = null)
     {
         int blocksLayer = LayerMask.NameToLayer("blocks");
 
@@ -508,20 +510,24 @@ public class LevelManager : MonoBehaviour
         GameObject neighbour;
         BasicBlock.EdgeIndex edge;
 
+        System.Random rnd = new System.Random(seed);
+
+        Array edges = Enum.GetValues(typeof(BasicBlock.EdgeIndex));
+
         for (int i = 0; i < num; i++)
         {
-            edge = BasicBlock.GetRandomEdge();
+            edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
             neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
 
             // find any free edge
             while (neighbour != null)
             {
                 block = neighbour;
-                edge = BasicBlock.GetRandomEdge();
+                edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
                 neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
             }
 
-            GameObject newBlock = BlocksFactory.Instance.NewColorBlock(GetRandomColorFromAvailable());
+            GameObject newBlock = BlocksFactory.Instance.NewColorBlock(availableColors[rnd.Next(0, availableColors.Count)]);
             // set to correct location
             newBlock.transform.parent = block.transform.parent;
             newBlock.transform.rotation = block.transform.rotation;
@@ -546,4 +552,39 @@ public class LevelManager : MonoBehaviour
             block = root;
         }
     }
+
+    public void DestroyAll()
+    {
+        GameObject active_blocks = GameObject.FindGameObjectWithTag("active_blocks");
+
+        foreach (Transform child in active_blocks.transform)
+        {
+            BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
+            if ((block == null) || (block is CentralBlock) || (!block.gameObject.activeInHierarchy) || block.destroyed)
+            {
+                continue;
+            }
+
+            block.Destroy();
+            Destroy(block.gameObject);
+        }
+    }
+
+#if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
+    public int seed;
+    public int spawnNum;
+    public bool recreateStartupBlocks = false;
+
+    void OnValidate()
+    {
+        if (recreateStartupBlocks)
+        {
+            seed++;
+            DestroyAll();
+            CreateStartupBlocks(seed, spawnNum);
+            recreateStartupBlocks = false;
+        }
+    }
+
+#endif // UNITY_EDITOR
 }

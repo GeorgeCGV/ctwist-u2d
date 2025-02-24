@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,12 +16,6 @@ public class BasicBlock : MonoBehaviour
         LeftTop = 4,
         Top = 5,
     };
-
-    public static EdgeIndex GetRandomEdge()
-    {
-        Array edges = Enum.GetValues(typeof(EdgeIndex));
-        return (EdgeIndex)edges.GetValue(UnityEngine.Random.Range(0, edges.Length));
-    }
 
     public static Dictionary<EdgeIndex, Vector2> EdgeDirections = new Dictionary<EdgeIndex, Vector2>()
     {

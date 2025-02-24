@@ -5,6 +5,7 @@ namespace Data
     [Serializable]
     public class LevelData
     {
+        public int seed;
         public int id;
         public int obstructionIdx;
         public string[] colorsInLevel;
