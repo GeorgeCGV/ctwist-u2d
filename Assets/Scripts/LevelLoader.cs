@@ -17,8 +17,8 @@ public class LoadScreen : MonoBehaviour
     private static int ABORTED_IDX = -100;
     private static int LOADED_OK_IDX = -1;
 
-    private static int animatorTriggerOpen = Animator.StringToHash("Open");
-    private static int animatorTriggerClose = Animator.StringToHash("Close");
+    private static readonly int animatorTriggerOpen = Animator.StringToHash("Open");
+    private static readonly int animatorTriggerClose = Animator.StringToHash("Close");
 
     private int levelIdx;
     private Data.LevelData levelData;

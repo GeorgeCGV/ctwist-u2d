@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class MenuController : MonoBehaviour
 {
-    private static int animatorTriggerOpen = Animator.StringToHash("Open");
-    private static int animatorTriggerClose = Animator.StringToHash("Close");
+    private static readonly int animatorTriggerOpen = Animator.StringToHash("Open");
+    private static readonly int animatorTriggerClose = Animator.StringToHash("Close");
 
     [SerializeField]
     private AudioClip backgroundMusic;

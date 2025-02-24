@@ -26,7 +26,7 @@ public class LevelManager : MonoBehaviour
     public AudioClip SfxOnWin;
     public AudioClip SfxOnNearTimeout;
 
-#region NearTimeout
+    #region NearTimeout
     [SerializeField]
     private float nearTimeoutTime = 10.15f;
 
@@ -34,7 +34,7 @@ public class LevelManager : MonoBehaviour
     private Animator envAnimator;
 
     private bool onNearTimeoutStarted;
-#endregion
+    #endregion
 
     public List<AudioClip> SfxBlocksClear;
 
@@ -332,7 +332,8 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
-        if (SfxOnObstruction != null) {
+        if (SfxOnObstruction != null)
+        {
             AudioManager.Instance.PlaySfx(SfxOnObstruction[UnityEngine.Random.Range(0, SfxOnObstruction.Count)]);
         }
 
@@ -459,11 +460,12 @@ public class LevelManager : MonoBehaviour
         Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
 
         // create obstructions
-        if (data.obstructionIdx >= 0) {
+        if (data.obstructionIdx >= 0)
+        {
             Instantiate(obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx], obstructionTmParent.transform);
         }
 
-        UILevelController.OnGameStarAllAnimationsDone += OnLevelStart;
+        UILevelController.OnGameStartAllAnimationsDone += OnLevelStart;
 
         level = data;
 

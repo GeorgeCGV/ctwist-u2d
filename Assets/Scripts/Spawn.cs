@@ -8,8 +8,8 @@ public class Spawn : MonoBehaviour
     public AudioClip SfxOnSpawn;
     public GameObject ColorBlockPrefab;
 
-    private static int animatorTriggerSpawn = Animator.StringToHash("Spawn");
-    private static int animatorTriggerStop = Animator.StringToHash("Stop");
+    private static readonly int animatorTriggerSpawn = Animator.StringToHash("Spawn");
+    private static readonly int animatorTriggerStop = Animator.StringToHash("Stop");
 
     private float currentTimeInSeconds;
     private float targetTimeInSeconds;

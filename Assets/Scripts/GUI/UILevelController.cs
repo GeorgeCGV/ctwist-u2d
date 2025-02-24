@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Canvas))]
 public class UILevelController : MonoBehaviour
 {
-    public static event Action OnGameStarAllAnimationsDone;
+    public static event Action OnGameStartAllAnimationsDone;
 
     [SerializeField]
     private GameObject annotationPrefab;

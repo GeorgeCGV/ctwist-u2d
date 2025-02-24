@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 [RequireComponent(typeof(Animator))]
 public class ColorBlock : BasicBlock
 {
-    private static int animatorColorIntParam = Animator.StringToHash("Color");
+    private static readonly int animatorColorIntParam = Animator.StringToHash("Color");
 
     public static Color red = new Color32(255, 165, 163, 255);
     public static Color blue = new Color32(112, 225, 255, 255);
