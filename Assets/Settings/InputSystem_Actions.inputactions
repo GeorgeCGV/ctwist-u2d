@@ -22,6 +22,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "OnInput",
+                    "type": "Value",
+                    "id": "bf954ac0-80cf-41cc-a738-7e8477a829d1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -70,13 +79,123 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "inputId",
+                    "name": "Id",
                     "id": "949c7eb3-b3a5-45df-bcfe-a592fba96bd0",
                     "path": "<Touchscreen>/touch0/touchId",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Touch",
                     "action": "OnTouchscreen",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "MouseAndPen",
+                    "id": "fdf4f744-0b3d-4a83-adfd-f1464849ba6c",
+                    "path": "PointerInput",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OnInput",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Contact",
+                    "id": "1d8c810a-64ee-4ed3-9318-ddbf30743256",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Contact",
+                    "id": "2bbdb686-0704-4b0e-8253-f23983b58910",
+                    "path": "<Pen>/tip",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Position",
+                    "id": "65fd6ce6-59ca-4c32-8985-ec55664fca05",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Position",
+                    "id": "a611f011-db61-404e-86cc-35828000b0d2",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Id",
+                    "id": "5c9944f1-dedc-49d2-be78-f658a1f35ea4",
+                    "path": "<Mouse>/pointerId",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Touchscreen",
+                    "id": "d7faf096-c015-457e-8673-149835303c88",
+                    "path": "PointerInput",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "OnInput",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "contact",
+                    "id": "715df701-6d97-4e0b-afdd-5da2b5b78832",
+                    "path": "<Touchscreen>/touch0/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "position",
+                    "id": "99ad26f1-3b18-47cc-ac8c-4ea5250b9d30",
+                    "path": "<Touchscreen>/touch0/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "OnInput",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Id",
+                    "id": "6a11f766-a1ca-45f9-9420-627c4d49cd4c",
+                    "path": "<Touchscreen>/touch0/touchId",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Touch",
+                    "action": "OnInput",
                     "isComposite": false,
                     "isPartOfComposite": true
                 }
