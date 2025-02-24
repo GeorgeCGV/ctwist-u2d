@@ -81,16 +81,16 @@ public class MultiplierHandler : MonoBehaviour
 
     void Update()
     {
-        if (scoreMultiplier == s_minMultiplierValue)
+        if (scoreMultiplierDecreaseTimer <= 0)
         {
-            // nothing to run as multiplier is already at min value
+            // nothing to run as time is already <= 0
             return;
         }
 
         scoreMultiplierDecreaseTimer = Mathf.Max(scoreMultiplierDecreaseTimer - scoreMultiplierDecayRate * Time.deltaTime, 0);
-
         if (scoreMultiplierDecreaseTimer <= 0)
         {
+            // try to decrement if reached 0
             Decrement();
         }
 

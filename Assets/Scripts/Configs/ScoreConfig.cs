@@ -14,5 +14,5 @@ public class ScoreConfig : ScriptableObject
     [SerializeField]
     public int ScorePerMatchMore = 5000;
     [SerializeField]
-    public int ScorePerFloating = 250;
+    public int ScorePerFloating = 25;
 }
