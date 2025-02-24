@@ -22764,12 +22764,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 260
+  m_fontSize: 600
   m_fontSizeBase: 191.4
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 60
-  m_fontSizeMax: 260
+  m_fontSizeMin: 28
+  m_fontSizeMax: 600
   m_fontStyle: 17
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
