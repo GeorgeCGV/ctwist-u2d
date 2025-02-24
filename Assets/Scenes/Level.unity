@@ -21714,9 +21714,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sensitivity: 0.6
-  minSwipeDistance: 0.2
-  maxSwipeDuration: 1
-  decayRate: 4
+  dragSensitivity: 7
+  minSwipeDistance: 0
+  decayRate: 3.5
   minAngularVelocity: 0.01
   swipeSpeedLimit: 30
 --- !u!114 &1608167287

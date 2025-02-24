@@ -5,24 +5,23 @@ using UnityEngine.InputSystem;
 public sealed class InputManager : MonoBehaviour
 {
     /// <summary>
-    /// Swipe sensitivity.
+    /// Swipe rotation sensitivity.
     /// </summary>
     [SerializeField, Min(0.1f)]
     private float sensitivity = 0.6f;
+
+    /// <summary>
+    /// Drag rotation sensitivity.
+    /// </summary>
+    [SerializeField, Min(1f)]
+    private float dragSensitivity = 7f;
 
     /// <summary>
     /// Minimum distance threshold between end and start positions
     /// to be considered as valid swipe motion.
     /// </summary>
     [SerializeField]
-    private float minSwipeDistance = 0.2f;
-
-    /// <summary>
-    /// Maximum time threshold between gesture end and start time
-    /// to be considered as valid swipe motion.
-    /// </summary>
-    [SerializeField]
-    private float maxSwipeDuration = 1.0f;
+    private float minSwipeDistance = 0f;
 
     /// <summary>
     /// Object to apply rotation to.
@@ -30,12 +29,12 @@ public sealed class InputManager : MonoBehaviour
     private GameObject activeBlocks;
 
     /// <summary>
-    /// Tap/Click start position in world coordinates.
+    /// Tap/Click start position and when last drag position in world coordinates.
     /// </summary>
     private Vector2 pointerPressStartPos;
 
     /// <summary>
-    /// Tap/Click end position in world coordinates.
+    /// Tap/Click a end position in world coordinates.
     /// </summary>
     private Vector2 pointerPressEndPos;
 
@@ -130,15 +129,12 @@ public sealed class InputManager : MonoBehaviour
             return;
         }
 
-        Vector2 dir = (pointerPressEndPos - pointerPressStartPos).normalized;
-
 #if DEBUG_LOG_INPUT
         Logger.Debug($"Swipe distance {distance} duration {duration} dir {dir}");
 #endif // DEBUG_LOG_INPUT
 
         // swipe is deadbanded by distance and duration
-        if ((distance >= minSwipeDistance) &&
-            (duration > 0) && (duration <= maxSwipeDuration))
+        if ((distance >= minSwipeDistance) && (duration > 0))
         {
             // compute angle difference and speed
             Vector2 pivot = activeBlocks.transform.position;
@@ -173,6 +169,11 @@ public sealed class InputManager : MonoBehaviour
             return;
         }
 
+        // if (!LevelManager.Instance.IsRunning())
+        // {
+        //     return;
+        // }
+
         if (input.Contact && !dragging)
         {
             dragStartTime = Time.time;
@@ -184,6 +185,20 @@ public sealed class InputManager : MonoBehaviour
             Logger.Debug($"{ctx.control.device.name}: started dragging at {pointerPressStartPos}");
 #endif // DEBUG_LOG_INPUT
 
+        } else if (input.Contact && dragging) {
+            // previous input type changed or it was lost, discard
+            if (activeInputId != input.InputId)
+            {
+                return;
+            }
+
+            Vector2 pointerCurrentPos = Camera.main.ScreenToWorldPoint(input.Position);
+            Vector2 pivot = activeBlocks.transform.position;
+            float angleDelta = Vector2.SignedAngle(pointerPressStartPos - pivot, pointerCurrentPos - pivot);
+            angularVelocity += angleDelta * dragSensitivity;
+
+            // update start position, as swipe shall happen from that point
+            pointerPressStartPos = pointerCurrentPos;
         }
         else if (!input.Contact && dragging)
         {
