@@ -10025,7 +10025,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d1d54f5b36224146976cf66bbb3bb05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentForUiLevelSelectPlayLevel: {fileID: 1697910355}
+  parentForUiLevelSelectPlayLevel: {fileID: 1697910356}
   uiLevelSelectPlayLevelPrefab: {fileID: 4344439963696458021, guid: f0d875019348896448c014b15ec15975, type: 3}
 --- !u!1 &1943736766
 GameObject:

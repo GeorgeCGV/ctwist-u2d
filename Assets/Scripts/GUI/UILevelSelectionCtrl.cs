@@ -3,7 +3,7 @@ using UnityEngine;
 public class LevelSelectionCtrl : MonoBehaviour
 {
     [SerializeField]
-    private GameObject parentForUiLevelSelectPlayLevel;
+    private Transform parentForUiLevelSelectPlayLevel;
 
     [SerializeField]
     private GameObject uiLevelSelectPlayLevelPrefab;
@@ -12,7 +12,7 @@ public class LevelSelectionCtrl : MonoBehaviour
     {
         for (int i = 0; i < GameManager.Instance.TotalLevels; i++)
         {
-            GameObject newPlayLevel = Instantiate(uiLevelSelectPlayLevelPrefab, parentForUiLevelSelectPlayLevel.transform);
+            GameObject newPlayLevel = Instantiate(uiLevelSelectPlayLevelPrefab, parentForUiLevelSelectPlayLevel);
             newPlayLevel.GetComponent<UISelectLevelPlayBtn>().Init(i);
         }
     }
