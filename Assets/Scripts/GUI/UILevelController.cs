@@ -107,7 +107,11 @@ public class UILevelController : MonoBehaviour
         {
             goalPanel.GetComponent<UIGoalPanel>().InitScoreGoal(data.goalScore);
         }
-        // set limits
+
+        TextMeshProUGUI lvlLabel = transform.Find("LevelLabel")?.GetComponent<TextMeshProUGUI>();
+        Assert.IsNotNull(lvlLabel);
+
+        lvlLabel.text = "Level " + (data.id + 1).ToString();
 
         pausePanel.GetComponent<Animator>().SetTrigger("Appear");
         topLeftPanel.GetComponent<Animator>().SetTrigger("Appear");
