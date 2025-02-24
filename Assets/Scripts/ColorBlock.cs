@@ -8,14 +8,14 @@ public class ColorBlock : BasicBlock
 {
     private static readonly int animatorColorIntParam = Animator.StringToHash("Color");
 
-    public static Color red = new Color32(255, 165, 163, 255);
-    public static Color blue = new Color32(112, 225, 255, 255);
-    public static Color white = new Color32(231, 231, 231, 255);
-    public static Color black = new Color32(96, 96, 96, 255);
-    public static Color yellow = new Color32(239, 227, 115, 255);
-    public static Color green = new Color32(99, 236, 124, 255);
-    public static Color pink = new Color32(255, 133, 228, 255);
-    public static Color purple = new Color32(185, 112, 255, 255);
+    public static Color red = new Color32(255, 103, 99, 255);
+    public static Color blue = new Color32(109, 164, 255, 255);
+    public static Color white = new Color32(230, 230, 230, 255);
+    public static Color black = new Color32(67, 67, 67, 255);
+    public static Color yellow = new Color32(190, 178, 72, 255);
+    public static Color green = new Color32(46, 159, 99, 255);
+    public static Color pink = new Color32(204, 113, 184, 255);
+    public static Color purple = new Color32(132, 42, 195, 255);
 
     public enum EBlockColor
     {
