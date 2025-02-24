@@ -312,17 +312,14 @@ public class LevelManager : MonoBehaviour
             return;
         }
 
+        if (active.GetComponent<BasicBlock>().destroyed) {
+            return;
+        }
+
         if (SfxOnObstruction != null)
         {
             AudioManager.Instance.PlaySfx(SfxOnObstruction[UnityEngine.Random.Range(0, SfxOnObstruction.Count)]);
         }
-
-        // ParticleSystem efx = active.GetComponent<BasicBlock>().NewDestroyEfx();
-        // if (efx != null) {
-        //     efx.Play();
-        // }
-
-        // GameOver(false);
 
         active.GetComponent<BasicBlock>().Destroy();
         Destroy(active);
