@@ -60,7 +60,9 @@ public class ProjectionSetup : MonoBehaviour
 
     void OnDestroy()
     {
-        StopCoroutine(screenChangeCoroutine);
+        if (screenChangeCoroutine != null) {
+            StopCoroutine(screenChangeCoroutine);
+        }
     }
 
     /// <summary>
