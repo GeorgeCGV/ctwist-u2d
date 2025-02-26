@@ -20,10 +20,15 @@ public class LevelManager : MonoBehaviour
     [SerializeField]
     private GameObject EfxOnStart;
 
+    [SerializeField]
     public AudioClip BackgroundMusic;
+    [SerializeField]
     public AudioClip SfxOnStart;
+    [SerializeField]
     public AudioClip SfxOnLost;
+    [SerializeField]
     public AudioClip SfxOnWin;
+    [SerializeField]
     public AudioClip SfxOnNearTimeout;
 
     #region NearTimeout
@@ -138,9 +143,9 @@ public class LevelManager : MonoBehaviour
         return IsStarted() && !IsPaused() && !isGameOver;
     }
 
-    protected IEnumerator GameOverDelay(bool won)
+    protected IEnumerator GameOverDelayed(bool won)
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1);
 
         AudioManager.Instance.StopMusic();
 
@@ -174,24 +179,14 @@ public class LevelManager : MonoBehaviour
     {
         isGameOver = true;
 
-        StartCoroutine(GameOverDelay(won));
+        GetComponent<Spawner>().StopSpawner();
+        DestroyAll();
+
+        StartCoroutine(GameOverDelayed(won));
     }
 
-    // float pass = 0;
-    // bool started1 = false;
-    // bool started2 = false;
     void Update()
     {
-        // pass += Time.deltaTime;
-        // if (pass > 3 && !started1) {
-        //     started1 = true;
-        //     AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
-        // }
-
-        // if (pass > 6 && !started2) {
-        //     started2 = true;
-        //     AudioManager.Instance.PlaySfxPausable(SfxOnWin);
-        // }
         if (!IsRunning())
         {
             return;
@@ -567,11 +562,9 @@ public class LevelManager : MonoBehaviour
 
     public void DestroyAll()
     {
-        GameObject active_blocks = GameObject.FindGameObjectWithTag("active_blocks");
-
-        foreach (Transform child in active_blocks.transform)
+        BasicBlock[] allObjects = FindObjectsByType<BasicBlock>(FindObjectsSortMode.None);
+        foreach (BasicBlock block in allObjects)
         {
-            BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
             if ((block == null) || (block is CentralBlock) || (!block.gameObject.activeInHierarchy) || block.destroyed)
             {
                 continue;
