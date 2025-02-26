@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: -5255816942282900717}
   - component: {fileID: 8404763309177892855}
   m_Layer: 3
-  m_Name: BasicCentral
+  m_Name: CentralBlock
   m_TagString: central
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

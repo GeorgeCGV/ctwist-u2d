@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1677156824273782917}
   - component: {fileID: 4192747550375175623}
   m_Layer: 0
-  m_Name: Spawn
+  m_Name: SpawnNode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -102,6 +102,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SfxOnSpawn: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
+  spawnIn: 0.5
+  spawn: 0
 --- !u!114 &4192747550375175623
 MonoBehaviour:
   m_ObjectHideFlags: 0

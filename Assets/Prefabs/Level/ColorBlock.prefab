@@ -156,7 +156,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5397662739790017680
 Transform:
   m_ObjectHideFlags: 0
@@ -306,6 +306,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbourRange: 0.35
   edgeAttachPositionOffset: 0.4
+  gravityPoint: {x: 0, y: 0}
+  GravityStrength: 1
   links:
     m_Keys: 000000000100000002000000030000000400000005000000
     m_Values:
@@ -315,8 +317,6 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
-  gravityPoint: {x: 0, y: 0}
-  GravityStrength: 1
   attached: 0
   destroyed: 0
   EfxOnDestroy: {fileID: 6527478309959237573, guid: f3238e63ad3f06040adb8200b72b545d, type: 3}
