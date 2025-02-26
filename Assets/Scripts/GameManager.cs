@@ -103,6 +103,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets achieved score if it is higher than previously achieved.
+    /// </summary>
+    /// <param name="levelId">Level id</param>
+    /// <param name="score">New score</param>
+    /// <returns>True if new score is new highscore, otherwise False.</returns>
+    public bool SetLevelScoreChecked(int levelId, int score)
+    {
+        // update level stars, but only if earned more than before
+        int previouslyEarnedAmount = PlayerPrefs.GetInt("score" + levelId, 0);
+        if (score > previouslyEarnedAmount)
+        {
+            PlayerPrefs.SetInt("score" + levelId, score);
+            PlayerPrefs.Save();
+            return true;
+        }
+
+        return false;
+    }
+
+
     public bool IsMusicOn()
     {
         return PlayerPrefs.GetInt("musicOn", 1) == 1;
