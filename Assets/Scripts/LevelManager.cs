@@ -364,14 +364,14 @@ public class LevelManager : MonoBehaviour
             AudioManager.Instance.PlaySfx(SfxOnObstruction[UnityEngine.Random.Range(0, SfxOnObstruction.Count)]);
         }
 
-        active.GetComponent<BasicBlock>().Destroy();
+        active.GetComponent<BasicBlock>().DestroyBlock();
         Destroy(active);
 
         List<GameObject> floatingBlocks = GetFloatingBlocks();
         for (int i = floatingBlocks.Count - 1; i >= 0; i--)
         {
             GameObject block = floatingBlocks[i];
-            block.GetComponent<BasicBlock>().Destroy();
+            block.GetComponent<BasicBlock>().DestroyBlock();
             Destroy(block);
         }
     }
@@ -425,7 +425,7 @@ public class LevelManager : MonoBehaviour
         {
             foreach (GameObject block in matches)
             {
-                block.GetComponent<BasicBlock>().Destroy();
+                block.GetComponent<BasicBlock>().DestroyBlock();
                 Destroy(block);
             }
 
@@ -466,7 +466,7 @@ public class LevelManager : MonoBehaviour
             for (int i = floatingBlocks.Count - 1; i >= 0; i--)
             {
                 GameObject block = floatingBlocks[i];
-                block.GetComponent<BasicBlock>().Destroy();
+                block.GetComponent<BasicBlock>().DestroyBlock();
                 Destroy(block);
             }
 
@@ -610,7 +610,7 @@ public class LevelManager : MonoBehaviour
                 continue;
             }
 
-            block.Destroy();
+            block.DestroyBlock();
             Destroy(block.gameObject);
         }
     }

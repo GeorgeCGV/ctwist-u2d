@@ -47,7 +47,7 @@ public class BasicBlock : MonoBehaviour
     /// </summary>
     /// <typeparam name="EdgeIndex">Edge Index.</typeparam>
     /// <typeparam name="AnchoredJoint2D">Link.</typeparam>
-    public SerializedDictionary<EdgeIndex, AnchoredJoint2D> links = new SerializedDictionary<EdgeIndex, AnchoredJoint2D>()
+    private Dictionary<EdgeIndex, AnchoredJoint2D> links = new Dictionary<EdgeIndex, AnchoredJoint2D>()
     {
         {EdgeIndex.RightTop, null},
         {EdgeIndex.RightBottom, null},
@@ -141,7 +141,7 @@ public class BasicBlock : MonoBehaviour
     /// Utility struct used during link process.
     /// See LinkWithNeighbours.
     /// </summary>
-    protected struct Link
+    protected struct Linkage
     {
         public EdgeIndex neighbourEdge;
         public GameObject neighbour;
@@ -243,9 +243,10 @@ public class BasicBlock : MonoBehaviour
     /// Removes link (joint) from the block links.
     /// </summary>
     /// <param name="linkToUnlink"></param>
-    protected void Unlink(AnchoredJoint2D linkToUnlink)
+    public void Unlink(AnchoredJoint2D linkToUnlink)
     {
-        foreach (EdgeIndex edge in links.Keys.ToArray())
+        EdgeIndex[] edges = links.Keys.ToArray();
+        foreach (EdgeIndex edge in edges)
         {
             AnchoredJoint2D link = links[edge];
             if (link == null)
@@ -261,6 +262,16 @@ public class BasicBlock : MonoBehaviour
                 break;
             }
         }
+    }
+
+    public void Link(EdgeIndex edgeIdx, AnchoredJoint2D joint)
+    {
+        links[edgeIdx] = joint;
+    }
+
+    public AnchoredJoint2D Link(EdgeIndex edgeIdx)
+    {
+        return links[edgeIdx];
     }
 
     protected virtual void Awake()
@@ -427,9 +438,10 @@ public class BasicBlock : MonoBehaviour
         return GetLinkNeighbour(links[edge]);
     }
 
-    public void Destroy()
+    public void DestroyBlock(bool withEfx = true)
     {
-        foreach (EdgeIndex edge in links.Keys.ToArray())
+        EdgeIndex[] edges = links.Keys.ToArray();
+        foreach (EdgeIndex edge in edges)
         {
             AnchoredJoint2D link = links[edge];
             if (link == null)
@@ -450,10 +462,12 @@ public class BasicBlock : MonoBehaviour
 
         destroyed = true;
 
-        ParticleSystem efx = NewDestroyEfx();
-        if (efx != null)
-        {
-            efx.Play();
+        if (withEfx) {
+            ParticleSystem efx = NewDestroyEfx();
+            if (efx != null)
+            {
+                efx.Play();
+            }
         }
     }
 
@@ -503,7 +517,7 @@ public class BasicBlock : MonoBehaviour
         // that prevents possible attachment when block collides
         // with antagonistic neighbour side that doesn't have a neighbour set
         // draw directions
-        Dictionary<EdgeIndex, Link> neighbours = new Dictionary<EdgeIndex, Link>(EdgeOffsets.Count);
+        Dictionary<EdgeIndex, Linkage> neighbours = new Dictionary<EdgeIndex, Linkage>(EdgeOffsets.Count);
         foreach (KeyValuePair<EdgeIndex, Vector2> entry in EdgeOffsets)
         {
             // perform inverse raycast, that avoids hit & stop due to our collider boundary
@@ -535,7 +549,7 @@ public class BasicBlock : MonoBehaviour
 
             (Vector2 closestPoint1, Vector2 closestPoint2, EdgeIndex edgeIdx) neighbourEdge = FindClosestColliderEdge(neighbourCollider, hit.collider.ClosestPoint(transform.position));
 
-            if (neighbour.links[neighbourEdge.edgeIdx] != null)
+            if (neighbour.Link(neighbourEdge.edgeIdx) != null)
             {
                 // edge is occupied, stop processing to prevent invalid state
                 neighbours.Clear();
@@ -556,7 +570,7 @@ public class BasicBlock : MonoBehaviour
                 break;
             }
 
-            neighbours.Add(entry.Key, new Link
+            neighbours.Add(entry.Key, new Linkage
             {
                 neighbourEdge = neighbourEdge.edgeIdx,
                 neighbour = hit.collider.gameObject
@@ -564,20 +578,17 @@ public class BasicBlock : MonoBehaviour
         }
 
         // attach / link
-        foreach (KeyValuePair<EdgeIndex, Link> entry in neighbours)
+        foreach (KeyValuePair<EdgeIndex, Linkage> entry in neighbours)
         {
             GameObject neighbour = entry.Value.neighbour;
             FixedJoint2D joint = neighbour.AddComponent<FixedJoint2D>();
 
             joint.connectedBody = GetComponent<Rigidbody2D>();
             joint.breakAction = JointBreakAction2D.Ignore;
-            // joint.breakAction = JointBreakAction2D.Destroy;
-            // joint.breakForce = 100;
-            // joint.breakTorque = 50;
             joint.dampingRatio = 1.0f;
             joint.frequency = 1;
 
-            neighbour.GetComponent<BasicBlock>().links[entry.Value.neighbourEdge] = joint;
+            neighbour.GetComponent<BasicBlock>().Link(entry.Value.neighbourEdge, joint);
             links[entry.Key] = joint;
         }
 
