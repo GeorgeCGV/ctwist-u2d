@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7325184632474839389}
   - component: {fileID: 5770379337364690038}
   - component: {fileID: 1849598042633428791}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: tm3
   m_TagString: obstructions_tilemap
   m_Icon: {fileID: 0}
@@ -4805,7 +4805,7 @@ TilemapCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5407702964979928580}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}

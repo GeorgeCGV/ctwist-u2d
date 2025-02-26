@@ -14,8 +14,8 @@ TagManager:
   - blocks
   - Water
   - UI
-  - Tilemap
-  - Tilemap-Obstruction
+  - obstruction
+  - 
   - 
   - 
   - 
