@@ -337,6 +337,8 @@ public class LevelManager : MonoBehaviour
 
     public void OnBlocksAttach(GameObject active)
     {
+        AudioManager.Instance.PlaySfx(active.GetComponent<BasicBlock>()?.SfxOnAttach());
+
         Queue<GameObject> blocks = new Queue<GameObject>();
         HashSet<GameObject> matches = new HashSet<GameObject>
         {
@@ -531,7 +533,7 @@ public class LevelManager : MonoBehaviour
             // set to correct location
             newBlock.transform.parent = block.transform.parent;
             newBlock.transform.rotation = block.transform.rotation;
-            newBlock.transform.position = block.transform.position + block.GetComponent<BasicBlock>().GetEdgeOffset(edge);
+            newBlock.transform.position = (Vector2)block.transform.position + block.GetComponent<BasicBlock>().GetEdgeOffset(edge);
             // mark as already attached and disable rigidbody physics
             newBlock.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             newBlock.GetComponent<Rigidbody2D>().totalForce = Vector2.zero;

@@ -51,11 +51,9 @@ public class ProgressiveValueTimer
         }
     }
 
-    public delegate void ValueChanged(float value);
-
+    private readonly float rate;
     private float currentValue;
     private float endValue;
-    private readonly float rate;
 
     private float elapsedTime;
     private readonly float intervalInSeconds;
