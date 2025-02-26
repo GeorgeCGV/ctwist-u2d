@@ -9,6 +9,7 @@ public class UIResultsMenuView : MonoBehaviour
 {
     private static readonly int animatorStarsProp = Animator.StringToHash("Stars");
     private static readonly int animatorWonProp = Animator.StringToHash("Won");
+    private static readonly int animatorHighscoreProp = Animator.StringToHash("Highscore");
     private static readonly int animatorShowTriggerProp = Animator.StringToHash("Open");
 
     public enum OnNextAction {
@@ -74,6 +75,7 @@ public class UIResultsMenuView : MonoBehaviour
         // Show the menu
         gameObject.SetActive(true);
         animator.SetBool(animatorWonProp, results.Won);
+        animator.SetBool(animatorHighscoreProp, results.IsHighscore);
         animator.SetInteger(animatorStarsProp, results.EarnedStars);
         animator.SetTrigger(animatorShowTriggerProp);
         AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogAppear);

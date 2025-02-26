@@ -169,10 +169,14 @@ public class LevelManager : MonoBehaviour
         // store earned stars
         GameManager.Instance.SetLevelStars(level.id, starsEarned);
 
+        // try to store achieved score
+        bool isHighscore = GameManager.Instance.SetLevelScoreChecked(level.id, score);
+
         OnGameOver?.Invoke(level, new Data.LevelResults(score, won,
                                                         nextLevelId,
                                                         GameManager.Instance.IsLastLevel(level.id),
-                                                        starsEarned));
+                                                        starsEarned,
+                                                        isHighscore));
     }
 
     protected void GameOver(bool won)

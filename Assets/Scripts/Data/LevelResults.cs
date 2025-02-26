@@ -33,14 +33,20 @@ namespace Data
         /// </summary>
         /// <value>Stars amount >= 0.</value>
         public int EarnedStars { get; private set; }
+        /// <summary>
+        /// Flag that tells if Score is new highscore.
+        /// </summary>
+        /// <value></value>
+        public bool IsHighscore { get; private set; }
 
-        public LevelResults(int score, bool won, int nextLevelId, bool wasLastLevel, int earnedStars)
+        public LevelResults(int score, bool won, int nextLevelId, bool wasLastLevel, int earnedStars, bool isHighscore)
         {
             Score = score;
             Won = won;
             NextLevel = nextLevelId;
             WasLastLevel = wasLastLevel;
             EarnedStars = earnedStars;
+            IsHighscore = isHighscore;
         }
     }
 }
