@@ -46,6 +46,8 @@ public class UICounterAnimate : MonoBehaviour
         {
             // Ensure it reaches the final value
             currentValue = endValue;
+            // prevent further updates
+            endValue = -1;
         }
 
         label.text = currentValue.ToString();
