@@ -57,7 +57,7 @@ public class LevelManager : MonoBehaviour
     private float timePassedInSeconds;
 
     [SerializeField]
-    private List<ColorBlock.EBlockColor> availableColors;
+    private List<ColorBlock.EBlockColor> availableColors = new List<ColorBlock.EBlockColor>();
 
     #region Multiplier
     private MultiplierHandler multiplier;
@@ -104,14 +104,8 @@ public class LevelManager : MonoBehaviour
 
     public ColorBlock.EBlockColor GetRandomColorFromAvailable()
     {
-        ColorBlock.EBlockColor ret = ColorBlock.EBlockColor.Red;
-
-        if (availableColors != null && availableColors.Count > 0)
-        {
-            ret = availableColors[UnityEngine.Random.Range(0, availableColors.Count)];
-        }
-
-        return ret;
+        Assert.IsFalse(availableColors.Count == 0, "availableColors must have elements");
+        return availableColors[UnityEngine.Random.Range(0, availableColors.Count)];
     }
 
     protected void IncrementScore(int val)
@@ -449,25 +443,17 @@ public class LevelManager : MonoBehaviour
         UILevelController.OnGameStartAllAnimationsDone += OnLevelStart;
 
         level = data;
+        Assert.IsFalse(level.colorsInLevel.Length == 0, "level msut have color blocks");
 
-        if (level.colorsInLevel.Length == 0)
+        foreach (string colorStr in level.colorsInLevel)
         {
-            availableColors = null;
-        }
-        else
-        {
-            availableColors = new List<ColorBlock.EBlockColor>(level.colorsInLevel.Length);
-
-            foreach (string colorStr in level.colorsInLevel)
+            if (Enum.TryParse(colorStr, out ColorBlock.EBlockColor color))
             {
-                if (Enum.TryParse(colorStr, out ColorBlock.EBlockColor color))
-                {
-                    availableColors.Add(color);
-                }
-                else
-                {
-                    Logger.Debug($"Failed to convert {colorStr} to block color, skip");
-                }
+                availableColors.Add(color);
+            }
+            else
+            {
+                Logger.Debug($"Failed to convert {colorStr} to block color, skip");
             }
         }
 
