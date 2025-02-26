@@ -72,6 +72,11 @@ public class Spawner : MonoBehaviour
     private (int min, int max) spawnBatchRange;
 
     /// <summary>
+    /// Executed when any spawn nodes spawned an Entity.
+    /// </summary>
+    private Action<GameObject> onSpawnedCallback;
+
+    /// <summary>
     /// Prepares the component and disables it to
     /// avoid Update calls.
     ///
@@ -92,8 +97,9 @@ public class Spawner : MonoBehaviour
     /// Initializes the spawner based on the level data.
     /// </summary>
     /// <param name="level">Level data.</param>
-    internal void Init(Data.LevelData level)
+    internal void Init(Data.LevelData level, Action<GameObject> onSpawned = null)
     {
+        onSpawnedCallback = onSpawned;
         spawnBatchChance = level.spawn.batchChance;
         spawnBatchRange = (Math.Max(1, level.spawn.batchMin), Math.Max(1, level.spawn.batchMax + 1));
 
@@ -211,8 +217,12 @@ public class Spawner : MonoBehaviour
     /// "free"/not busy spawn points.
     /// </summary>
     /// <param name="node">Spawn node.</param>
-    private void OnSpawnedHandler(SpawnNode node)
+    /// <param name="obj">Spawned entity.</param>
+    private void OnSpawnedHandler(SpawnNode node, GameObject obj)
     {
         freeSpawnNodes.Add(node);
+        if (obj) {
+            onSpawnedCallback?.Invoke(obj);
+        }
     }
 }

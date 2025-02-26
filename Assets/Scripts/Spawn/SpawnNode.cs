@@ -38,9 +38,9 @@ public class SpawnNode : MonoBehaviour
     /// </summary>
     private float animationDuration;
     /// <summary>
-    /// Executed when spawn animation is over.
+    /// Executed when spawn animation is over and entity has spawned.
     /// </summary>
-    private Action<SpawnNode> onFreeCallback;
+    private Action<SpawnNode, GameObject> onSpawnedCallback;
 
     /// <summary>
     /// Tied to the object's enable state.
@@ -76,9 +76,9 @@ public class SpawnNode : MonoBehaviour
     /// Schedules ISpawnEntity to be spawned.
     /// </summary>
     /// <param name="entity">Entity to spawn.</param>
-    /// <param name="onFree">Callback to invoke when spawn node is done.</param>
+    /// <param name="onSpawned">Callback to invoke when spawn node is done.</param>
     /// <returns>True if spawn is scheduled, otherwise False.</returns>
-    public bool SpawnEntity(ISpawnEntity entity, Action<SpawnNode> onFree = null)
+    public bool SpawnEntity(ISpawnEntity entity, Action<SpawnNode, GameObject> onSpawned = null)
     {
         if (Busy)
         {
@@ -91,7 +91,7 @@ public class SpawnNode : MonoBehaviour
         // avoids division by 0 in the update
         animationDuration = Mathf.Max(entity.SpawnInSeconds(), 0.1f);
         spawnEntity = entity;
-        onFreeCallback = onFree;
+        onSpawnedCallback = onSpawned;
 
         spriteRenderer.color = spawnEntity.SpawnColor();
         light2D.color = spawnEntity.BacklightColor();
@@ -132,13 +132,14 @@ public class SpawnNode : MonoBehaviour
         }
         else
         {
+            GameObject obj = null;
             // animation is over
             // spawn if there is anything to spawn
             // the entity is set to null in StopSpawn,
             // otherwise it is always set
             if (spawnEntity != null)
             {
-                GameObject obj = spawnEntity.Create();
+                obj = spawnEntity.Create();
 
                 obj.transform.position = transform.position;
                 BasicBlock block = obj.GetComponent<BasicBlock>();
@@ -156,7 +157,7 @@ public class SpawnNode : MonoBehaviour
 
             // invoke on "free"/done callback after
             // node state update
-            onFreeCallback?.Invoke(this);
+            onSpawnedCallback?.Invoke(this, obj);
         }
     }
 
