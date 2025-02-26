@@ -495,6 +495,8 @@ public class LevelManager : MonoBehaviour
         Camera.main.cullingMask |= 1 << LayerMask.NameToLayer("blocks");
 
         isLevelStarted = true;
+
+        GetComponent<Spawner>().StartSpawner();
     }
 
     private void CreateStartupBlocks(int seed, int num, GameObject root = null)

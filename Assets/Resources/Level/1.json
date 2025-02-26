@@ -12,6 +12,9 @@
         "max": 6
     },
     "spawn": {
+        "batchChance": 0.2,
+        "batchMin": 1,
+        "batchMax": 3,
         "timeMin": 2,
         "timeMax": 4,
         "timeDecreasePerTimeLimitPercent": 25,

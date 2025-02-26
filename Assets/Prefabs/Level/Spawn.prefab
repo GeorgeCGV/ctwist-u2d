@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3065925520062767607}
   - component: {fileID: 8666943458935562220}
-  - component: {fileID: 5054148551363857086}
   - component: {fileID: 1677156824273782917}
   - component: {fileID: 4192747550375175623}
   m_Layer: 0
@@ -90,28 +89,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!95 &5054148551363857086
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9045432397820542265}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: e28a11e9d46fe9246b597e5a5239a2f3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &1677156824273782917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,7 +102,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SfxOnSpawn: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
-  ColorBlockPrefab: {fileID: 5790817439536844642, guid: 552d4a66ed4150f439ac2ab8b3ea1d60, type: 3}
 --- !u!114 &4192747550375175623
 MonoBehaviour:
   m_ObjectHideFlags: 0
