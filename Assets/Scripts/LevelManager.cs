@@ -499,6 +499,14 @@ public class LevelManager : MonoBehaviour
         GetComponent<Spawner>().StartSpawner();
     }
 
+    void OnDestroy()
+    {
+        // subsribed at level startup; however, a user might exit
+        // before level fully starts. Therefore, we shall remove
+        // dangling subscription
+        UILevelController.OnGameStartAllAnimationsDone -= OnLevelStart;
+    }
+
     private void CreateStartupBlocks(int seed, int num, GameObject root = null)
     {
         int blocksLayer = LayerMask.NameToLayer("blocks");
