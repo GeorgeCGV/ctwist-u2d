@@ -149,16 +149,17 @@ public class LevelManager : MonoBehaviour
 
         AudioManager.Instance.StopMusic();
 
+        int nextLevelId = level.id;
         if (won)
         {
+            // try to unlock next level
+            nextLevelId = GameManager.Instance.NextLevel(level.id);
             AudioManager.Instance.PlaySfxPausable(SfxOnWin);
         }
         else
         {
             AudioManager.Instance.PlaySfxPausable(SfxOnLost);
         }
-
-        int nextLevelId = GameManager.Instance.NextLevel(level.id);
 
         // Determine how many stars were earned
         int starsEarned = 0;
