@@ -76,7 +76,7 @@ public class UIResultsMenuView : MonoBehaviour
         animator.SetBool(animatorWonProp, results.Won);
         animator.SetInteger(animatorStarsProp, results.EarnedStars);
         animator.SetTrigger(animatorShowTriggerProp);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogAppear);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogAppear);
 
     }
 

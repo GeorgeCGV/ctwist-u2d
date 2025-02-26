@@ -20,13 +20,13 @@ public class UIOptionsCtrl : MonoBehaviour
 
     public void OnSfxValueChanged(bool value)
     {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         GameManager.Instance.ToggleSFX();
     }
 
     public void OnMusicValueChanged(bool value)
     {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         GameManager.Instance.ToggleMusic();
     }
 }

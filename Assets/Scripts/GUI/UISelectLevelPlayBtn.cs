@@ -43,7 +43,7 @@ public class UISelectLevelPlayBtn : MonoBehaviour
     }
 
     public void OnPlay() {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         LoadScreen.Instance.LoadLevel(id);
     }
 }

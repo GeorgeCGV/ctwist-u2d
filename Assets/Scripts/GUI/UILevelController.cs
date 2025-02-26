@@ -141,25 +141,25 @@ public class UILevelController : MonoBehaviour
     public void OnPause()
     {
         AudioManager.Instance.PausableSfxPause(true);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         LevelManager.Instance.SetPaused(true);
         pauseMenu.SetActive(true);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogAppear);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogAppear);
     }
 
     public void OnUnpause()
     {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         pauseMenu.SetActive(false);
         LevelManager.Instance.SetPaused(false);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogDissapear);
         AudioManager.Instance.PausableSfxPause(false);
     }
 
     public void OnQuit()
     {
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogDissapear);
         AudioManager.Instance.StopSfxPausable();
         SceneManager.LoadSceneAsync(0);
         LevelManager.Instance.SetPaused(false);
@@ -170,8 +170,8 @@ public class UILevelController : MonoBehaviour
         if (onNextAction == UIResultsMenuView.OnNextAction.Quit) {
             OnQuit();
         } else {
-            AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
-            AudioManager.Instance.PlaySfx((int)AudioManager.SFX.DialogDissapear);
+            AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogDissapear);
             AudioManager.Instance.StopSfxPausable();
             LoadScreen.Instance.LoadLevel(nextLevelId);
             LevelManager.Instance.SetPaused(false);

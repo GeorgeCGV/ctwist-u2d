@@ -24,9 +24,9 @@ public class MenuController : MonoBehaviour
     {
         panel.SetActive(open);
         Animator panelAnimator = panel.GetComponent<Animator>();
-        AudioManager.Instance.PlaySfx((int)AudioManager.SFX.BtnClick);
+        AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
         panelAnimator.SetTrigger(open ? animatorTriggerOpen : animatorTriggerClose);
-        AudioManager.Instance.PlaySfx(open ? (int)AudioManager.SFX.DialogAppear : (int)AudioManager.SFX.DialogDissapear);
+        AudioManager.Instance.PlaySfx(open ? AudioManager.SFX.DialogAppear : AudioManager.SFX.DialogDissapear);
     }
 
     public void OnLevelSelectionOpen() {
