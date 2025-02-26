@@ -14,6 +14,8 @@ public class LevelManager : MonoBehaviour
     public static event Action<string, Vector2> OnAnnounce;
 
     public static event Action<int, int> OnTimeLeftUpdate;
+    public static event Action<int, int> OnSpawnsLeftUpdate;
+
     public static event Action<Data.LevelData, Data.LevelResults> OnGameOver;
     public static event Action<Data.LevelData> OnBeforeGameStarts;
 
@@ -56,6 +58,10 @@ public class LevelManager : MonoBehaviour
 
     private float timePassedInSeconds;
 
+    private int totalAmountOfSpawnedBlocks;
+
+    private HashSet<GameObject> notAttachedBlocks = new HashSet<GameObject>();
+
     [SerializeField]
     private List<ColorBlock.EBlockColor> availableColors = new List<ColorBlock.EBlockColor>();
 
@@ -97,6 +103,7 @@ public class LevelManager : MonoBehaviour
             multiplier = GetComponent<MultiplierHandler>();
             isLevelStarted = false;
             isGameOver = false;
+            totalAmountOfSpawnedBlocks = 0;
             Score = 0;
             timePassedInSeconds = 0;
         }
@@ -184,6 +191,42 @@ public class LevelManager : MonoBehaviour
         StartCoroutine(GameOverDelayed(won));
     }
 
+    /// <summary>
+    /// Checks if level time limit is reached.
+    /// </summary>
+    /// <returns>True if limit reached, otherwise False.</returns>
+    protected bool IsTimeLimitReached()
+    {
+        bool limitReached = false;
+
+        int seconds = 0;
+        int minutes = 0;
+
+        if (timePassedInSeconds >= level.limit.time)
+        {
+            // don't return here so that we could invoke OnTimeLeftUpdate
+            limitReached = true;
+        }
+        else
+        {
+            float timeDiffInSeconds = level.limit.time - timePassedInSeconds;
+            seconds = Mathf.FloorToInt(timeDiffInSeconds % 60);
+            minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
+
+            // 10 seconds clip
+            if (!onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
+            {
+                onNearTimeoutStarted = true;
+                AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
+                envAnimator.SetFloat("NearTimeoutSpeed", Utils.GetAnimatorClipLength(envAnimator, "NearTimeout") / nearTimeoutTime);
+                envAnimator.SetTrigger("NearTimeout");
+            }
+        }
+
+        OnTimeLeftUpdate?.Invoke(minutes, seconds);
+        return limitReached;
+    }
+
     void Update()
     {
         if (!IsRunning())
@@ -204,35 +247,39 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        // check limit conditions
-        if (level.limitTime != 0)
-        {
-            int seconds = 0;
-            int minutes = 0;
-
-            if (timePassedInSeconds >= level.limitTime)
-            {
+        // process level limit(s) condition(s)
+        Data.ELimitVariant limitVariant = level.limit.LevelLimit();
+        if (limitVariant == Data.ELimitVariant.TIME_LIMIT) {
+            if (IsTimeLimitReached()) {
                 // lost due to timeout
                 GameOver(false);
             }
-            else
-            {
-                float timeDiffInSeconds = level.limitTime - timePassedInSeconds;
-                seconds = Mathf.FloorToInt(timeDiffInSeconds % 60);
-                minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
-
-                // 10 seconds clip
-                if (!onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
-                {
-                    onNearTimeoutStarted = true;
-                    AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
-                    envAnimator.SetFloat("NearTimeoutSpeed", Utils.GetAnimatorClipLength(envAnimator, "NearTimeout") / nearTimeoutTime);
-                    envAnimator.SetTrigger("NearTimeout");
+        } else if (limitVariant == Data.ELimitVariant.SPAWN_LIMIT) {
+            // spawn/moves limited level
+            if (totalAmountOfSpawnedBlocks >= level.limit.spawns) {
+                // gameover state
+                // but we shall await all blocks to "fall" / attach
+                if (notAttachedBlocks.Count == 0) {
+                    // lost due to no more spawns/moves
+                    GameOver(false);
                 }
             }
-
-            OnTimeLeftUpdate?.Invoke(minutes, seconds);
         }
+    }
+
+    /// <summary>
+    /// Callback for the spawner when block spawns
+    /// </summary>
+    /// <param name="block"></param>
+    private void OnSpawnedBlock(GameObject block)
+    {
+        totalAmountOfSpawnedBlocks++;
+        // we have to keep track of not yet attached objects
+        // so that spawn level mode could wait until all blocks
+        // are attached before gameover
+        notAttachedBlocks.Add(block);
+        // notify others
+        OnSpawnsLeftUpdate?.Invoke(totalAmountOfSpawnedBlocks, level.limit.spawns);
     }
 
     protected List<GameObject> GetFloatingBlocks()
@@ -331,6 +378,8 @@ public class LevelManager : MonoBehaviour
 
     public void OnBlocksAttach(GameObject active)
     {
+        notAttachedBlocks.Remove(active);
+
         AudioManager.Instance.PlaySfx(active.GetComponent<BasicBlock>()?.SfxOnAttach());
 
         Queue<GameObject> blocks = new Queue<GameObject>();
@@ -457,7 +506,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        GetComponent<Spawner>().Init(level);
+        GetComponent<Spawner>().Init(level, OnSpawnedBlock);
 
         multiplier.Init(level.multiplier);
 

@@ -4,25 +4,22 @@
     "colorsInLevel": ["Green", "Yellow", "Red"],
     "obstructionIdx": 0,
     "goalScore": 7000,
-    "limitTime": 0,
-    "limitMove": 0,
+    "limit": {
+        "spawns": 5
+    },
     "multiplier": {
         "decayTime": 1.7,
         "decayRate": 0.5,
         "max": 6
     },
     "spawn": {
-        "batchChance": 0.2,
-        "batchMin": 1,
-        "batchMax": 3,
         "timeMin": 2,
         "timeMax": 4,
-        "timeDecreasePerTimeLimitPercent": 25,
         "timeDecreasePerTimeSeconds": 2,
         "timeDecreaseByTimePercent": 5
     },
     "block": {
-        "speedMin": 4,
+        "speedMin": 3,
         "speedMax": 5,
         "speedIncreasePerTimeLimitPercent": 10,
         "speedIncreasePerTimeSeconds": 3,

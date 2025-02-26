@@ -105,7 +105,7 @@ public class Spawner : MonoBehaviour
 
         float decreaseSpawnTimeEverySeconds;
         float blockSpeedIncreaseEverySeconds;
-        if (level.limitTime <= 0)
+        if (level.limit.time <= 0)
         {
             // no time limit, use actual seconds
             decreaseSpawnTimeEverySeconds = level.spawn.timeDecreasePerTimeSeconds;
@@ -113,8 +113,8 @@ public class Spawner : MonoBehaviour
         }
         else
         {
-            decreaseSpawnTimeEverySeconds = level.limitTime * level.spawn.timeDecreasePerTimeLimitPercent * 0.01f;
-            blockSpeedIncreaseEverySeconds = level.limitTime * level.block.speedIncreasePerTimeLimitPercent * 0.01f;
+            decreaseSpawnTimeEverySeconds = level.limit.time * level.spawn.timeDecreasePerTimeLimitPercent * 0.01f;
+            blockSpeedIncreaseEverySeconds = level.limit.time * level.block.speedIncreasePerTimeLimitPercent * 0.01f;
         }
 
         // spawn time goes from max to min
@@ -187,8 +187,8 @@ public class Spawner : MonoBehaviour
             {
                 // add a bit of variability
                 inSeconds = amountToSpawn == 1
-                                    ? 0.5f : UnityEngine.Random.Range(nextSpawnTime - 0.5f , nextSpawnTime + 0.5f);
-                speed =  amountToSpawn == 1 ? blockSpeed : UnityEngine.Random.Range(blockSpeed - 1f , blockSpeed + 1f);
+                                    ? 0.5f : UnityEngine.Random.Range(nextSpawnTime - 0.5f, nextSpawnTime + 0.5f);
+                speed = amountToSpawn == 1 ? blockSpeed : UnityEngine.Random.Range(blockSpeed - 1f, blockSpeed + 1f);
 
                 // enqueue new spawn entity
                 ColorBlock.EBlockColor rndColor = LevelManager.Instance.GetRandomColorFromAvailable();

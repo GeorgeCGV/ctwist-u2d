@@ -4,8 +4,6 @@
     "colorsInLevel": ["Blue","Red"],
     "obstructionIdx": -1,
     "goalScore": 3000,
-    "limitTime": 0,
-    "limitMove": 0,
     "multiplier": {
         "decayTime": 2,
         "decayRate": 0.25,

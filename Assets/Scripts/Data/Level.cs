@@ -39,13 +39,9 @@ namespace Data
         /// </summary>
         public int goalScore;
         /// <summary>
-        /// Level time limit in seconds.
+        /// Level limit (if any).
         /// </summary>
-        public int limitTime;
-        /// <summary>
-        /// Level spawn moves limit.
-        /// </summary>
-        public int limitMove;
+        public Limit limit;
         /// <summary>
         /// Spawner related.
         /// </summary>
@@ -65,6 +61,45 @@ namespace Data
         /// to grant a star.
         /// </summary>
         public int[] starRewards;
+    }
+
+    /// <summary>
+    /// What limit the level has.
+    /// The level can have up to one limit.
+    /// </summary>
+    public enum ELimitVariant
+    {
+        NO_LIMIT,
+        TIME_LIMIT,
+        SPAWN_LIMIT
+    }
+
+    [Serializable]
+    public class Limit
+    {
+        /// <summary>
+        /// Level time limit in seconds.
+        /// </summary>
+        public int time;
+        /// <summary>
+        /// Level spawns limit.
+        /// </summary>
+        public int spawns;
+
+        /// <summary>
+        /// Level limit type.
+        /// </summary>
+        /// <returns>ELevelLimit</returns>
+        public ELimitVariant LevelLimit()
+        {
+            if (time > 0) {
+                return ELimitVariant.TIME_LIMIT;
+            } else if (spawns > 0) {
+                return ELimitVariant.SPAWN_LIMIT;
+            }
+
+            return ELimitVariant.NO_LIMIT;
+        }
     }
 
     [Serializable]

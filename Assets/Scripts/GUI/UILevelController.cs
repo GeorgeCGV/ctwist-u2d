@@ -53,24 +53,14 @@ public class UILevelController : MonoBehaviour
 
     void OnEnable()
     {
-        LevelManager.OnTimeLeftUpdate += HandleTimeLeftUpdate;
         LevelManager.OnAnnounce += HandleAnnounce;
         LevelManager.OnBeforeGameStarts += HandleBeforeGameStarts;
         LevelManager.OnGameOver += HandleGameOver;
 
     }
 
-    private void HandleGameOver(LevelData data, LevelResults results)
-    {
-        // pause the time
-        LevelManager.Instance.SetPaused(true);
-        // show results view
-        resultsView.Show(results, OnQuit, OnNext);
-    }
-
     void OnDisable()
     {
-        LevelManager.OnTimeLeftUpdate -= HandleTimeLeftUpdate;
         LevelManager.OnAnnounce -= HandleAnnounce;
         LevelManager.OnBeforeGameStarts -= HandleBeforeGameStarts;
         LevelManager.OnGameOver -= HandleGameOver;
@@ -94,13 +84,17 @@ public class UILevelController : MonoBehaviour
         annoation.GetComponent<RectTransform>().anchoredPosition = uiPosition;
     }
 
-    private void HandleTimeLeftUpdate(int min, int sec)
+    private void HandleGameOver(LevelData data, LevelResults results)
     {
-        timeLabel.text = $"{min:D2}:{sec:D2}";
+        // pause the time
+        LevelManager.Instance.SetPaused(true);
+        // show results view
+        resultsView.Show(results, OnQuit, OnNext);
     }
 
+
     #region LevelStartup
-    private void HandleBeforeGameStarts(Data.LevelData data)
+    private void HandleBeforeGameStarts(LevelData data)
     {
         // set goals
         if (data.goalScore != 0)
@@ -112,6 +106,11 @@ public class UILevelController : MonoBehaviour
         Assert.IsNotNull(lvlLabel);
 
         lvlLabel.text = "Level " + (data.id + 1).ToString();
+
+        UILimitView limitView = topRightPanel.transform.Find("LimitPanel").GetComponent<UILimitView>();
+        Assert.IsNotNull(limitView);
+
+        limitView.Init(data.limit);
 
         pausePanel.GetComponent<Animator>().SetTrigger("Appear");
         topLeftPanel.GetComponent<Animator>().SetTrigger("Appear");
@@ -167,9 +166,12 @@ public class UILevelController : MonoBehaviour
 
     public void OnNext(int nextLevelId, UIResultsMenuView.OnNextAction onNextAction)
     {
-        if (onNextAction == UIResultsMenuView.OnNextAction.Quit) {
+        if (onNextAction == UIResultsMenuView.OnNextAction.Quit)
+        {
             OnQuit();
-        } else {
+        }
+        else
+        {
             AudioManager.Instance.PlaySfx(AudioManager.SFX.BtnClick);
             AudioManager.Instance.PlaySfx(AudioManager.SFX.DialogDissapear);
             AudioManager.Instance.StopSfxPausable();
