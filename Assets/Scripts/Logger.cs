@@ -7,6 +7,13 @@ using System.Diagnostics;
 /// </summary>
 public static class Logger
 {
+    /// <summary>
+    /// Proxy for UnityEngine.Debug.Log(string).
+    ///
+    /// Excluded from the build if ENABLE_LOGS
+    /// is not defined.
+    /// </summary>
+    /// <param name="logMsg">Message.</param>
     [Conditional("ENABLE_LOGS")]
     public static void Debug(string logMsg)
     {

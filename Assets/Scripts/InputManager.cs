@@ -1,4 +1,3 @@
-using InputSamples.Drawing;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

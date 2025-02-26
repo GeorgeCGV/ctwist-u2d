@@ -1,6 +1,15 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour, ISettingsStore
+/// <summary>
+/// Manages overall game state.
+/// Provides info on how many levels are there.
+/// Provides generic player and settins persistence.
+///
+/// The instance is not destructable, as it has to be present
+/// across the scenes.
+///
+/// </summary>
+public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 

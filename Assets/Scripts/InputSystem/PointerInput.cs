@@ -6,61 +6,74 @@ using UnityEngine.InputSystem.Utilities;
 using UnityEditor;
 #endif
 
-namespace InputSamples.Drawing
+/// <summary>
+/// Contains player input information.
+/// Usage of a raw composite allows to unite
+/// and handle mouse/pointer and touch inputs
+/// equally.
+/// </summary>
+public struct PointerInput
 {
     /// <summary>
-    /// Contains information for drag inputs.
+    /// Some form of contact with the screen.
+    /// Can be a mouse button or a finger.
     /// </summary>
-    public struct PointerInput
-    {
-        public bool Contact;
-
-        public int InputId;
-
-        public Vector2 Position;
-    }
-
-#if UNITY_EDITOR
-    [InitializeOnLoad]
-#endif
-    public class PointerInputComposite : InputBindingComposite<PointerInput>
-    {
-
-#if UNITY_EDITOR
-        static PointerInputComposite()
-        {
-            Register();
-        }
-#endif
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Register()
-        {
-            InputSystem.RegisterBindingComposite<PointerInputComposite>();
-        }
-
-        /// <summary>
-        /// Required in Editor v6
-        /// </summary>
-        public int Mode;
-
-        [InputControl(layout = "Button")]
-        public int Contact;
-
-        [InputControl(layout = "Vector2")]
-        public int Position;
-
-        [InputControl(layout = "Integer")]
-        public int Id;
-
-        public override PointerInput ReadValue(ref InputBindingCompositeContext context)
-        {
-            return new PointerInput
-            {
-                Contact = context.ReadValueAsButton(Contact),
-                InputId = context.ReadValue<int>(Id),
-                Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position),
-            };
-        }
-    }
+    public bool Contact;
+    /// <summary>
+    /// InputId to differentiate the input control.
+    /// </summary>
+    public int InputId;
+    /// <summary>
+    /// Current position in screen coordinates.
+    /// </summary>
+    public Vector2 Position;
 }
+
+/// <summary>
+/// Custom composite for the new InputSystem that allows combined
+/// input of some contact (i.e. mouse button/finger) and its
+/// position to be consumed in the even handlers.
+/// </summary>
+#if UNITY_EDITOR
+[InitializeOnLoad]
+#endif
+public class PointerInputComposite : InputBindingComposite<PointerInput>
+{
+    /// <summary>
+    /// Required in Editor v6
+    /// </summary>
+    public int Mode;
+
+    [InputControl(layout = "Button")]
+    public int Contact;
+
+    [InputControl(layout = "Vector2")]
+    public int Position;
+
+    [InputControl(layout = "Integer")]
+    public int Id;
+
+    public override PointerInput ReadValue(ref InputBindingCompositeContext context)
+    {
+        return new PointerInput
+        {
+            Contact = context.ReadValueAsButton(Contact),
+            InputId = context.ReadValue<int>(Id),
+            Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position),
+        };
+    }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Register()
+    {
+        InputSystem.RegisterBindingComposite<PointerInputComposite>();
+    }
+
+#if UNITY_EDITOR
+    static PointerInputComposite()
+    {
+        Register();
+    }
+#endif
+}
+

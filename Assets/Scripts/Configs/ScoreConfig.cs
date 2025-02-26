@@ -1,12 +1,12 @@
 using UnityEngine;
 
+/// <summary>
+/// Score configuration that provides values to use
+/// when player is awarded.
+/// </summary>
 [CreateAssetMenu(fileName = "ScoreConfig", menuName = "Config/ScoreConfig")]
 public class ScoreConfig : ScriptableObject
 {
-    [SerializeField]
-    public int ScorePerSecond = 5;
-    [SerializeField]
-    public int ScorePerAttach = 50;
     [SerializeField]
     public int ScorePerMatch3 = 250;
     [SerializeField]

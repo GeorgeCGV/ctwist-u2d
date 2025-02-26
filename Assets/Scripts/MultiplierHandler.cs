@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Manages score multiplier.
+/// </summary>
 public class MultiplierHandler : MonoBehaviour
 {
     private static int s_minMultiplierValue = 1;
@@ -10,6 +13,9 @@ public class MultiplierHandler : MonoBehaviour
     /// <float, float> - <current_time, start_time/max_time>
     /// </summary>
     public static event Action<float, float> OnMultiplierTimerUpdate;
+    /// <summary>
+    /// Invoked when score multiplier value changes.
+    /// </summary>
     public static event Action<int> OnMultiplierUpdate;
 
     [SerializeField]
