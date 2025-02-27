@@ -1,5 +1,13 @@
 using System;
 
+/// <summary>
+/// Progressive value timer decreases or increases the value from
+/// start value to end value at specified time interval.
+/// </summary>
+/// <remarks>
+/// The rate is computed based on the current value.
+/// </remarks>
+/// <see cref="IValueChangeOperation"/>
 public class ProgressiveValueTimer
 {
     /// <summary>
@@ -25,7 +33,10 @@ public class ProgressiveValueTimer
         bool IsEndReached(float currentValue, float endValue);
     }
 
-    public readonly struct IncrementalOperation : IValueChangeOperation
+    /// <summary>
+    /// Increments start value until it reaches the end value.
+    /// </summary>
+    public struct IncrementalOperation : IValueChangeOperation
     {
         public float ComputeChange(float currentValue, float rate)
         {
@@ -38,7 +49,10 @@ public class ProgressiveValueTimer
         }
     }
 
-    public readonly struct DecrementalOperation : IValueChangeOperation
+    /// <summary>
+    /// Decrements start value until it reaches end value.
+    /// </summary>
+    public struct DecrementalOperation : IValueChangeOperation
     {
         public float ComputeChange(float currentValue, float rate)
         {
@@ -51,57 +65,56 @@ public class ProgressiveValueTimer
         }
     }
 
-    private readonly float rate;
-    private float currentValue;
-    private float endValue;
+    private readonly float _rate;
+    private float _currentValue;
+    private float _endValue;
 
-    private float elapsedTime;
-    private readonly float intervalInSeconds;
-    private bool isComplete;
+    private float _elapsedTime;
+    private readonly float _intervalInSeconds;
+    private bool _isComplete;
 
-    private readonly Action<float> onValueChange;
-    private readonly IValueChangeOperation valueBehaviour;
+    private readonly Action<float> _onValueChange;
+    private readonly IValueChangeOperation _valueBehaviour;
 
     public ProgressiveValueTimer(float initial, float to, float by, float seconds,
-                                 Action<float> callback, IValueChangeOperation behaviour)
+        Action<float> callback, IValueChangeOperation behaviour)
     {
-        onValueChange = callback ?? throw new ArgumentNullException(nameof(callback), "Callback cannot be null");
-        valueBehaviour = behaviour ?? throw new ArgumentNullException(nameof(behaviour), "Behaviour cannot be null");
-        rate = by;
-        intervalInSeconds = seconds;
+        _onValueChange = callback ?? throw new ArgumentNullException(nameof(callback), "Callback cannot be null");
+        _valueBehaviour = behaviour ?? throw new ArgumentNullException(nameof(behaviour), "Behaviour cannot be null");
+        _rate = by;
+        _intervalInSeconds = seconds;
         Reset(initial, to);
     }
 
     public void Update(float deltaTime)
     {
-        if (isComplete)
+        if (_isComplete)
         {
             return;
         }
 
-        elapsedTime += deltaTime;
-        if (elapsedTime >= intervalInSeconds)
+        _elapsedTime += deltaTime;
+        if (_elapsedTime >= _intervalInSeconds)
         {
-            elapsedTime = 0;
+            _elapsedTime = 0;
 
-            currentValue = valueBehaviour.ComputeChange(currentValue, rate);
+            _currentValue = _valueBehaviour.ComputeChange(_currentValue, _rate);
 
-            if (valueBehaviour.IsEndReached(currentValue, endValue))
+            if (_valueBehaviour.IsEndReached(_currentValue, _endValue))
             {
-                currentValue = endValue;
-                isComplete = true;
+                _currentValue = _endValue;
+                _isComplete = true;
             }
 
-            onValueChange?.Invoke(currentValue);
+            _onValueChange?.Invoke(_currentValue);
         }
-
     }
 
     public void Reset(float initial, float to)
     {
-        currentValue = initial;
-        endValue = to;
-        elapsedTime = 0;
-        isComplete = false;
+        _currentValue = initial;
+        _endValue = to;
+        _elapsedTime = 0;
+        _isComplete = false;
     }
 }

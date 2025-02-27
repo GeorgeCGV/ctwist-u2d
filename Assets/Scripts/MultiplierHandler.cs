@@ -1,4 +1,5 @@
 using System;
+using Model;
 using UnityEngine;
 
 /// <summary>
@@ -6,25 +7,28 @@ using UnityEngine;
 /// </summary>
 public class MultiplierHandler : MonoBehaviour
 {
-    private static int s_minMultiplierValue = 1;
+    private const int MinMultiplierValue = 1;
 
     /// <summary>
     /// Invoked every time when current multiplier timer value changes.
-    /// <float, float> - <current_time, start_time/max_time>
     /// </summary>
+    /// <param name="currentTimerTime">Current decay timer rime.</param>
+    /// <param name="maximumTimerTime">Maximum decay timer time.</param>
     public static event Action<float, float> OnMultiplierTimerUpdate;
+
     /// <summary>
     /// Invoked when score multiplier value changes.
     /// </summary>
+    /// <param name="multiplier">Multiplier value.</param>
     public static event Action<int> OnMultiplierUpdate;
 
     [SerializeField]
-    private int scoreMultiplier = s_minMultiplierValue;
+    private int scoreMultiplier = MinMultiplierValue;
 
     [SerializeField, Min(0.1f)]
     private float scoreMultiplierDecayTime = 1f;
 
-    private float scoreMultiplierDecreaseTimer = 0;
+    private float _scoreMultiplierDecayTimer;
 
     [SerializeField, Min(0.01f)]
     private float scoreMultiplierDecayRate = 0.25f;
@@ -32,15 +36,16 @@ public class MultiplierHandler : MonoBehaviour
     // it is expected the value to be at least 1
     // ideally, the maximum shall be equal to
     // SfxBlocksClear length
-     [SerializeField, Min(1)]
+    [SerializeField, Min(1)]
     private int scoreMultiplierMax = 6;
 
     public int Multiplier
     {
-        get { return scoreMultiplier; }
+        get => scoreMultiplier;
         private set
         {
-            if (scoreMultiplier == value) {
+            if (scoreMultiplier == value)
+            {
                 return;
             }
 
@@ -51,55 +56,66 @@ public class MultiplierHandler : MonoBehaviour
 
     public void Increment()
     {
-        if (scoreMultiplier < scoreMultiplierMax) {
-            Multiplier = scoreMultiplier + 1; // avoid extra call in case of ++
-            // reset timer
-            scoreMultiplierDecreaseTimer = scoreMultiplierDecayTime;
-            // notify
-            OnMultiplierTimerUpdate?.Invoke(scoreMultiplierDecreaseTimer, scoreMultiplierDecayTime);
+        if (scoreMultiplier >= scoreMultiplierMax)
+        {
+            return;
         }
+
+        // avoid extra call in case of ++
+        Multiplier = scoreMultiplier + 1;
+        // reset timer
+        _scoreMultiplierDecayTimer = scoreMultiplierDecayTime;
+        // notify
+        OnMultiplierTimerUpdate?.Invoke(_scoreMultiplierDecayTimer, scoreMultiplierDecayTime);
     }
 
     public void Decrement()
     {
-        if (scoreMultiplier > s_minMultiplierValue) {
-            Multiplier = scoreMultiplier - 1; // avoid extra call in case of --
-            // reset timer
-            scoreMultiplierDecreaseTimer = scoreMultiplierDecayTime;
-            // notify
-            OnMultiplierTimerUpdate?.Invoke(scoreMultiplierDecreaseTimer, scoreMultiplierDecayTime);
+        if (scoreMultiplier <= MinMultiplierValue)
+        {
+            return;
         }
+
+        // avoid extra call in case of --
+        Multiplier = scoreMultiplier - 1;
+        // reset timer
+        _scoreMultiplierDecayTimer = scoreMultiplierDecayTime;
+        // notify
+        OnMultiplierTimerUpdate?.Invoke(_scoreMultiplierDecayTimer, scoreMultiplierDecayTime);
     }
 
-    public void Init(Data.Multiplier config)
+    public void Init(Multiplier data)
     {
-        scoreMultiplierDecayTime = Mathf.Max(config.decayTime, scoreMultiplierDecayTime);
-        scoreMultiplierDecayRate = Mathf.Max(config.decayRate, scoreMultiplierDecayRate);
+        scoreMultiplierDecayTime = Mathf.Max(data.decayTime, scoreMultiplierDecayTime);
+        scoreMultiplierDecayRate = Mathf.Max(data.decayRate, scoreMultiplierDecayRate);
         // some levels might override the multiplier
-        scoreMultiplierMax = config.max > s_minMultiplierValue ? config.max : scoreMultiplierMax;
+        scoreMultiplierMax = data.max > MinMultiplierValue ? data.max : scoreMultiplierMax;
     }
 
-    void Start()
+    private void Start()
     {
-        OnMultiplierTimerUpdate?.Invoke(scoreMultiplierDecreaseTimer, scoreMultiplierDecayTime);
+        OnMultiplierTimerUpdate?.Invoke(_scoreMultiplierDecayTimer, scoreMultiplierDecayTime);
         OnMultiplierUpdate?.Invoke(scoreMultiplier);
     }
 
-    void Update()
+    private void Update()
     {
-        if (scoreMultiplierDecreaseTimer <= 0)
+        if (_scoreMultiplierDecayTimer <= 0)
         {
             // nothing to run as time is already <= 0
             return;
         }
 
-        scoreMultiplierDecreaseTimer = Mathf.Max(scoreMultiplierDecreaseTimer - scoreMultiplierDecayRate * Time.deltaTime, 0);
-        if (scoreMultiplierDecreaseTimer <= 0)
+        _scoreMultiplierDecayTimer =
+            Mathf.Max(_scoreMultiplierDecayTimer - scoreMultiplierDecayRate * Time.deltaTime, 0);
+        if (_scoreMultiplierDecayTimer <= 0)
         {
+            _scoreMultiplierDecayTimer = 0;
             // try to decrement if reached 0
             Decrement();
         }
-
-        OnMultiplierTimerUpdate?.Invoke(scoreMultiplierDecreaseTimer, scoreMultiplierDecayTime);
+    
+        // notify
+        OnMultiplierTimerUpdate?.Invoke(_scoreMultiplierDecayTimer, scoreMultiplierDecayTime);
     }
 }

@@ -1,47 +1,55 @@
+using Blocks;
 using UnityEngine;
+using UnityEngine.Assertions;
+using static Model.BlockType;
 
-/// <summary>
-/// ColorBlockEntity provides a way to spawn ColorBlock.
-/// </summary>
-public class ColorBlockEntity : ISpawnEntity
+namespace Spawn
 {
-    private readonly ColorBlock.EBlockColor blockColor;
-    private readonly Color unityColor;
-
-    private readonly float inSeconds;
-    private readonly float speed;
-
-    public ColorBlockEntity(ColorBlock.EBlockColor color, float seconds, float speed)
+    /// <summary>
+    /// Allows to spawn <see cref="ColorBlock"/>.
+    /// </summary>
+    public class ColorBlockEntity : ISpawnEntity
     {
-        blockColor = color;
-        unityColor = ColorBlock.UnityColorFromBlockColor(color);
-        inSeconds = seconds;
-        this.speed = speed;
-    }
+        private readonly EBlockType _blockColor;
+        private readonly Color _unityColor;
 
-    public Color BacklightColor()
-    {
-        // give some contrast when black spawn color is used
-        return unityColor == ColorBlock.black ? Color.white : unityColor;
-    }
+        private readonly float _inSeconds;
+        private readonly float _speed;
 
-    public Color SpawnColor()
-    {
-        return unityColor;
-    }
+        public ColorBlockEntity(EBlockType type, float seconds, float speed)
+        {
+            Assert.IsTrue(EBlockTypeIsColorBlock(type), "expected color type");
 
-    public GameObject Create()
-    {
-        return BlocksFactory.Instance.NewColorBlock(blockColor);
-    }
+            _blockColor = type;
+            _unityColor = UnityColorFromType(type);
+            _inSeconds = seconds;
+            _speed = speed;
+        }
 
-    public float SpawnInSeconds()
-    {
-        return inSeconds;
-    }
+        public Color BacklightColor()
+        {
+            // give some contrast when black spawn color is used
+            return _unityColor == Black ? Color.white : _unityColor;
+        }
 
-    public float BlockStartSpeed()
-    {
-        return speed;
+        public Color SpawnColor()
+        {
+            return _unityColor;
+        }
+
+        public BasicBlock Create()
+        {
+            return BlocksFactory.Instance.NewColorBlock(_blockColor);
+        }
+
+        public float SpawnInSeconds()
+        {
+            return _inSeconds;
+        }
+
+        public float BlockStartSpeed()
+        {
+            return _speed;
+        }
     }
 }

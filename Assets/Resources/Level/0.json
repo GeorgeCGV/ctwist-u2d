@@ -1,9 +1,11 @@
 {
     "seed": 1,
     "startBlocksNum": 4,
-    "colorsInLevel": ["Blue","Red"],
+    "blocksInLevel": ["blue","red"],
     "obstructionIdx": -1,
-    "goalScore": 3000,
+    "goal": {
+        "score": 3000
+    },
     "multiplier": {
         "decayTime": 2,
         "decayRate": 0.25,

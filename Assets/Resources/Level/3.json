@@ -1,11 +1,14 @@
 {
     "seed": 133,
     "startBlocksNum": 14,
-    "colorsInLevel": ["Pink", "Black", "White", "Yellow"],
+    "blocksInLevel": ["pink", "black", "white", "yellow"],
     "obstructionIdx": 2,
-    "goalScore": 5000,
-    "limitTime": 80,
-    "limitMove": 0,
+    "goal": {
+        "score": 5000
+    },
+    "limit": {
+        "time": 80
+    },
     "multiplier": {
         "decayTime": 1,
         "decayRate": 0.25,

@@ -2051,7 +2051,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundMusic: {fileID: 8300000, guid: 2d7be52d90d7d7d4bb33b64141fa44dd, type: 3}
-  optionsPanel: {fileID: 1469509092}
+  optionsPanelAnimator: {fileID: 1469509096}
   levelSelectionPanel: {fileID: 1927330310}
 --- !u!1 &993449425
 GameObject:
@@ -8551,6 +8551,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e321ebd4f7cd04cbaec4e4cc297146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sfxToggle: {fileID: 1943736768}
+  musicToggle: {fileID: 1864910714}
 --- !u!1 &1489429000
 GameObject:
   m_ObjectHideFlags: 0

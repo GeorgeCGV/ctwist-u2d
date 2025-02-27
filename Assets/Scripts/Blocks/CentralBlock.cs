@@ -1,27 +1,47 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
-public class CentralBlock : BasicBlock
+namespace Blocks
 {
+    /// <summary>
+    /// Central block.
+    /// </summary>
+    /// <remarks>
+    /// Only one instance shall exist per level.
+    /// It is not affected by gravity or collisions.
+    /// Acts as a player.
+    /// </remarks>
+    [RequireComponent(typeof(Animator))]
+    public class CentralBlock : BasicBlock
+    {
+        #region Unity
+        
+        protected override void Awake()
+        {
+            attached = true;
+            BlockType = Model.BlockType.EBlockType.Central;
+        }
+
+        protected override void Update()
+        {
+            // override as central won't collide with obstructions.
 
 #if UNITY_EDITOR
-    protected override void Update()
-    {
-        DrawCollider();
-
-        DrawEdgeAttachmentRays();
-
-        DrawNeighbourLinkRays();
-    }
+            DrawCollider();
+            DrawEdgeAttachmentRays();
+            DrawNeighbourLinkRays();
 #endif
+        }
 
-    protected override void FixedUpdate()
-    {
-        // we don't need gravity in central block
-    }
+        protected override void FixedUpdate()
+        {
+            // we don't need gravity in central block
+        }
 
-    protected override void OnCollisionEnter2D(Collision2D other)
-    {
-        // nothing to do
+        protected override void OnCollisionEnter2D(Collision2D other)
+        {
+            // nothing to do
+        }
+        
+        #endregion
     }
 }

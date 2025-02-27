@@ -2,13 +2,17 @@ using UnityEngine;
 
 /// <summary>
 /// Manages overall game state.
-/// Provides info on how many levels are there.
-/// Provides generic player and settins persistence.
-///
-/// The instance is not destructable, as it has to be present
-/// across the scenes.
-///
 /// </summary>
+/// <remarks>
+/// <para>
+/// Provides info on how many levels are there.
+/// Provides generic player and settings persistence.
+/// </para>
+/// <para>
+/// The instance is not destructible, as it has to be present
+/// across scenes.
+/// </para>
+/// </remarks>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -16,14 +20,26 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Total amount of available levels in the game.
     /// </summary>
-    [SerializeField]
+    [SerializeField, Min(0)]
     private int availableLevelsAmount;
 
     public int TotalLevels => availableLevelsAmount;
-
-    void Awake()
+    
+    /// <summary>
+    /// Checks if the level ID is the final level in the game.
+    /// </summary>
+    /// <param name="levelId">Level ID.</param>
+    /// <returns>True if the leve is final, otherwise False.</returns>
+    public bool IsLastLevel(int levelId)
     {
-        // prevent mutliple instances
+        return levelId == (availableLevelsAmount - 1);
+    }
+
+    #region Unity
+    
+    private void Awake()
+    {
+        // prevent multiple instances
         if (Instance != null && Instance != this)
         {
             // destroy script and the entire object
@@ -37,25 +53,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
+        // the game is relatively small, simply mute the sources
         AudioManager.Instance.MuteSfx(!IsSFXOn());
     }
-
-    public int CurrentLevelId()
-    {
-        return PlayerPrefs.GetInt("currentLevel", 0);
-    }
-
-    public bool IsLastLevel(int levelId)
-    {
-        return levelId == (availableLevelsAmount - 1);
-    }
-
-    public bool IsLevelUnlocked(int levelId)
-    {
-        return levelId <= CurrentLevelId();
-    }
+    
+    #endregion Unity
 
     /// <summary>
     /// Gets next level based on played level id.
@@ -67,32 +71,45 @@ public class GameManager : MonoBehaviour
     {
         // if it was the last available level,
         // then there is nothing to unlock
-        if (IsLastLevel(playedLevelId)) {
+        if (IsLastLevel(playedLevelId))
+        {
             return playedLevelId;
         }
 
         // get last unlocked lvl id
         int lastUnlockedLevelId = CurrentLevelId();
-        // if we player the last unlocked level
-        // then unlock the next one
-        if (playedLevelId == lastUnlockedLevelId)
-        {
-            int nextLevelId = lastUnlockedLevelId + 1;
-            PlayerPrefs.SetInt("currentLevel", nextLevelId);
-            PlayerPrefs.Save();
-            return nextLevelId;
-        }
 
         // replaying, simply return the next level id
-        return playedLevelId + 1;
+        if (playedLevelId != lastUnlockedLevelId)
+        {
+            return playedLevelId + 1;
+        }
+
+        // unlock the next level if we played the last unlocked level
+        int nextLevelId = lastUnlockedLevelId + 1;
+        PlayerPrefs.SetInt("currentLevel", nextLevelId);
+        PlayerPrefs.Save();
+        return nextLevelId;
     }
 
-    public int GetLevelStars(int levelId)
+    #region PlayerPrefs
+
+    public static int CurrentLevelId()
+    {
+        return PlayerPrefs.GetInt("currentLevel", 0);
+    }
+
+    public static bool IsLevelUnlocked(int levelId)
+    {
+        return levelId <= CurrentLevelId();
+    }
+
+    public static int GetLevelStars(int levelId)
     {
         return PlayerPrefs.GetInt("stars" + levelId, 0);
     }
 
-    public void SetLevelStars(int levelId, int stars)
+    public static void SetLevelStars(int levelId, int stars)
     {
         // update level stars, but only if earned more than before
         int previouslyEarnedAmount = PlayerPrefs.GetInt("stars" + levelId, 0);
@@ -108,11 +125,12 @@ public class GameManager : MonoBehaviour
     /// </summary>
     /// <param name="levelId">Level id</param>
     /// <param name="score">New score</param>
-    /// <returns>True if new score is new highscore, otherwise False.</returns>
-    public bool SetLevelScoreChecked(int levelId, int score)
+    /// <returns>True if new score is new high score, otherwise False.</returns>
+    public static bool SetLevelScoreChecked(int levelId, int score)
     {
         // update level stars, but only if earned more than before
         int previouslyEarnedAmount = PlayerPrefs.GetInt("score" + levelId, 0);
+
         if (score > previouslyEarnedAmount)
         {
             PlayerPrefs.SetInt("score" + levelId, score);
@@ -124,35 +142,41 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public bool IsMusicOn()
+    public static bool IsMusicOn()
     {
         return PlayerPrefs.GetInt("musicOn", 1) == 1;
     }
 
-    public void ToggleMusic()
+    public static void ToggleMusic()
     {
-        int value = PlayerPrefs.GetInt("musicOn", 1)  ^ 1;
+        int value = PlayerPrefs.GetInt("musicOn", 1) ^ 1;
+
         PlayerPrefs.SetInt("musicOn", value);
         PlayerPrefs.Save();
 
-        if (value == 0) {
+        if (value == 0)
+        {
             AudioManager.Instance.StopMusic();
-        } else {
+        }
+        else
+        {
             AudioManager.Instance.PlayMusic();
         }
     }
 
-    public bool IsSFXOn()
+    public static bool IsSFXOn()
     {
         return PlayerPrefs.GetInt("sfxOn", 1) == 1;
     }
 
-    public void ToggleSFX()
+    public static void ToggleSfx()
     {
-        int value = PlayerPrefs.GetInt("sfxOn", 1)  ^ 1;
+        int value = PlayerPrefs.GetInt("sfxOn", 1) ^ 1;
         PlayerPrefs.SetInt("sfxOn", value);
         PlayerPrefs.Save();
 
         AudioManager.Instance.MuteSfx(value == 0);
     }
+
+    #endregion
 }

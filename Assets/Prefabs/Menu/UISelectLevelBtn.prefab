@@ -475,7 +475,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
-  highlight: {fileID: 0}
+  highlight: {fileID: 6764611520291773070}
+  playButton: {fileID: 1669465423351128528}
+  levelLabel: {fileID: 8873447854050219551}
   stars:
   - {fileID: 4622923349656097005}
   - {fileID: 6442002581137292289}

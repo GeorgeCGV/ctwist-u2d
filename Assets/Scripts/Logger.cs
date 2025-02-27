@@ -13,10 +13,10 @@ public static class Logger
     /// Excluded from the build if ENABLE_LOGS
     /// is not defined.
     /// </summary>
-    /// <param name="logMsg">Message.</param>
+    /// <param name="msg">Message.</param>
     [Conditional("ENABLE_LOGS")]
-    public static void Debug(string logMsg)
+    public static void Debug(string msg)
     {
-        UnityEngine.Debug.Log(logMsg);
+        UnityEngine.Debug.Log(msg);
     }
 }

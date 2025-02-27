@@ -1,134 +1,214 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Blocks;
+using Configs;
+using Model;
+using Spawn;
+using UI.Level;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Utils;
+using static Model.BlockType;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(MultiplierHandler), typeof(Spawner))]
 public class LevelManager : MonoBehaviour
 {
+    private static readonly int EnvAnimatorNearTimeoutTrigger = Animator.StringToHash("NearTimeout");
+    private static readonly int EnvAnimatorNearTimeoutSpeedValue = Animator.StringToHash("NearTimeoutSpeed");
+
     public static LevelManager Instance { get; private set; }
 
+    #region Actions
+    
     public static event Action<int> OnScoreUpdate;
-
+    public static event Action<BlocksStats> OnBlocksStatsUpdate;
     public static event Action<string, Vector2> OnAnnounce;
-
     public static event Action<int, int> OnTimeLeftUpdate;
     public static event Action<int, int> OnSpawnsLeftUpdate;
+    public static event Action<LevelResults> OnGameOver;
+    public static event Action<LevelData> OnBeforeGameStarts;
+    
+    #endregion
 
-    public static event Action<Data.LevelData, Data.LevelResults> OnGameOver;
-    public static event Action<Data.LevelData> OnBeforeGameStarts;
+    #region SFX
+    
+    [SerializeField]
+    private GameObject efxOnStart;
 
     [SerializeField]
-    private GameObject EfxOnStart;
+    public AudioClip backgroundMusic;
 
     [SerializeField]
-    public AudioClip BackgroundMusic;
-    [SerializeField]
-    public AudioClip SfxOnStart;
-    [SerializeField]
-    public AudioClip SfxOnLost;
-    [SerializeField]
-    public AudioClip SfxOnWin;
-    [SerializeField]
-    public AudioClip SfxOnNearTimeout;
+    public AudioClip sfxOnStart;
 
+    [SerializeField]
+    public AudioClip sfxOnLost;
+
+    [SerializeField]
+    public AudioClip sfxOnWin;
+
+    [SerializeField]
+    public AudioClip sfxOnNearTimeout;
+    
+    public List<AudioClip> sfxBlocksClear;
+    
+    #endregion
+    
     #region NearTimeout
+
     [SerializeField]
     private float nearTimeoutTime = 10.15f;
 
     [SerializeField]
     private Animator envAnimator;
 
-    private bool onNearTimeoutStarted;
+    private bool _onNearTimeoutStarted;
+
     #endregion
-
-    public List<AudioClip> SfxBlocksClear;
-
-    private Data.LevelData level;
+    
+    [SerializeField]
+    private LevelData level;
 
     [SerializeField]
     private ScoreConfig scoreConfig;
 
-    private bool isLevelStarted;
-
-    private bool isGameOver;
-
-    private int score;
-
-    private float timePassedInSeconds;
-
-    private int totalAmountOfSpawnedBlocks;
-
-    private HashSet<GameObject> notAttachedBlocks = new HashSet<GameObject>();
-
     [SerializeField]
-    private List<ColorBlock.EBlockColor> availableColors = new List<ColorBlock.EBlockColor>();
+    private List<EBlockType> availableBlocks = new(Enum.GetValues(typeof(EBlockType)).Length);
 
-    #region Multiplier
-    private MultiplierHandler multiplier;
-    #endregion
+    /// <summary>
+    /// Is level started flag.
+    /// </summary>
+    /// <remarks>
+    /// The level/game starts after startup animation is complete.
+    /// </remarks>
+    private bool _isLevelStarted;
+
+    /// <summary>
+    /// Is game-over flag.
+    /// </summary>
+    private bool _isGameOver;
+
+    /// <summary>
+    /// Current score.
+    /// </summary>
+    private int _score;
+
+    /// <summary>
+    /// Elapsed level time in seconds.
+    /// </summary>
+    /// <remarks>
+    /// Won't count when paused.
+    /// </remarks>
+    private float _elapsedTime;
+
+    /// <summary>
+    /// Stores spawned but not yet attached blocks.
+    /// </summary>
+    /// <remarks>
+    /// Newly spawned blocks are added here from <see cref="OnSpawnedBlock"/>
+    /// and removed in <see cref="OnBlocksAttach"/>.
+    /// </remarks>
+    private readonly HashSet<BasicBlock> _notAttachedBlocks = new();
+
+    /// <summary>
+    /// Blocks stats.
+    /// </summary>
+    private readonly BlocksStats _blocksStats = new(Enum.GetValues(typeof(EBlockType)).Length);
+
+    /// <summary>
+    /// Spawner - responsible for blocks spawn queue and spawn nodes.
+    /// </summary>
+    private Spawner _spawner;
+    
+    /// <summary>
+    /// Reference to <see cref="CentralBlock"/> present in the level.
+    /// </summary>
+    /// <remarks>
+    /// Central block is tagged with <code>central</code> tag.
+    /// </remarks>
+    private GameObject _central;
+    
+    /// <summary>
+    /// All attached blocks end up as a child of this object.
+    /// </summary>
+    /// <remarks>
+    /// Player controls its rotation.
+    /// </remarks>
+    private GameObject _activeBlocks;
+    
+    /// <summary>
+    /// Multiplier manager.
+    /// </summary>
+    private MultiplierHandler _multiplier;
+    
     #region Obstruction
+
+    /// <summary>
+    /// An obstruction tilemap <see cref="obstructionTilemaps"/> is created
+    /// as a child of this object.
+    /// </summary>
     [SerializeField]
     private GameObject obstructionTmParent;
+
+    /// <summary>
+    /// SFX to play on collision with obstruction.
+    /// </summary>
     [SerializeField]
-    private List<AudioClip> SfxOnObstruction;
+    private List<AudioClip> sfxOnObstruction;
+
+    /// <summary>
+    /// Config that stores available level obstruction tilemaps.
+    /// </summary>
     [SerializeField]
     private ObstructionPrefabsConfig obstructionTilemaps;
+
     #endregion
 
-    protected int Score
+    private int Score
     {
-        get
-        {
-            return score;
-        }
+        // no need for getter, avoid extra fn. call
         set
         {
-            score = value;
-            OnScoreUpdate?.Invoke(score);
+            _score = value;
+            // notify others
+            OnScoreUpdate?.Invoke(_score);
         }
     }
-
-    void Awake()
+    
+    /// <summary>
+    /// Increments current score by <c>val</c> amount.
+    /// </summary>
+    /// <param name="val">Amount to increment by.</param>
+    private void IncrementScore(int val)
     {
-        // prevent mutliple instances
-        if (Instance != null && Instance != this)
+        Score = _score + val;
+    }
+    
+    public EBlockType GetRandomColorTypeFromAvailable()
+    {
+        Assert.IsFalse(availableBlocks.Count == 0, "availableBlocks must have elements");
+        EBlockType type;
+
+        do
         {
-            Destroy(this);
-        }
-        else
-        {
-            Instance = this;
-            multiplier = GetComponent<MultiplierHandler>();
-            isLevelStarted = false;
-            isGameOver = false;
-            totalAmountOfSpawnedBlocks = 0;
-            Score = 0;
-            timePassedInSeconds = 0;
-        }
+            type = availableBlocks[Random.Range(0, availableBlocks.Count)];
+        } while (!EBlockTypeIsColorBlock(type));
+
+        return type;
     }
 
-    public ColorBlock.EBlockColor GetRandomColorFromAvailable()
-    {
-        Assert.IsFalse(availableColors.Count == 0, "availableColors must have elements");
-        return availableColors[UnityEngine.Random.Range(0, availableColors.Count)];
-    }
-
-    protected void IncrementScore(int val)
-    {
-        Score += val;
-    }
-
-    public void SetPaused(bool value)
+    public static void SetPaused(bool value)
     {
         Time.timeScale = value ? 0 : 1;
     }
 
-    public bool IsPaused()
+    public static bool IsPaused()
     {
 #if UNITY_EDITOR
-        return UnityEditor.EditorApplication.isPaused || Time.timeScale == 0;
+        return EditorApplication.isPaused || Time.timeScale == 0;
 #else
         return Time.timeScale == 0;
 #endif
@@ -136,58 +216,85 @@ public class LevelManager : MonoBehaviour
 
     public bool IsStarted()
     {
-        return isLevelStarted;
+        return _isLevelStarted;
     }
 
     public bool IsRunning()
     {
-        return IsStarted() && !IsPaused() && !isGameOver;
+        return IsStarted() && !IsPaused() && !_isGameOver;
     }
 
-    protected IEnumerator GameOverDelayed(bool won)
+    private IEnumerator GameOverDelayed(bool won)
     {
+        // delay to give effects some time
         yield return new WaitForSeconds(1);
 
+        // the music can be stopped to not interfere
+        // with won / lost sfx.
         AudioManager.Instance.StopMusic();
+        
+        int baseScore = _score;
+        int totalScore = baseScore;
+        // bonus score points that will be added to the base score
+        Dictionary<string, int> bonusScores = new();
+        
+        // set to current, unless player won
+        int nextLevelId = level.ID;
 
-        int nextLevelId = level.id;
         if (won)
         {
+            AudioManager.Instance.PlaySfxPausable(sfxOnWin);
+            
             // try to unlock next level
-            nextLevelId = GameManager.Instance.NextLevel(level.id);
-            AudioManager.Instance.PlaySfxPausable(SfxOnWin);
+            nextLevelId = GameManager.Instance.NextLevel(level.ID);
+
+            // compute bonus scores
+            if (level.limit.Variant() == ELimitVariant.TimeLimit)
+            {
+                // from time left
+                bonusScores["+Time"] = scoreConfig.ComputeBonusForTimeLimit(_elapsedTime,
+                    level.limit.time);
+            }
+            else if (level.limit.Variant() == ELimitVariant.SpawnLimit)
+            {
+                // from elapsed time and spawns/moves left
+                bonusScores["+Moves"] = scoreConfig.ComputeBonusForSpawnLimit(_elapsedTime,
+                    _blocksStats.TotalSpawnedBlocksAmount,
+                    level.limit.spawns);
+            }
         }
         else
         {
-            AudioManager.Instance.PlaySfxPausable(SfxOnLost);
+            AudioManager.Instance.PlaySfxPausable(sfxOnLost);
         }
 
-        // Determine how many stars were earned
+        // add bonus scores to total score
+        foreach (int bonusScore in bonusScores.Values)
+        {
+            totalScore += bonusScore;
+        }
+
+        // determine how many stars were earned
         int starsEarned = 0;
         for (int i = 0; i < 3; i++)
         {
-            starsEarned += score >= level.starRewards[i] ? 1 : 0;
+            starsEarned += totalScore >= level.starRewards[i] ? 1 : 0;
         }
         // store earned stars
-        GameManager.Instance.SetLevelStars(level.id, starsEarned);
+        GameManager.SetLevelStars(level.ID, starsEarned);
 
         // try to store achieved score
-        bool isHighscore = GameManager.Instance.SetLevelScoreChecked(level.id, score);
-
-        OnGameOver?.Invoke(level, new Data.LevelResults(score, won,
-                                                        nextLevelId,
-                                                        GameManager.Instance.IsLastLevel(level.id),
-                                                        starsEarned,
-                                                        isHighscore));
+        bool isHighscore = GameManager.SetLevelScoreChecked(level.ID, totalScore);
+        OnGameOver?.Invoke(new LevelResults(baseScore, bonusScores, starsEarned,
+            nextLevelId, GameManager.Instance.IsLastLevel(level.ID),
+            won, isHighscore));
     }
 
-    protected void GameOver(bool won)
+    private void GameOver(bool won)
     {
-        isGameOver = true;
-
-        GetComponent<Spawner>().StopSpawner();
-        DestroyAll();
-
+        _isGameOver = true;
+        _spawner.StopSpawner();
+        DestroyAllBlocks();
         StartCoroutine(GameOverDelayed(won));
     }
 
@@ -195,31 +302,32 @@ public class LevelManager : MonoBehaviour
     /// Checks if level time limit is reached.
     /// </summary>
     /// <returns>True if limit reached, otherwise False.</returns>
-    protected bool IsTimeLimitReached()
+    private bool IsTimeLimitReached()
     {
         bool limitReached = false;
 
         int seconds = 0;
         int minutes = 0;
 
-        if (timePassedInSeconds >= level.limit.time)
+        if (_elapsedTime >= level.limit.time)
         {
             // don't return here so that we could invoke OnTimeLeftUpdate
             limitReached = true;
         }
         else
         {
-            float timeDiffInSeconds = level.limit.time - timePassedInSeconds;
+            float timeDiffInSeconds = level.limit.time - _elapsedTime;
             seconds = Mathf.FloorToInt(timeDiffInSeconds % 60);
             minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
 
             // 10 seconds clip
-            if (!onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
+            if (!_onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
             {
-                onNearTimeoutStarted = true;
-                AudioManager.Instance.PlaySfxPausable(SfxOnNearTimeout);
-                envAnimator.SetFloat("NearTimeoutSpeed", Utils.GetAnimatorClipLength(envAnimator, "NearTimeout") / nearTimeoutTime);
-                envAnimator.SetTrigger("NearTimeout");
+                _onNearTimeoutStarted = true;
+                AudioManager.Instance.PlaySfxPausable(sfxOnNearTimeout);
+                envAnimator.SetFloat(EnvAnimatorNearTimeoutSpeedValue,
+                    Helpers.GetAnimatorClipLength(envAnimator, "NearTimeout") / nearTimeoutTime);
+                envAnimator.SetTrigger(EnvAnimatorNearTimeoutTrigger);
             }
         }
 
@@ -227,20 +335,68 @@ public class LevelManager : MonoBehaviour
         return limitReached;
     }
 
-    void Update()
+    #region Unity
+    
+    private void Awake()
+    {
+        // prevent multiple instances
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+            _isLevelStarted = false;
+            _isGameOver = false;
+            _score = 0;
+            _elapsedTime = 0;
+            _spawner = GetComponent<Spawner>();
+            _central = GameObject.FindGameObjectWithTag("central");
+            Assert.IsNotNull(_central, "missing central block, must have 'central' tag");
+            _activeBlocks = GameObject.FindGameObjectWithTag("active_blocks");
+            Assert.IsNotNull(_activeBlocks,
+                "missing active blocks (attached blocks parent), must have 'active_blocks' tag");
+            _multiplier = GetComponent<MultiplierHandler>();
+            Assert.IsNotNull(_multiplier, "missing multiplier component");
+        }
+    }
+    private void Update()
     {
         if (!IsRunning())
         {
             return;
         }
 
-        timePassedInSeconds += Time.deltaTime;
+        _elapsedTime += Time.deltaTime;
 
         // check win conditions
-        if (level.goalScore != 0)
+        EGoalVariant goal = level.goal.Variant();
+        if (goal == EGoalVariant.Score)
         {
             // check if reached the score goal
-            if (score >= level.goalScore)
+            if (_score >= level.goal.score)
+            {
+                // won
+                GameOver(true);
+            }
+        }
+        else if (goal == EGoalVariant.Blocks)
+        {
+            // check for all match goals to be complete
+            int matchesTarget = level.goal.blocks.Length;
+            foreach (BlocksGoal blocksGoal in level.goal.blocks)
+            {
+                if (_blocksStats.Matched.TryGetValue(blocksGoal.ParsedType, out int currentMatches))
+                {
+                    if (currentMatches >= blocksGoal.amount)
+                    {
+                        matchesTarget--;
+                    }
+                }
+            }
+
+            if (matchesTarget == 0)
             {
                 // won
                 GameOver(true);
@@ -248,56 +404,83 @@ public class LevelManager : MonoBehaviour
         }
 
         // process level limit(s) condition(s)
-        Data.ELimitVariant limitVariant = level.limit.LevelLimit();
-        if (limitVariant == Data.ELimitVariant.TIME_LIMIT) {
-            if (IsTimeLimitReached()) {
+        ELimitVariant limit = level.limit.Variant();
+        if (limit == ELimitVariant.TimeLimit)
+        {
+            if (IsTimeLimitReached())
+            {
                 // lost due to timeout
                 GameOver(false);
             }
-        } else if (limitVariant == Data.ELimitVariant.SPAWN_LIMIT) {
+        }
+        else if (limit == ELimitVariant.SpawnLimit)
+        {
             // spawn/moves limited level
-            if (totalAmountOfSpawnedBlocks >= level.limit.spawns) {
-                // gameover state
-                // but we shall await all blocks to "fall" / attach
-                if (notAttachedBlocks.Count == 0) {
+            if (_blocksStats.TotalSpawnedBlocksAmount >= level.limit.spawns)
+            {
+                // game-over state, but we shall await all blocks to "fall" / attach
+                if (_notAttachedBlocks.Count == 0)
+                {
                     // lost due to no more spawns/moves
                     GameOver(false);
                 }
             }
         }
     }
+    
+    /// <summary>
+    /// Unsubscribe from all actions.
+    /// </summary>
+    private void OnDestroy()
+    {
+        // subscribed at level startup; however, a user might exit
+        // before level fully starts. Therefore, we shall remove
+        // dangling subscription
+        UILevelCoordinator.OnGameStartAllAnimationsDone -= OnLevelStart;
+    }
+    
+    #endregion Unity
 
     /// <summary>
     /// Callback for the spawner when block spawns
     /// </summary>
+    /// <remarks>
+    /// <see cref="Spawner.Init"/>
+    /// </remarks>
     /// <param name="block"></param>
-    private void OnSpawnedBlock(GameObject block)
+    private void OnSpawnedBlock(BasicBlock block)
     {
-        totalAmountOfSpawnedBlocks++;
+        _blocksStats.AddSpawned(block.GetComponent<BasicBlock>().BlockType, 1);
         // we have to keep track of not yet attached objects
         // so that spawn level mode could wait until all blocks
-        // are attached before gameover
-        notAttachedBlocks.Add(block);
+        // are attached before game-over
+        _notAttachedBlocks.Add(block);
         // notify others
-        OnSpawnsLeftUpdate?.Invoke(totalAmountOfSpawnedBlocks, level.limit.spawns);
+        OnSpawnsLeftUpdate?.Invoke(_blocksStats.TotalSpawnedBlocksAmount, level.limit.spawns);
     }
 
-    protected List<GameObject> GetFloatingBlocks()
+    /// <summary>
+    /// Get "floating" blocks.
+    /// </summary>
+    /// <remarks>
+    /// Floating blocks - previously attached blocks that lost connection to the central block.
+    /// </remarks>
+    /// <returns>
+    /// List of floating block game objects, never <c>null</c>.
+    /// </returns>
+    private List<BasicBlock> GetFloatingBlocks()
     {
-        GameObject active_blocks = GameObject.FindGameObjectWithTag("active_blocks");
-        GameObject central = GameObject.FindGameObjectWithTag("central");
-        List<GameObject> floatingBlocks = new List<GameObject>();
+        List<BasicBlock> floatingBlocks = new();
 
         // iterate over all blocks from the central
         // and reset the 'attached' flag
-        Queue<GameObject> blocks = new Queue<GameObject>();
-        blocks.Enqueue(central);
-        GameObject current;
-        GameObject other;
+        Queue<GameObject> blocks = new();
+        blocks.Enqueue(_central);
+        
         while (blocks.Count != 0)
         {
-            current = blocks.Dequeue();
-            if (current.GetComponent<BasicBlock>().destroyed)
+            GameObject current = blocks.Dequeue();
+            if (current.GetComponent<BasicBlock>().Destroyed)
             {
                 continue;
             }
@@ -306,7 +489,7 @@ public class LevelManager : MonoBehaviour
 
             foreach (BasicBlock.EdgeIndex edgeIndex in Enum.GetValues(typeof(BasicBlock.EdgeIndex)))
             {
-                other = current.GetComponent<BasicBlock>().GetNeighbour(edgeIndex);
+                GameObject other = current.GetComponent<BasicBlock>().GetNeighbour(edgeIndex);
                 if (other == null)
                 {
                     continue;
@@ -321,10 +504,10 @@ public class LevelManager : MonoBehaviour
 
         // iterate over all active blocks and find all blocks that
         // still have 'attached' set
-        foreach (Transform child in active_blocks.transform)
+        foreach (Transform child in _activeBlocks.transform)
         {
             BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
-            if ((block == null) || (!block.gameObject.activeInHierarchy) || block.destroyed)
+            if ((block == null) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
             {
                 continue;
             }
@@ -338,60 +521,63 @@ public class LevelManager : MonoBehaviour
             // it has correct state
             if (!block.attached)
             {
-                floatingBlocks.Add(block.gameObject);
+                floatingBlocks.Add(block);
             }
         }
 
         return floatingBlocks;
     }
 
-    public void OnBlocksObstructionCollision(GameObject active)
+    /// <summary>
+    /// Handles block collision with obstruction.
+    /// </summary>
+    /// <param name="block"></param>
+    public void OnBlocksObstructionCollision(BasicBlock block)
     {
         // game over for now
         // protect against subsequent calls due to called from blocks update
-        if (isGameOver)
+        if (_isGameOver)
+        {
+            return;
+        }
+        
+        if (block.Destroyed)
         {
             return;
         }
 
-        if (active.GetComponent<BasicBlock>().destroyed)
+        // play some random obstruction sfx
+        if ((sfxOnObstruction != null) && (sfxOnObstruction.Count > 0))
         {
-            return;
+            AudioManager.Instance.PlaySfx(sfxOnObstruction[Random.Range(0, sfxOnObstruction.Count)]);
         }
 
-        if (SfxOnObstruction != null)
-        {
-            AudioManager.Instance.PlaySfx(SfxOnObstruction[UnityEngine.Random.Range(0, SfxOnObstruction.Count)]);
-        }
+        // destroy collided block
+        block.DestroyBlock();
+        Destroy(block.gameObject);
 
-        active.GetComponent<BasicBlock>().DestroyBlock();
-        Destroy(active);
-
-        List<GameObject> floatingBlocks = GetFloatingBlocks();
-        for (int i = floatingBlocks.Count - 1; i >= 0; i--)
+        // find and destroy possible floating blocks
+        List<BasicBlock> floatingBlocks = GetFloatingBlocks();
+        foreach (BasicBlock floatingBlock in floatingBlocks)
         {
-            GameObject block = floatingBlocks[i];
-            block.GetComponent<BasicBlock>().DestroyBlock();
-            Destroy(block);
+            floatingBlock.DestroyBlock();
+            Destroy(floatingBlock.gameObject);
         }
     }
 
-    public void OnBlocksAttach(GameObject active)
+    public void OnBlocksAttach(BasicBlock active)
     {
-        notAttachedBlocks.Remove(active);
+        _notAttachedBlocks.Remove(active);
 
         AudioManager.Instance.PlaySfx(active.GetComponent<BasicBlock>()?.SfxOnAttach());
 
-        Queue<GameObject> blocks = new Queue<GameObject>();
-        HashSet<GameObject> matches = new HashSet<GameObject>
+        Queue<GameObject> blocks = new();
+        HashSet<GameObject> matches = new()
         {
-            active
+            active.gameObject
         };
 
-        // IncrementScore(ScorePerAttach);
-        // OnAnnounce?.Invoke("+" + ScorePerAttach, active.transform.position);
-
-        blocks.Enqueue(active);
+        blocks.Enqueue(active.gameObject);
 
         while (blocks.Count != 0)
         {
@@ -425,146 +611,157 @@ public class LevelManager : MonoBehaviour
         {
             foreach (GameObject block in matches)
             {
-                block.GetComponent<BasicBlock>().DestroyBlock();
+                BasicBlock basicBlock = block.GetComponent<BasicBlock>();
+                if (basicBlock is ColorBlock cb)
+                {
+                    _blocksStats.AddMatched(cb.ColorType, 1);
+                }
+
+                basicBlock.DestroyBlock();
                 Destroy(block);
             }
 
-            int matchScore;
-            switch (matchedAmount)
-            {
-                case 3:
-                    matchScore = scoreConfig.ScorePerMatch3;
-                    break;
-                case 4:
-                    matchScore = scoreConfig.ScorePerMatch4;
-                    break;
-                case 5:
-                    matchScore = scoreConfig.ScorePerMatchMore;
-                    break;
-                default:
-                    matchScore = scoreConfig.ScorePerMatch3 + (matchedAmount - 5) * scoreConfig.ScorePerMatch3;
-                    break;
-            }
-
-            matchScore *= multiplier.Multiplier;
+            int matchScore = scoreConfig.ComputeScoreForMatchAmount(matchedAmount) * _multiplier.Multiplier;
 
             IncrementScore(matchScore);
             OnAnnounce?.Invoke("+" + matchScore, active.transform.position);
 
-            int sfxBlockClearIdx = Math.Clamp(multiplier.Multiplier - 1, 0, SfxBlocksClear.Count - 1);
-            AudioManager.Instance.PlaySfx(SfxBlocksClear[sfxBlockClearIdx]);
+            int sfxBlockClearIdx = Math.Clamp(_multiplier.Multiplier - 1, 0, sfxBlocksClear.Count - 1);
+            AudioManager.Instance.PlaySfx(sfxBlocksClear[sfxBlockClearIdx]);
 
             // find floating/disconnected blocks
-            List<GameObject> floatingBlocks = GetFloatingBlocks();
-            int floatingScore = scoreConfig.ScorePerFloating * floatingBlocks.Count * multiplier.Multiplier;
+            List<BasicBlock> floatingBlocks = GetFloatingBlocks();
+            int floatingScore = scoreConfig.scorePerFloating * floatingBlocks.Count * _multiplier.Multiplier;
             if (floatingScore != 0)
             {
                 IncrementScore(floatingScore);
                 OnAnnounce?.Invoke("+" + floatingScore, floatingBlocks[0].transform.position);
             }
 
-            for (int i = floatingBlocks.Count - 1; i >= 0; i--)
+            foreach (BasicBlock floatingBlock in floatingBlocks)
             {
-                GameObject block = floatingBlocks[i];
-                block.GetComponent<BasicBlock>().DestroyBlock();
-                Destroy(block);
-            }
+                if (floatingBlock is ColorBlock cb)
+                {
+                    _blocksStats.AddMatched(cb.ColorType, 1);
+                }
 
-            multiplier.Increment();
+                floatingBlock.DestroyBlock();
+                Destroy(floatingBlock.gameObject);
+            }
+            
+            // notify about matched amounts change
+            OnBlocksStatsUpdate?.Invoke(_blocksStats);
+
+            _multiplier.Increment();
+
+            int centralLinksCount = _central.GetComponent<BasicBlock>().LinksCount();
+            // the level might get boring when no blocks are present;
+            // however, don't do it for the spawn limit mode
+            if (level.limit.Variant() != ELimitVariant.SpawnLimit)
+            {
+                // spawn if we have <= 1 connected links on the central block
+                if (centralLinksCount <= 2)
+                {
+                    _spawner.SpawnRandomEntities(availableBlocks.Count > 2 ? Random.Range(1, 2) : 1);
+                }
+            }
         }
     }
 
     /// <summary>
-    /// Called when LoadScreen switched to the level scene and finished with
-    /// its closing animation.
+    /// Initialize the level and kickstart startup animation sequence.
     /// </summary>
-    public void OnLevelSceneLoaded(GameObject loadScreen, Data.LevelData data)
+    /// <remarks>
+    /// Called when <see cref="LevelLoader"/> switched to the level scene and finished with
+    /// its closing animation.
+    /// </remarks>
+    public void OnLevelSceneLoaded(LevelData data)
     {
         // disable blocks layer render
-        Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
-
-        // create obstructions
-        if (data.obstructionIdx >= 0)
+        if (Camera.main != null)
         {
-            Instantiate(obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx], obstructionTmParent.transform);
+            Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
         }
-
-        UILevelController.OnGameStartAllAnimationsDone += OnLevelStart;
 
         level = data;
-        Assert.IsFalse(level.colorsInLevel.Length == 0, "level msut have color blocks");
 
-        foreach (string colorStr in level.colorsInLevel)
+        // create obstructions
+        if (level.obstructionIdx >= 0)
         {
-            if (Enum.TryParse(colorStr, out ColorBlock.EBlockColor color))
-            {
-                availableColors.Add(color);
-            }
-            else
-            {
-                Logger.Debug($"Failed to convert {colorStr} to block color, skip");
-            }
+            Instantiate(obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx],
+                obstructionTmParent.transform);
         }
 
-        GetComponent<Spawner>().Init(level, OnSpawnedBlock);
+        Assert.IsFalse((level.ParsedBlocksInLevel == null) || (level.ParsedBlocksInLevel.Length == 0),
+            "level must have blocks");
+        availableBlocks.AddRange(level.ParsedBlocksInLevel);
 
-        multiplier.Init(level.multiplier);
+        _spawner.Init(level, OnSpawnedBlock);
+        _multiplier.Init(level.multiplier);
 
-        CreateStartupBlocks(level.seed > 0 ? level.seed : UnityEngine.Random.Range(0, int.MaxValue), level.startBlocksNum, null);
+        CreateStartupBlocks(level.seed > 0 ? level.seed : Random.Range(0, int.MaxValue),
+            level.startBlocksNum);
+
+        UILevelCoordinator.OnGameStartAllAnimationsDone += OnLevelStart;
         OnBeforeGameStarts?.Invoke(level);
     }
 
+    /// <summary>
+    /// Called when UI finishes with startup animation.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="UILevelCoordinator.OnGameStartAllAnimationsDone"/>
+    /// </remarks>
     private void OnLevelStart()
     {
-        UILevelController.OnGameStartAllAnimationsDone -= OnLevelStart;
-        AudioManager.Instance.PlayMusic(BackgroundMusic);
-        AudioManager.Instance.PlaySfx(SfxOnStart);
+        UILevelCoordinator.OnGameStartAllAnimationsDone -= OnLevelStart;
 
-        GameObject root = GameObject.FindGameObjectWithTag("central");
-        Assert.IsNotNull(root);
+        AudioManager.Instance.PlayMusic(backgroundMusic);
+        AudioManager.Instance.PlaySfx(sfxOnStart);
 
-        GameObject efx = Instantiate(EfxOnStart, root.transform.position, Quaternion.identity);
+        GameObject efx = Instantiate(efxOnStart, _central.transform.position, Quaternion.identity);
         efx.GetComponent<ParticleSystem>().Play();
 
         // enable blocks layer render
-        Camera.main.cullingMask |= 1 << LayerMask.NameToLayer("blocks");
+        if (Camera.main != null)
+        {
+            Camera.main.cullingMask |= 1 << LayerMask.NameToLayer("blocks");
+        }
 
-        isLevelStarted = true;
-
-        GetComponent<Spawner>().StartSpawner();
+        // start the game
+        _spawner.StartSpawner();
+        _isLevelStarted = true;
     }
-
-    void OnDestroy()
-    {
-        // subsribed at level startup; however, a user might exit
-        // before level fully starts. Therefore, we shall remove
-        // dangling subscription
-        UILevelController.OnGameStartAllAnimationsDone -= OnLevelStart;
-    }
-
+    
+    /// <summary>
+    /// Creates startup blocks starting from the root.
+    /// </summary>
+    /// <remarks>
+    /// The central block is used when provided <c>root</c> is <c>null</c>.
+    /// </remarks>
+    /// <param name="seed">RNG seed.</param>
+    /// <param name="num">Number of blocks to generate.</param>
+    /// <param name="root">Root block or null.</param>
     private void CreateStartupBlocks(int seed, int num, GameObject root = null)
     {
         int blocksLayer = LayerMask.NameToLayer("blocks");
 
         if (root == null)
         {
-            root = GameObject.FindGameObjectWithTag("central");
+            root = _central;
         }
 
         Assert.IsNotNull(root);
 
         GameObject block = root;
-        GameObject neighbour;
-        BasicBlock.EdgeIndex edge;
 
         System.Random rnd = new System.Random(seed);
 
         Array edges = Enum.GetValues(typeof(BasicBlock.EdgeIndex));
-
         for (int i = 0; i < num; i++)
         {
-            edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
-            neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
+            BasicBlock.EdgeIndex edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
+            GameObject neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
 
             // find any free edge
             while (neighbour != null)
@@ -574,38 +771,44 @@ public class LevelManager : MonoBehaviour
                 neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
             }
 
-            GameObject newBlock = BlocksFactory.Instance.NewColorBlock(availableColors[rnd.Next(0, availableColors.Count)]);
+            BasicBlock newBlock =
+                BlocksFactory.Instance.NewColorBlock(availableBlocks[rnd.Next(0, availableBlocks.Count)]);
             // set to correct location
             newBlock.transform.parent = block.transform.parent;
             newBlock.transform.rotation = block.transform.rotation;
-            newBlock.transform.position = (Vector2)block.transform.position + block.GetComponent<BasicBlock>().GetEdgeOffset(edge);
+            newBlock.transform.position =
+                (Vector2)block.transform.position + block.GetComponent<BasicBlock>().GetEdgeOffset(edge);
             // mark as already attached and disable rigidbody physics
             newBlock.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             newBlock.GetComponent<Rigidbody2D>().totalForce = Vector2.zero;
             newBlock.GetComponent<BasicBlock>().attached = true;
             // add to blocks layer
             // as physics update won't run between object linkage - force physics update
-            // that shall update rigidbody after applied tranforms
+            // that shall update rigidbody after applied transforms
             Physics2D.SyncTransforms();
             // link new block to neighbours
             int linkedNeighboursCount = newBlock.GetComponent<BasicBlock>().LinkWithNeighbours(blocksLayer);
             Assert.IsTrue(linkedNeighboursCount > 0);
-            // add block to the blocks layer to allow raycasting against it
+            // add block to the blocks layer to allow ray-casting against it
             newBlock.gameObject.layer = blocksLayer;
 
-            Logger.Debug($"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
+            Logger.Debug(
+                $"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
 
             // begin from root
             block = root;
         }
     }
 
-    public void DestroyAll()
+    /// <summary>
+    /// Destroy all blocks (spawned, attached, floating) except <see cref="CentralBlock"/>.
+    /// </summary>
+    private void DestroyAllBlocks()
     {
         BasicBlock[] allObjects = FindObjectsByType<BasicBlock>(FindObjectsSortMode.None);
         foreach (BasicBlock block in allObjects)
         {
-            if ((block == null) || (block is CentralBlock) || (!block.gameObject.activeInHierarchy) || block.destroyed)
+            if ((!block) || (block is CentralBlock) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
             {
                 continue;
             }
@@ -616,20 +819,21 @@ public class LevelManager : MonoBehaviour
     }
 
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
-    public int seed;
-    public int spawnNum;
-    public bool recreateStartupBlocks = false;
+    public int testSeed;
+    public int testSpawnNum;
+    public bool testRecreateStartupBlocks;
 
-    void OnValidate()
+    private void OnValidate()
     {
-        if (recreateStartupBlocks)
+        if (!testRecreateStartupBlocks)
         {
-            seed++;
-            DestroyAll();
-            CreateStartupBlocks(seed, spawnNum);
-            recreateStartupBlocks = false;
+            return;
         }
-    }
 
+        testSeed++;
+        DestroyAllBlocks();
+        CreateStartupBlocks(testSeed, testSpawnNum);
+        testRecreateStartupBlocks = false;
+    }
 #endif // UNITY_EDITOR
 }

@@ -1,11 +1,13 @@
 {
     "seed": 3,
     "startBlocksNum": 5,
-    "colorsInLevel": ["Green", "Yellow", "Red"],
+    "blocksInLevel": ["green", "yellow", "red"],
     "obstructionIdx": 0,
-    "goalScore": 7000,
+    "goal": {
+        "score": 3000
+    },
     "limit": {
-        "spawns": 5
+        "spawns": 10
     },
     "multiplier": {
         "decayTime": 1.7,

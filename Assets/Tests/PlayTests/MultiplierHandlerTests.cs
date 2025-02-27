@@ -1,4 +1,5 @@
 using System.Collections;
+using Model;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -12,7 +13,7 @@ public class MultiplierHandlerTests
     private float timerUpdateValue;
     private int multiplierUpdateValue;
 
-    private Data.Multiplier config = new Data.Multiplier
+    private Multiplier config = new Multiplier
     {
         decayTime = 2f,
         decayRate = 0.5f,

@@ -101,9 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a1513c055b6a65419115fedfdd67d69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SfxOnSpawn: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
-  spawnIn: 0.5
-  spawn: 0
+  sfxOnSpawn: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
+  testSpawnIn: 1
+  testSpawn: 0
 --- !u!114 &4192747550375175623
 MonoBehaviour:
   m_ObjectHideFlags: 0

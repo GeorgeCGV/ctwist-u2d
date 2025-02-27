@@ -4,12 +4,16 @@ using UnityEngine.Assertions;
 /// <summary>
 /// Audio manager provides ways to play background music
 /// and sound effects.
-///
-/// The instance is not destructable, as it has to be present
-/// across the scenes.
-///
-/// Contains shared SFXes internally.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Contains shared SFXes internally.
+/// </para>
+/// <para>
+/// The instance is not destructible, as it has to be present
+/// across scenes.
+/// </para>
+/// </remarks>
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
@@ -17,18 +21,21 @@ public class AudioManager : MonoBehaviour
     /// <summary>
     /// General sound effects used across the scenes.
     /// </summary>
-    public enum SFX
+    public enum Sfx
     {
         BtnClick,
         DialogAppear,
-        DialogDissapear
+        DialogDisappear
     }
+
+    #region Audio Sources
 
     /// <summary>
     /// Background music source for looped tracks.
     /// </summary>
     [SerializeField]
     private AudioSource musicSource;
+
     /// <summary>
     /// Sound effects source used for short
     /// PlayOneShot clips.
@@ -46,18 +53,22 @@ public class AudioManager : MonoBehaviour
     [SerializeField]
     private AudioSource sfxPausableSource;
 
+    #endregion
+
     #region Common SFX Clips
+
     [SerializeField]
     private AudioClip sfxBtnClick;
     [SerializeField]
     private AudioClip sfxDialogAppear;
     [SerializeField]
-    private AudioClip sfxDialogDissappear;
+    private AudioClip sfxDialogDisappear;
+
     #endregion
 
     private void Awake()
     {
-        // prevent mutliple instances
+        // prevent multiple instances
         if (Instance != null && Instance != this)
         {
             // destroy script and the entire object that has audio sources
@@ -72,6 +83,7 @@ public class AudioManager : MonoBehaviour
     }
 
     #region Background Music Source
+
     /// <summary>
     /// Background source pause/unpause.
     /// </summary>
@@ -91,7 +103,6 @@ public class AudioManager : MonoBehaviour
     /// <summary>
     /// Stops background source.
     /// </summary>
-    /// <param name="source"></param>
     public void StopMusic()
     {
         musicSource.Stop();
@@ -109,28 +120,30 @@ public class AudioManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Starts to play audio clip with  background audio source.
-    ///
+    /// Starts to play audio clip with background audio source.
+    /// </summary>
+    /// <remarks>
     /// Only sets the audio clip to the source when
     /// music is disabled.
-    /// </summary>
-    /// <param name="audio"></param>
-    public void PlayMusic(AudioClip audio)
+    /// </remarks>
+    /// <param name="clip">Music audio clip.</param>
+    public void PlayMusic(AudioClip clip)
     {
+        Assert.IsNotNull(clip, "music audio clip shall not be null");
         musicSource.Stop();
-
         // set the clip for potential music enable
-        musicSource.clip = audio;
+        musicSource.clip = clip;
         musicSource.time = 0;
-
-        if (GameManager.Instance.IsMusicOn())
+        if (GameManager.IsMusicOn())
         {
             musicSource.Play();
         }
     }
+
     #endregion
 
     #region Pausable SFX source
+
     /// <summary>
     /// Pausable SFX source pause/unpause.
     /// </summary>
@@ -152,51 +165,67 @@ public class AudioManager : MonoBehaviour
         sfxPausableSource.Stop();
     }
 
-    public void PlaySfxPausable(AudioClip audio)
+    /// <summary>
+    /// Starts to play audio clip with sfx pausable audio source.
+    /// </summary>
+    /// <param name="clip">Music audio clip.</param>
+    public void PlaySfxPausable(AudioClip clip)
     {
-        if (sfxPausableSource.isPlaying)
-        {
-            sfxPausableSource.Stop();
-        }
-
-        sfxPausableSource.clip = audio;
+        Assert.IsNotNull(clip, "sfx audio clip shall not be null");
+        sfxPausableSource.Stop();
+        sfxPausableSource.clip = clip;
         sfxPausableSource.time = 0;
         sfxPausableSource.Play();
     }
+
     #endregion
 
     #region SFX Source
-    public void PlaySfx(AudioClip audio)
-    {
-        Assert.IsNotNull(audio);
 
-        sfxSource.PlayOneShot(audio);
+    /// <summary>
+    /// Plays one shot audio clip with sfx audio source.
+    /// </summary>
+    /// <param name="clip">Music audio clip.</param>
+    public void PlaySfx(AudioClip clip)
+    {
+        Assert.IsNotNull(clip, "sfx audio clip shall not be null");
+        Assert.IsNotNull(clip);
+        sfxSource.PlayOneShot(clip);
     }
 
-    public void PlaySfx(SFX sfxKey)
+    /// <summary>
+    /// Plays one shot stored SFX with sfx audio source.
+    /// </summary>
+    /// <remarks>
+    /// Ignores invalid values.
+    /// </remarks>
+    /// <param name="sfxKey">SFX to play.</param>
+    public void PlaySfx(Sfx sfxKey)
     {
         AudioClip clip;
         switch (sfxKey)
         {
-            case SFX.BtnClick:
+            case Sfx.BtnClick:
                 clip = sfxBtnClick;
                 break;
-            case SFX.DialogAppear:
+            case Sfx.DialogAppear:
                 clip = sfxDialogAppear;
                 break;
-            case SFX.DialogDissapear:
-                clip = sfxDialogDissappear;
+            case Sfx.DialogDisappear:
+                clip = sfxDialogDisappear;
                 break;
             default:
-                Debug.Log("No SFX found for key " + sfxKey);
+                Logger.Debug("No SFX found for key " + sfxKey);
                 return;
         }
 
         sfxSource.PlayOneShot(clip);
     }
+
     #endregion
 
     #region SFX
+
     /// <summary>
     /// Mutes SFX and Pausable SFX sources.
     /// </summary>
@@ -206,5 +235,6 @@ public class AudioManager : MonoBehaviour
         sfxSource.mute = value;
         sfxPausableSource.mute = value;
     }
+
     #endregion
 }

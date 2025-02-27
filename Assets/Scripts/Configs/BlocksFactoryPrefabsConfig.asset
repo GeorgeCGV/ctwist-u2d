@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71be3eaa65852064ca94d655f052ba8f, type: 3}
   m_Name: BlocksFactoryPrefabsConfig
   m_EditorClassIdentifier: 
-  ColorBlockPrefab: {fileID: 5790817439536844642, guid: 552d4a66ed4150f439ac2ab8b3ea1d60, type: 3}
+  colorBlockPrefab: {fileID: 5790817439536844642, guid: 552d4a66ed4150f439ac2ab8b3ea1d60, type: 3}

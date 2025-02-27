@@ -316,7 +316,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48719fe9775368d4ab473ceeeb6deab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sfxScoring: {fileID: 8300000, guid: be911a9c140e0594ba126ad74abcb15f, type: 3}
+  sfx: {fileID: 8300000, guid: be911a9c140e0594ba126ad74abcb15f, type: 3}
+  testFrom: 0
+  testTo: 0
+  testAnimate: 0
 --- !u!1001 &36390053
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17942,6 +17945,7 @@ GameObject:
   - component: {fileID: 330009511}
   - component: {fileID: 330009512}
   - component: {fileID: 330009513}
+  - component: {fileID: 330009514}
   m_Layer: 5
   m_Name: LeftTopPanel
   m_TagString: Untagged
@@ -18007,6 +18011,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0db7256136c23c7449f4484a1eafdfe8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fillBar: {fileID: 696506043}
+  label: {fileID: 1678663879}
+--- !u!114 &330009514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330009510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a7cce9d39233ec4c87f55af30db52ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  label: {fileID: 568395077}
 --- !u!1 &344322568
 GameObject:
   m_ObjectHideFlags: 0
@@ -18217,15 +18236,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   annotationPrefab: {fileID: 8899917464667268626, guid: f61dd43cc6df83646bdb49882ec33b8c, type: 3}
-  pausePanel: {fileID: 1777070872}
-  topLeftPanel: {fileID: 330009510}
-  topRightPanel: {fileID: 783926180}
+  pausePanelAnimator: {fileID: 1777070874}
+  topLeftPanelAnimator: {fileID: 330009512}
+  topRightPanelAnimator: {fileID: 783926182}
   pauseMenu: {fileID: 1731449638}
-  resultsMenu: {fileID: 1075941696}
-  SfxOnCountdown: {fileID: 8300000, guid: 18e07c53ca4feca47b46d4b9c11dc8d1, type: 3}
   countdownLabel: {fileID: 1736858469}
-  goalPanel: {fileID: 1140753969}
-  timeLabel: {fileID: 903172194}
+  sfxOnCountdown: {fileID: 8300000, guid: 18e07c53ca4feca47b46d4b9c11dc8d1, type: 3}
+  goalCtrl: {fileID: 1140753973}
+  limitCtrl: {fileID: 1195385060}
+  resultsCtrl: {fileID: 1075941699}
+  lvlLabel: {fileID: 1947576162}
 --- !u!95 &378946678
 Animator:
   serializedVersion: 7
@@ -18860,7 +18880,6 @@ GameObject:
   - component: {fileID: 568395075}
   - component: {fileID: 568395078}
   - component: {fileID: 568395077}
-  - component: {fileID: 568395076}
   m_Layer: 5
   m_Name: ScoreLbl
   m_TagString: Untagged
@@ -18887,18 +18906,6 @@ RectTransform:
   m_AnchoredPosition: {x: 22, y: -8}
   m_SizeDelta: {x: 380, y: 60}
   m_Pivot: {x: 0.5, y: 1}
---- !u!114 &568395076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 568395074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a7cce9d39233ec4c87f55af30db52ba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &568395077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19349,6 +19356,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1677156824273782917, guid: ef7bc0808e099734abe8e6154088272a, type: 3}
+      propertyPath: testSpawn
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1677156824273782917, guid: ef7bc0808e099734abe8e6154088272a, type: 3}
+      propertyPath: sfxOnSpawn
+      value: 
+      objectReference: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
     - target: {fileID: 3065925520062767607, guid: ef7bc0808e099734abe8e6154088272a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.3
@@ -20480,6 +20495,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a9a59a362005e34389ed8c78b264593, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bonusScorePrefab: {fileID: 8899917464667268626, guid: 7bed06868f5ae2b40b49020d918c326b, type: 3}
+  rightBtnLbl: {fileID: 1970500138}
+  counterAnimator: {fileID: 10427266}
   sfxStarAppear: {fileID: 8300000, guid: bb22c97426219764c9a82b633ded6d3a, type: 3}
 --- !u!1 &1115640942
 GameObject:
@@ -20590,6 +20608,7 @@ RectTransform:
   - {fileID: 1259855096}
   - {fileID: 2027213949}
   - {fileID: 1617107568}
+  - {fileID: 2131487488}
   m_Father: {fileID: 783926181}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
@@ -20647,7 +20666,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a369cb0f761d32a479c14ec103cc051b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreGoalIcon: {fileID: 1617107567}
   scoreGoalLabel: {fileID: 2027213950}
+  fillBar: {fileID: 1259855097}
+  blockGoalItemIcons: {fileID: 100100200, guid: 40a42de3c3526a2488f1bf0381d2acd3, type: 3}
+  blockGoalsParent: {fileID: 2131487487}
+  blockGoalsItemPrefab: {fileID: 4956505462768856795, guid: 71bfd7305a1ec6d4286b55bb8a059beb, type: 3}
 --- !u!114 &1157089542 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1677156824273782917, guid: ef7bc0808e099734abe8e6154088272a, type: 3}
@@ -20693,7 +20717,7 @@ MonoBehaviour:
   sfxPausableSource: {fileID: 788115978}
   sfxBtnClick: {fileID: 8300000, guid: c0cd8289d6e0afa4f82d5d29af71e8d9, type: 3}
   sfxDialogAppear: {fileID: 8300000, guid: 1ac2c961152d992488674eb8a7970123, type: 3}
-  sfxDialogDissappear: {fileID: 8300000, guid: 673b064fbc234b946b7a6fe899097ef1, type: 3}
+  sfxDialogDisappear: {fileID: 8300000, guid: 673b064fbc234b946b7a6fe899097ef1, type: 3}
 --- !u!4 &1172659396
 Transform:
   m_ObjectHideFlags: 0
@@ -20703,7 +20727,7 @@ Transform:
   m_GameObject: {fileID: 1172659394}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1007.74866, y: 700.70044, z: 5.8252873}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21791,7 +21815,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sensitivity: 0.6
   dragSensitivity: 7
-  minSwipeDistance: 0
   decayRate: 2.7
   minAngularVelocity: 0.01
   swipeSpeedLimit: 30
@@ -22078,30 +22101,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42aa45eaa782c3c4dbdef4f22593f433, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EfxOnStart: {fileID: 5134935953714602175, guid: a9a62cf3b1c8b6249bbc8733a28aa365, type: 3}
-  BackgroundMusic: {fileID: 8300000, guid: 127dc90fd9d96834bbdedf890be3165d, type: 3}
-  SfxOnStart: {fileID: 8300000, guid: 82593e5490d3c414b81e84be1bbfc12a, type: 3}
-  SfxOnLost: {fileID: 8300000, guid: 1536f3c6237b54542aa5b4f8a15800a4, type: 3}
-  SfxOnWin: {fileID: 8300000, guid: 968f5e3b8a7a12a40808f4a1bbe1e148, type: 3}
-  SfxOnNearTimeout: {fileID: 8300000, guid: 0846f7fbdd0c04e4f88fa2a7fcee8d98, type: 3}
-  nearTimeoutTime: 10.15
-  envAnimator: {fileID: 1453179009}
-  SfxBlocksClear:
+  efxOnStart: {fileID: 5134935953714602175, guid: a9a62cf3b1c8b6249bbc8733a28aa365, type: 3}
+  backgroundMusic: {fileID: 8300000, guid: 127dc90fd9d96834bbdedf890be3165d, type: 3}
+  sfxOnStart: {fileID: 8300000, guid: 82593e5490d3c414b81e84be1bbfc12a, type: 3}
+  sfxOnLost: {fileID: 8300000, guid: 1536f3c6237b54542aa5b4f8a15800a4, type: 3}
+  sfxOnWin: {fileID: 8300000, guid: 968f5e3b8a7a12a40808f4a1bbe1e148, type: 3}
+  sfxOnNearTimeout: {fileID: 8300000, guid: 0846f7fbdd0c04e4f88fa2a7fcee8d98, type: 3}
+  sfxBlocksClear:
   - {fileID: 8300000, guid: 5e714ea264ca0ae4a855053fc34b1c5e, type: 3}
   - {fileID: 8300000, guid: 67b281bb9c2094346bf3c272c38bde8f, type: 3}
   - {fileID: 8300000, guid: f36b39d6425c4fb4da4141e3fecb040c, type: 3}
   - {fileID: 8300000, guid: ec5183c2201478d45861d8695ebe4f4d, type: 3}
   - {fileID: 8300000, guid: 6fe9c12039dd9e84f86f9bf073b26394, type: 3}
   - {fileID: 8300000, guid: ac3ae0ed59388e04298c13e7ef62ea46, type: 3}
+  nearTimeoutTime: 10.15
+  envAnimator: {fileID: 1453179009}
+  level:
+    seed: 0
+    obstructionIdx: 0
+    blocksInLevel: []
+    startBlocksNum: 0
+    goal:
+      score: 0
+      blocks: []
+    limit:
+      time: 1
+      spawns: 0
+    spawn:
+      batchChance: 0
+      batchMin: 0
+      batchMax: 0
+      timeMin: 0
+      timeMax: 0
+      timeDecreasePerTimeLimitPercent: 0
+      timeDecreasePerTimeSeconds: 0
+      timeDecreaseByTimePercent: 0
+    block:
+      speedMin: 0
+      speedMax: 0
+      speedIncreasePerTimeLimitPercent: 0
+      speedIncreasePerTimeSeconds: 0
+      speedIncreaseBySpeedPercent: 0
+    multiplier:
+      decayTime: 0
+      decayRate: 0
+      max: 0
+    starRewards: 
   scoreConfig: {fileID: 11400000, guid: 0d08571074f2d084d8ac134c153afe69, type: 2}
-  availableColors: 00000000
+  availableBlocks: 01000000
   obstructionTmParent: {fileID: 418289023}
-  SfxOnObstruction:
+  sfxOnObstruction:
   - {fileID: 8300000, guid: edf9aeeb496949447abfcb2471b0322a, type: 3}
   obstructionTilemaps: {fileID: 11400000, guid: 7bbd906956a76f840b32cacdbe5b6f34, type: 2}
-  seed: 16
-  spawnNum: 0
-  recreateStartupBlocks: 0
+  testSeed: 0
+  testSpawnNum: 0
+  testRecreateStartupBlocks: 0
 --- !u!4 &1617644880
 Transform:
   m_ObjectHideFlags: 0
@@ -22145,7 +22199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ba46d72b095f9c43817d1d6ab584201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnNodes:
+  spawnNodes:
   - {fileID: 377083735}
   - {fileID: 143692442}
   - {fileID: 140024406}
@@ -30424,6 +30478,66 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2118412334}
   m_CullTransparentMesh: 1
+--- !u!1 &2131487487
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2131487488}
+  - component: {fileID: 2131487489}
+  m_Layer: 5
+  m_Name: BlockGoals
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2131487488
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2131487487}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1140753970}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 354, y: 64}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2131487489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2131487487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 19
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 106, y: 64}
+  m_Spacing: {x: 12, y: 0}
+  m_Constraint: 1
+  m_ConstraintCount: 3
 --- !u!4 &2841509569962913819 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5301901568064554848, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
