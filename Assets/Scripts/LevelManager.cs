@@ -228,6 +228,8 @@ public class LevelManager : MonoBehaviour
     {
         // delay to give effects some time
         yield return new WaitForSeconds(1);
+        
+        DestroyAllBlocks();
 
         // the music can be stopped to not interfere
         // with won / lost sfx.
@@ -294,7 +296,6 @@ public class LevelManager : MonoBehaviour
     {
         _isGameOver = true;
         _spawner.StopSpawner();
-        DestroyAllBlocks();
         StartCoroutine(GameOverDelayed(won));
     }
 
