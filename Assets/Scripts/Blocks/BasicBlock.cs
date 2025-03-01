@@ -550,6 +550,7 @@ namespace Blocks
             }
 
             ParticleSystem efx = NewAttachEfx();
+            efx.transform.position = otherEdgeMidpoint;
             efx.Play();
 
             // run match check and scoring
