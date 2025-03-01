@@ -46,6 +46,13 @@ namespace UI.Level
         /// <param name="newScore">New game score.</param>
         private void HandleScoreUpdate(int newScore)
         {
+            // play bump animation if present
+            UILabelBumpAnimator bumpAnimator = label.GetComponent<UILabelBumpAnimator>();
+            if (bumpAnimator != null)
+            {
+                bumpAnimator.enabled = true;
+            }
+            
             label.text = newScore.ToString();
         }
     }
