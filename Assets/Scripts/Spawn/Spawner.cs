@@ -92,7 +92,13 @@ namespace Spawn
         /// can spawn during its life.
         /// </summary>
         private int _spawnsLeft;
-        
+
+        /// <summary>
+        /// A chance to spawn <see cref="StoneBlock"/>.
+        /// </summary>
+        /// <value>[0.0; 1.0]</value>
+        private float _stoneBlockChance;
+
         /// <summary>
         /// Callback for the spawn node.
         /// Used to enqueue the spawn node back to
@@ -117,7 +123,7 @@ namespace Spawn
         public void Init(LevelData data, Action<BasicBlock> onSpawned = null)
         {
             _spawnsLeft = data.limit.Variant() == ELimitVariant.SpawnLimit ? data.limit.spawns : SpawnUnlimited;
-
+            _stoneBlockChance = data.spawn.stoneBlockChancePercent * 0.01f;
             _onSpawnedCallback = onSpawned;
             _spawnBatchChance = data.spawn.batchChance;
             _spawnBatchRange = (Math.Max(1, data.spawn.batchMin), Math.Max(1, data.spawn.batchMax + 1));
@@ -205,13 +211,15 @@ namespace Spawn
                 }
 
                 // enqueue new spawn entity
-                EBlockType type = LevelManager.Instance.GetRandomColorTypeFromAvailable();
-                _spawnQueue.Enqueue(new ColorBlockEntity(type, inSeconds, speed));
+                EBlockType type = (_stoneBlockChance > 0) && (Random.value <= _stoneBlockChance)
+                    ? EBlockType.Stone
+                    : LevelManager.Instance.GetRandomColorTypeFromAvailable();
+                _spawnQueue.Enqueue(new SpawnBlockEntity(type, inSeconds, speed));
             }
         }
 
         #region Unity
-        
+
         /// <summary>
         /// Prepares the component and disables it to
         /// avoid Update calls.
@@ -276,7 +284,7 @@ namespace Spawn
                 rndFreeNode.SpawnEntity(_spawnQueue.Dequeue(), OnSpawnedHandler);
             }
         }
-        
+
         #endregion Unity
     }
 }

@@ -27101,6 +27101,7 @@ MonoBehaviour:
       timeDecreasePerTimeLimitPercent: 0
       timeDecreasePerTimeSeconds: 0
       timeDecreaseByTimePercent: 0
+      stoneBlockChancePercent: 0
     block:
       speedMin: 0
       speedMax: 0
@@ -35559,6 +35560,38 @@ PrefabInstance:
     - target: {fileID: 5301901568064554848, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_Color.b
+      value: 0.91372555
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_Color.g
+      value: 0.49803925
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_Intensity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_ShadowSoftness
+      value: 0.203
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_ShadowsEnabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_BlendStyleIndex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_PointLightInnerRadius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7548784742820048411, guid: e3270ef65bbcfff4b962bbd6cca7e4c1, type: 3}
+      propertyPath: m_PointLightOuterRadius
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

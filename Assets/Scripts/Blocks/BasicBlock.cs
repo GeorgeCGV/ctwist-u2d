@@ -45,9 +45,9 @@ namespace Blocks
             { EdgeIndex.Top, new Vector2(0.0f, 0.4f) },
         };
 
-        [SerializeField] protected float neighbourRange = 0.36f;
+        [SerializeField] protected float neighbourRange = 0.35f;
 
-        [SerializeField] protected float edgeAttachPositionOffset = 0.85f;
+        [SerializeField] protected float edgeAttachPositionOffset = 0.4f;
 
         [SerializeField] protected Vector2 gravityPoint = Vector2.zero;
 
@@ -70,11 +70,25 @@ namespace Blocks
             { EdgeIndex.Top, null },
         };
 
+        private EBlockType _blockType;
+
         /// <summary>
         /// Setter and Getter for the block type.
         /// </summary>
         /// <value>EBlockType</value>
-        public EBlockType BlockType { get; protected set; }
+        public EBlockType BlockType
+        {
+            get => _blockType;
+            protected set
+            {
+                Light2D lightComponent = GetComponent<Light2D>();
+                if (lightComponent != null)
+                {
+                    lightComponent.color = UnityColorFromType(value);
+                }
+                _blockType = value;
+            }
+        }
 
         /// <summary>
         /// Attached flag.
@@ -472,7 +486,8 @@ namespace Blocks
                 // don't need to process already attached ones
                 return;
             }
-            else if (other.gameObject.layer != _blocksLayer)
+
+            if (other.gameObject.layer != _blocksLayer)
             {
                 // don't process if the other block is also a "floating" blocks
                 return;

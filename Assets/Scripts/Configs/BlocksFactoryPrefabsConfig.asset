@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: BlocksFactoryPrefabsConfig
   m_EditorClassIdentifier: 
   colorBlockPrefab: {fileID: 5790817439536844642, guid: 552d4a66ed4150f439ac2ab8b3ea1d60, type: 3}
+  stoneBlockPrefab: {fileID: 3649973704180001063, guid: c1fb03653d30e9a42a4ea22fcc806249, type: 3}

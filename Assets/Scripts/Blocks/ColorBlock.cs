@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using static Model.BlockType;
 
 namespace Blocks
@@ -63,13 +62,7 @@ namespace Blocks
                 }
 
                 GetComponent<Animator>().SetInteger(AnimatorColorIntParam, animatorTriggerValue);
-
-                Light2D lightComponent = GetComponent<Light2D>();
-                if (lightComponent != null)
-                {
-                    lightComponent.color = UnityColorFromType(value);
-                }
-
+                
                 BlockType = value;
             }
         }

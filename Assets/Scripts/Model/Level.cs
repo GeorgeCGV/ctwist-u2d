@@ -252,6 +252,7 @@ namespace Model
         public int timeDecreasePerTimeLimitPercent;
         public float timeDecreasePerTimeSeconds;
         public int timeDecreaseByTimePercent;
+        public float stoneBlockChancePercent;
     }
 
     [Serializable]

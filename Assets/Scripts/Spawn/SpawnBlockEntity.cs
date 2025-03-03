@@ -6,21 +6,22 @@ using static Model.BlockType;
 namespace Spawn
 {
     /// <summary>
-    /// Allows to spawn <see cref="ColorBlock"/>.
+    /// Allows to spawn <see cref="ColorBlock"/>, <see cref="StoneBlock"/>.
     /// </summary>
-    public class ColorBlockEntity : ISpawnEntity
+    public class SpawnBlockEntity : ISpawnEntity
     {
-        private readonly EBlockType _blockColor;
+        private readonly EBlockType _blockType;
         private readonly Color _unityColor;
 
         private readonly float _inSeconds;
         private readonly float _speed;
 
-        public ColorBlockEntity(EBlockType type, float seconds, float speed)
+        public SpawnBlockEntity(EBlockType type, float seconds, float speed)
         {
-            Assert.IsTrue(EBlockTypeIsColorBlock(type), "expected color type");
+            Assert.IsTrue(EBlockTypeIsColorBlock(type) || type == EBlockType.Stone,
+                "expected color type");
 
-            _blockColor = type;
+            _blockType = type;
             _unityColor = UnityColorFromType(type);
             _inSeconds = seconds;
             _speed = speed;
@@ -28,8 +29,8 @@ namespace Spawn
 
         public Color BacklightColor()
         {
-            // give some contrast when black spawn color is used
-            return _unityColor == Black ? Color.white : _unityColor;
+            // give some contrast when main color ir dark
+            return _unityColor == Black || _unityColor == Stone ? Color.white : _unityColor;
         }
 
         public Color SpawnColor()
@@ -39,7 +40,12 @@ namespace Spawn
 
         public BasicBlock Create()
         {
-            return BlocksFactory.Instance.NewColorBlock(_blockColor);
+            if (_blockType == EBlockType.Stone)
+            {
+                return BlocksFactory.Instance.NewStoneBlock();
+            }
+
+            return BlocksFactory.Instance.NewColorBlock(_blockType);
         }
 
         public float SpawnInSeconds()

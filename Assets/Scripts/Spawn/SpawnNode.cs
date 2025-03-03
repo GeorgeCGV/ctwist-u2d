@@ -161,7 +161,8 @@ namespace Spawn
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
         public float testSpawnIn = 1.0f;
         public bool testSpawn = false;
-
+        public BlockType.EBlockType testSpawnType;
+        
         private void OnValidate()
         {
             if (!testSpawn)
@@ -169,7 +170,7 @@ namespace Spawn
                 return;
             }
             
-            SpawnEntity(new ColorBlockEntity(BlockType.EBlockType.Blue, testSpawnIn, 1));
+            SpawnEntity(new SpawnBlockEntity(testSpawnType, testSpawnIn, 1));
             testSpawn = false;
         }
 #endif // UNITY_EDITOR

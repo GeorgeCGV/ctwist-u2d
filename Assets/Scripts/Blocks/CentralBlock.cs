@@ -1,4 +1,5 @@
 using UnityEngine;
+using static Model.BlockType;
 
 namespace Blocks
 {
@@ -18,7 +19,7 @@ namespace Blocks
         protected override void Awake()
         {
             attached = true;
-            BlockType = Model.BlockType.EBlockType.Central;
+            BlockType = EBlockType.Central;
         }
 
         protected override void Update()

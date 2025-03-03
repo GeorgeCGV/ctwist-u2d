@@ -41,10 +41,10 @@ namespace Blocks
         }
 
         /// <summary>
-        /// Instantiates ColorBlock of provided EBlockColor.
+        /// Instantiates <see cref="ColorBlock"/>.
         /// </summary>
-        /// <param name="type">Subset of EBlockType.</param>
-        /// <returns>GameObject with ColorBlock script.</returns>
+        /// <param name="type">Subset of <see cref="EBlockType"/>.</param>
+        /// <returns><see cref="ColorBlock"/> as <see cref="BasicBlock"/>.</returns>
         public BasicBlock NewColorBlock(EBlockType type)
         {
             if (!EBlockTypeIsColorBlock(type))
@@ -52,12 +52,23 @@ namespace Blocks
                 throw new ArgumentException("expected color type");
             }
 
-            ColorBlock colorBlock = Instantiate(config.colorBlockPrefab).GetComponent<ColorBlock>();
+            ColorBlock block = Instantiate(config.colorBlockPrefab).GetComponent<ColorBlock>();
 
-            colorBlock.name = $"{type}#{Random.Range(0, 10000)}";
-            colorBlock.ColorType = type;
+            block.name = $"{type}#{Random.Range(0, 10000)}";
+            block.ColorType = type;
 
-            return colorBlock;
+            return block;
+        }
+        
+        /// <summary>
+        /// Instantiates <see cref="StoneBlock"/>.
+        /// </summary>
+        /// <returns><see cref="StoneBlock"/> as <see cref="BasicBlock"/>.</returns>
+        public BasicBlock NewStoneBlock()
+        {
+            StoneBlock block = Instantiate(config.stoneBlockPrefab).GetComponent<StoneBlock>();
+            block.name = $"{block.BlockType}#{Random.Range(0, 10000)}";
+            return block;
         }
     }
 }

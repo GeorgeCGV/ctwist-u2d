@@ -16,6 +16,7 @@ namespace Model
         public static readonly Color Green = new Color32(46, 159, 99, 255);
         public static readonly Color Pink = new Color32(204, 113, 184, 255);
         public static readonly Color Purple = new Color32(132, 42, 195, 255);
+        public static readonly Color Stone = new Color32(98, 98, 112, 255);
 
         /// <summary>
         /// Game consists of blocks, each block has a type.
@@ -30,7 +31,8 @@ namespace Model
             White,
             Purple,
             Pink,
-            Black
+            Black,
+            Stone,
         }
 
         /// <summary>
@@ -62,6 +64,8 @@ namespace Model
                     return Pink;
                 case EBlockType.Black:
                     return Black;
+                case EBlockType.Stone:
+                    return Stone;
                 default:
                     throw new NotImplementedException("not supported");
             }
@@ -74,7 +78,7 @@ namespace Model
         /// <returns>True if so, otherwise False.</returns>
         public static bool EBlockTypeIsColorBlock(EBlockType type)
         {
-            return type != EBlockType.Central;
+            return type != EBlockType.Central && type != EBlockType.Stone;
         }
 
         /// <summary>
@@ -89,6 +93,8 @@ namespace Model
             {
                 case "central":
                     return EBlockType.Central;
+                case "stone":
+                    return EBlockType.Stone;
                 case "blue":
                     return EBlockType.Blue;
                 case "red":

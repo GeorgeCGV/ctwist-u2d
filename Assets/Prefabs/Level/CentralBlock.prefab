@@ -307,20 +307,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbourRange: 0.35
   edgeAttachPositionOffset: 0.4
-  targetPoint: {x: 0, y: 0}
-  startForce: 1
-  stepForce: NaN
+  gravityPoint: {x: 0, y: 0}
+  gravityStrength: 1
   attached: 1
-  destroyed: 0
-  links:
-    m_Keys: 000000000100000002000000030000000400000005000000
-    m_Values:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
 --- !u!95 &8404763309177892855
 Animator:
   serializedVersion: 7
@@ -438,7 +427,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3783503589098105062}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
@@ -458,7 +447,7 @@ MonoBehaviour:
   m_AlphaBlendOnOverlap: 0
   m_OverlapOperation: 0
   m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
+  m_NormalMapQuality: 0
   m_UseNormalMap: 0
   m_ShadowsEnabled: 0
   m_ShadowIntensity: 0.75

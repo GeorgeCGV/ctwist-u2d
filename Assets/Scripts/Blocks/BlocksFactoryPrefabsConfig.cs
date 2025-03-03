@@ -10,5 +10,8 @@ namespace Blocks
     {
         [SerializeField]
         public GameObject colorBlockPrefab;
+        
+        [SerializeField]
+        public GameObject stoneBlockPrefab;
     }
 }
