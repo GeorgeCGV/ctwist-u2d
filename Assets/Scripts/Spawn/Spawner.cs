@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Blocks;
+using Blocks.SpecialProperties;
 using Model;
 using UnityEngine;
 using static Model.BlockType;
@@ -98,7 +99,13 @@ namespace Spawn
         /// </summary>
         /// <value>[0.0; 1.0]</value>
         private float _stoneBlockChance;
-
+        
+        /// <summary>
+        /// A chance to spawn a block with <see cref="ChainedProperty"/>.
+        /// </summary>
+        /// <value>[0.0; 1.0]</value>
+        private float _chainedPropertyChance;
+        
         /// <summary>
         /// Callback for the spawn node.
         /// Used to enqueue the spawn node back to
@@ -124,6 +131,7 @@ namespace Spawn
         {
             _spawnsLeft = data.limit.Variant() == ELimitVariant.SpawnLimit ? data.limit.spawns : SpawnUnlimited;
             _stoneBlockChance = data.spawn.stoneBlockChancePercent * 0.01f;
+            _chainedPropertyChance = data.spawn.chainedBlockChancePercent * 0.01f;
             _onSpawnedCallback = onSpawned;
             _spawnBatchChance = data.spawn.batchChance;
             _spawnBatchRange = (Math.Max(1, data.spawn.batchMin), Math.Max(1, data.spawn.batchMax + 1));
@@ -196,6 +204,7 @@ namespace Spawn
 
             float inSeconds;
             float speed;
+            IMatchProperty matchProperty;
             for (int i = 0; i < amount; i++)
             {
                 // add a bit of variability
@@ -214,7 +223,15 @@ namespace Spawn
                 EBlockType type = (_stoneBlockChance > 0) && (Random.value <= _stoneBlockChance)
                     ? EBlockType.Stone
                     : LevelManager.Instance.GetRandomColorTypeFromAvailable();
-                _spawnQueue.Enqueue(new SpawnBlockEntity(type, inSeconds, speed));
+
+                // special match property
+                matchProperty = null;
+                if (type != EBlockType.Stone && Random.value <= _chainedPropertyChance)
+                {
+                    matchProperty = MatchPropertyFactory.Instance.NewChainedProperty();
+                }
+                
+                _spawnQueue.Enqueue(new SpawnBlockEntity(type, inSeconds, speed, matchProperty));
             }
         }
 

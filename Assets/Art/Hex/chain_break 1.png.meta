@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8064483165661ac4e9355b2883a6ed72
+guid: 07b002010fd07444b893b015698f6cba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4026113986942543127
-    second: BlockDestroy_0
+      213: -8958933079915439113
+    second: chain_break 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BlockDestroy_0
+      name: chain_break 1_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 1
         y: 0
-        width: 32
-        height: 32
+        width: 15
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 71521f00751afd730800000000000000
-      internalID: 4026113986942543127
+      spriteID: 7fbd42d84d97ba380800000000000000
+      internalID: -8958933079915439113
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BlockDestroy_0: 4026113986942543127
+      chain_break 1_0: -8958933079915439113
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

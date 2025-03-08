@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8064483165661ac4e9355b2883a6ed72
+guid: 6067e32877453b942abe8340ecd9d208
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4026113986942543127
-    second: BlockDestroy_0
+      213: -2095641726186779527
+    second: glow_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BlockDestroy_0
+      name: glow_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 42
+        height: 42
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 71521f00751afd730800000000000000
-      internalID: 4026113986942543127
+      spriteID: 97c862604f8cae2e0800000000000000
+      internalID: -2095641726186779527
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      BlockDestroy_0: 4026113986942543127
+      glow_0: -2095641726186779527
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

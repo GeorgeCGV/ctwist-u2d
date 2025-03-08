@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Blocks.SpecialProperties;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering.Universal;
@@ -45,11 +46,14 @@ namespace Blocks
             { EdgeIndex.Top, new Vector2(0.0f, 0.4f) },
         };
 
-        [SerializeField] protected float neighbourRange = 0.35f;
+        [SerializeField]
+        protected float neighbourRange = 0.35f;
 
-        [SerializeField] protected float edgeAttachPositionOffset = 0.4f;
+        [SerializeField]
+        protected float edgeAttachPositionOffset = 0.4f;
 
-        [SerializeField] protected Vector2 gravityPoint = Vector2.zero;
+        [SerializeField]
+        protected Vector2 gravityPoint = Vector2.zero;
 
         [FormerlySerializedAs("GravityStrength")] [SerializeField]
         public float gravityStrength = 1.0f;
@@ -113,6 +117,42 @@ namespace Blocks
         /// Layer where all attached blocks are.
         /// </summary>
         private int _blocksLayer;
+
+        private IMatchProperty _matchProperty;
+
+        /// <summary>
+        /// Set new match property.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ChainedProperty"/>
+        /// </remarks>
+        /// <param name="matchProperty">Match property.</param>
+        public void SetMatchProperty(IMatchProperty matchProperty)
+        {
+            Assert.IsNotNull(matchProperty, "matchProperty is null");
+            matchProperty.Activate(this);
+            _matchProperty = matchProperty;
+        }
+
+        /// <summary>
+        /// Processes block's <see cref="IMatchProperty"/> when matched.
+        /// </summary>
+        /// <returns>Match processing modification.</returns>
+        public EMatchPropertyOutcome ProcessMatchProperties()
+        {
+            EMatchPropertyOutcome outcome = EMatchPropertyOutcome.ContinueNormalMatching;
+            
+            if (_matchProperty != null)
+            {
+                outcome = _matchProperty.ProcessMatch(out bool removeProperty);
+                if (removeProperty)
+                {
+                    _matchProperty = null;
+                }
+            }
+
+            return outcome;
+        }
 
         #region Helpers
 
@@ -729,5 +769,36 @@ namespace Blocks
 
             return neighbours.Count;
         }
+        
+#if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
+    
+        public bool toggleChained;
+        
+        public IMatchProperty ActiveProperty;
+        
+        private void OnValidate()
+        {
+            if (!toggleChained)
+            {
+                return;
+            }
+
+            if (ActiveProperty == null)
+            {
+                ActiveProperty = MatchPropertyFactory.Instance.NewChainedProperty();
+                ActiveProperty.Activate(this);
+            }
+            else
+            {
+                ActiveProperty.ProcessMatch(out bool removeProperty);
+                if (removeProperty)
+                {
+                    ActiveProperty = null;
+                }
+            }
+
+            toggleChained = false;
+        }
+#endif // UNITY_EDITOR
     }
 }

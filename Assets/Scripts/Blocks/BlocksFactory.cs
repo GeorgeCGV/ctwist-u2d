@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 namespace Blocks
 {
     /// <summary>
-    /// Factory to instantiate different game blocks/crystals.
+    /// Factory to instantiate different <see cref="BasicBlock"/>.
     /// </summary>
     public class BlocksFactory : MonoBehaviour
     {
@@ -25,8 +25,7 @@ namespace Blocks
             // prevent multiple instances
             if (Instance != null && Instance != this)
             {
-                // safe to destroy the whole object
-                Destroy(gameObject);
+                Destroy(this);
             }
             else
             {

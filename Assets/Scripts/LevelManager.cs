@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Blocks;
+using Blocks.SpecialProperties;
 using Configs;
 using Model;
 using Spawn;
@@ -610,18 +611,46 @@ public class LevelManager : MonoBehaviour
 
         if (matchedAmount >= 3)
         {
+            bool stopNormalMatching = false;
+            // process special properties
+            List<EBlockType> bulkDestroyTypes = new List<EBlockType>();
             foreach (GameObject block in matches)
             {
                 BasicBlock basicBlock = block.GetComponent<BasicBlock>();
+                EMatchPropertyOutcome outcome = basicBlock.ProcessMatchProperties();
+                if (outcome == EMatchPropertyOutcome.StopMatching)
+                {
+                    stopNormalMatching = true;
+                } else if (outcome == EMatchPropertyOutcome.DestroyAllOfSameType)
+                {
+                    bulkDestroyTypes.Add(basicBlock.BlockType);
+                }
+            }
+
+            if (bulkDestroyTypes.Count != 0)
+            {
+                // TODO: destroy all block of specific type
+            }
+
+            // stop if one of outcome was to stop further matching
+            if (stopNormalMatching)
+            {
+                return;
+            }
+            
+            foreach (GameObject block in matches)
+            {
+                BasicBlock basicBlock = block.GetComponent<BasicBlock>();
+    
                 if (basicBlock is ColorBlock cb)
                 {
                     _blocksStats.AddMatched(cb.ColorType, 1);
                 }
-
+            
                 basicBlock.DestroyBlock();
                 Destroy(block);
             }
-
+            
             int matchScore = scoreConfig.ComputeScoreForMatchAmount(matchedAmount) * _multiplier.Multiplier;
 
             IncrementScore(matchScore);
@@ -758,6 +787,8 @@ public class LevelManager : MonoBehaviour
 
         System.Random rnd = new System.Random(seed);
 
+        float chanceForChainedBlock = level.startBlocksChainedBlockChancePercent * 0.01f;
+
         Array edges = Enum.GetValues(typeof(BasicBlock.EdgeIndex));
         for (int i = 0; i < num; i++)
         {
@@ -792,7 +823,13 @@ public class LevelManager : MonoBehaviour
             Assert.IsTrue(linkedNeighboursCount > 0);
             // add block to the blocks layer to allow ray-casting against it
             newBlock.gameObject.layer = blocksLayer;
-
+            
+            // add special match property
+            if (rnd.NextDouble() <= chanceForChainedBlock)
+            {
+                newBlock.SetMatchProperty(MatchPropertyFactory.Instance.NewChainedProperty());
+            }
+            
             Logger.Debug(
                 $"Created {newBlock.name} at {newBlock.transform.position} with {linkedNeighboursCount} links");
 

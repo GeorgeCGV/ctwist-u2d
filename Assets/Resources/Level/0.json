@@ -1,6 +1,7 @@
 {
     "seed": 1,
     "startBlocksNum": 4,
+    "startBlocksChainedBlockChancePercent": 0,
     "blocksInLevel": ["blue","red"],
     "obstructionIdx": -1,
     "goal": {
@@ -16,7 +17,8 @@
         "timeMax": 4,
         "timeDecreasePerTimeLimitPercent": 20,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 5
+        "timeDecreaseByTimePercent": 5,
+        "chainedBlockChancePercent": 0
     },
     "block": {
         "speedMin": 4,

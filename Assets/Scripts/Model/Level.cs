@@ -60,6 +60,10 @@ namespace Model
         /// </summary>
         public int startBlocksNum;
         /// <summary>
+        /// Chance in percent that a start block might have chained property. 
+        /// </summary>
+        public int startBlocksChainedBlockChancePercent;
+        /// <summary>
         /// Goal a player must achieve to complete the level.
         /// </summary>
         public Goal goal;
@@ -253,6 +257,7 @@ namespace Model
         public float timeDecreasePerTimeSeconds;
         public int timeDecreaseByTimePercent;
         public float stoneBlockChancePercent;
+        public int chainedBlockChancePercent;
     }
 
     [Serializable]
