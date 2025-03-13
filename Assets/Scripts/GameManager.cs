@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
         // prevent multiple instances
         if (Instance != null && Instance != this)
         {
-            // destroy script and the entire object
+            // destroy the entire object
             Destroy(gameObject);
         }
         else
@@ -51,12 +51,6 @@ public class GameManager : MonoBehaviour
             // prevent destruction
             DontDestroyOnLoad(this);
         }
-    }
-
-    private void Start()
-    {
-        // the game is relatively small, simply mute the sources
-        AudioManager.Instance.MuteSfx(!IsSFXOn());
     }
     
     #endregion Unity
@@ -147,21 +141,10 @@ public class GameManager : MonoBehaviour
         return PlayerPrefs.GetInt("musicOn", 1) == 1;
     }
 
-    public static void ToggleMusic()
+    public static void SetMusicOption(bool musicOn)
     {
-        int value = PlayerPrefs.GetInt("musicOn", 1) ^ 1;
-
-        PlayerPrefs.SetInt("musicOn", value);
+        PlayerPrefs.SetInt("musicOn", musicOn ? 1 : 0);
         PlayerPrefs.Save();
-
-        if (value == 0)
-        {
-            AudioManager.Instance.StopMusic();
-        }
-        else
-        {
-            AudioManager.Instance.PlayMusic();
-        }
     }
 
     public static bool IsSFXOn()
@@ -169,13 +152,10 @@ public class GameManager : MonoBehaviour
         return PlayerPrefs.GetInt("sfxOn", 1) == 1;
     }
 
-    public static void ToggleSfx()
+    public static void SetSfxOption(bool sfxOn)
     {
-        int value = PlayerPrefs.GetInt("sfxOn", 1) ^ 1;
-        PlayerPrefs.SetInt("sfxOn", value);
+        PlayerPrefs.SetInt("sfxOn", sfxOn ? 1 : 0);
         PlayerPrefs.Save();
-
-        AudioManager.Instance.MuteSfx(value == 0);
     }
 
     #endregion

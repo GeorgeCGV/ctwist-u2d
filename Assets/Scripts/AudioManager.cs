@@ -65,6 +65,12 @@ public class AudioManager : MonoBehaviour
     private AudioClip sfxDialogDisappear;
 
     #endregion
+    
+    private void Start()
+    {
+        // the game is relatively small, simply mute the sources
+        MuteSfx(!GameManager.IsSFXOn());
+    }
 
     private void Awake()
     {

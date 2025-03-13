@@ -36,8 +36,9 @@ namespace UI.Menu
         /// <param name="value"></param>
         private void OnSfxValueChanged(bool value)
         {
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
-            GameManager.ToggleSfx();
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
+            GameManager.SetSfxOption(value);
+            AudioManager.Instance.MuteSfx(!value);
         }
 
         /// <summary>
@@ -49,8 +50,16 @@ namespace UI.Menu
         /// <param name="value"></param>
         private void OnMusicValueChanged(bool value)
         {
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
-            GameManager.ToggleMusic();
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
+            GameManager.SetMusicOption(value);
+            if (value)
+            {
+                AudioManager.Instance.PlayMusic();
+            }
+            else
+            {
+                AudioManager.Instance.StopMusic();
+            }
         }
     }
 }
