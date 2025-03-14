@@ -318,6 +318,9 @@ namespace Blocks
         /// <summary>
         /// Removes link (joint) from the block links.
         /// </summary>
+        /// <remarks>
+        /// Doesn't destroy the joint object.
+        /// </remarks>
         /// <param name="linkToUnlink"></param>
         private void Unlink(AnchoredJoint2D linkToUnlink)
         {
@@ -603,6 +606,13 @@ namespace Blocks
             return GetLinkNeighbour(_links[edge]);
         }
 
+        /// <summary>
+        /// Destroys the block (if not destroyed yet).
+        /// </summary>
+        /// <remarks>
+        /// Unlinks and destroys the joint object between blocks (if present).
+        /// </remarks>
+        /// <param name="withEfx">To play or not to play the OnDestroy VFX.</param>
         public void DestroyBlock(bool withEfx = true)
         {
             if (Destroyed)
