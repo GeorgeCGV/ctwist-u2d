@@ -65,6 +65,8 @@ namespace Configs
             }
             
             float timeLeftPercent = (timeLimit - elapsedTime) / timeLimit;
+            // ensure player always receives at least the base bonus score
+            // even if they finish the level with minimal time remaining
             float multiplier = 1 + timeLeftPercent * timeLeftPercent * scoreTimeLimitBonusFactor;
             
             return (int)(scoreBaseForTimeLimit * multiplier);
@@ -91,7 +93,7 @@ namespace Configs
             
             float moveLeftPercent = (float)(spawnsLimit - totalSpawned) / spawnsLimit;
             // decreases as elapsedTime increases
-            float timeBonus = 1 / (1 + elapsedTime * scoreBaseTimeFactorForSpawnsLimit);
+            float timeBonus = Mathf.Clamp01(1 / (1 + elapsedTime * scoreBaseTimeFactorForSpawnsLimit));
             float factor = moveLeftPercent * timeBonus;
             
             return (int)(scoreBaseForSpawnsLimit * factor);

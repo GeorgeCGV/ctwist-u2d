@@ -121,8 +121,8 @@ namespace UI.Level
             {
                 return;
             }
-            
-            Animate(testFrom, testTo, delegate { Animate(100); });
+            Animate(testFrom, testTo);
+            // Animate(testFrom, testTo, delegate { Animate(100); });
             testAnimate = false;
         }
 #endif // UNITY_EDITOR && DEBUG

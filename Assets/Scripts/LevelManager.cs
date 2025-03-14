@@ -12,6 +12,8 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Utils;
 using static Model.BlockType;
+using Array = System.Array;
+using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(MultiplierHandler), typeof(Spawner))]
@@ -20,6 +22,11 @@ public class LevelManager : MonoBehaviour
     private static readonly int EnvAnimatorNearTimeoutTrigger = Animator.StringToHash("NearTimeout");
     private static readonly int EnvAnimatorNearTimeoutSpeedValue = Animator.StringToHash("NearTimeoutSpeed");
 
+    /// <summary>
+    /// Maximum capacity of the field, excluding central block.
+    /// </summary>
+    private const int FieldBlocksCapacity = 450;
+    
     public static LevelManager Instance { get; private set; }
 
     #region Actions
@@ -37,7 +44,7 @@ public class LevelManager : MonoBehaviour
     #region SFX
     
     [SerializeField]
-    private GameObject efxOnStart;
+    private ParticleSystem efxOnStart;
 
     [SerializeField]
     public AudioClip backgroundMusic;
@@ -118,7 +125,7 @@ public class LevelManager : MonoBehaviour
     /// Blocks stats.
     /// </summary>
     private readonly BlocksStats _blocksStats = new(Enum.GetValues(typeof(EBlockType)).Length);
-
+    
     /// <summary>
     /// Spawner - responsible for blocks spawn queue and spawn nodes.
     /// </summary>
@@ -130,7 +137,7 @@ public class LevelManager : MonoBehaviour
     /// <remarks>
     /// Central block is tagged with <code>central</code> tag.
     /// </remarks>
-    private GameObject _central;
+    private CentralBlock _central;
     
     /// <summary>
     /// All attached blocks end up as a child of this object.
@@ -354,7 +361,7 @@ public class LevelManager : MonoBehaviour
             _score = 0;
             _elapsedTime = 0;
             _spawner = GetComponent<Spawner>();
-            _central = GameObject.FindGameObjectWithTag("central");
+            _central = GameObject.FindGameObjectWithTag("central").GetComponent<CentralBlock>();
             Assert.IsNotNull(_central, "missing central block, must have 'central' tag");
             _activeBlocks = GameObject.FindGameObjectWithTag("active_blocks");
             Assert.IsNotNull(_activeBlocks,
@@ -381,6 +388,7 @@ public class LevelManager : MonoBehaviour
             {
                 // won
                 GameOver(true);
+                return;
             }
         }
         else if (goal == EGoalVariant.Blocks)
@@ -402,6 +410,7 @@ public class LevelManager : MonoBehaviour
             {
                 // won
                 GameOver(true);
+                return;
             }
         }
 
@@ -452,7 +461,7 @@ public class LevelManager : MonoBehaviour
     /// <param name="block"></param>
     private void OnSpawnedBlock(BasicBlock block)
     {
-        _blocksStats.AddSpawned(block.GetComponent<BasicBlock>().BlockType, 1);
+        _blocksStats.AddSpawned(block.BlockType, 1);
         // we have to keep track of not yet attached objects
         // so that spawn level mode could wait until all blocks
         // are attached before game-over
@@ -718,8 +727,10 @@ public class LevelManager : MonoBehaviour
         // create obstructions
         if (level.obstructionIdx >= 0)
         {
-            Instantiate(obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx],
-                obstructionTmParent.transform);
+            GameObject tilemap = obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx];
+            Assert.IsTrue(tilemap != null && tilemap.GetComponent<ObstacleCollisionDetector>() != null,
+                "missing obstruction tilemap; must have ObstacleCollisionDetector script");
+            Instantiate(tilemap, obstructionTmParent.transform);
         }
 
         Assert.IsFalse((level.ParsedBlocksInLevel == null) || (level.ParsedBlocksInLevel.Length == 0),
@@ -749,8 +760,7 @@ public class LevelManager : MonoBehaviour
         AudioManager.Instance.PlayMusic(backgroundMusic);
         AudioManager.Instance.PlaySfx(sfxOnStart);
 
-        GameObject efx = Instantiate(efxOnStart, _central.transform.position, Quaternion.identity);
-        efx.GetComponent<ParticleSystem>().Play();
+        Instantiate(efxOnStart, _central.transform.position, Quaternion.identity).Play();
 
         // enable blocks layer render
         if (Camera.main != null)
@@ -772,7 +782,7 @@ public class LevelManager : MonoBehaviour
     /// <param name="seed">RNG seed.</param>
     /// <param name="num">Number of blocks to generate.</param>
     /// <param name="root">Root block or null.</param>
-    private void CreateStartupBlocks(int seed, int num, GameObject root = null)
+    private void CreateStartupBlocks(int seed, int num, BasicBlock root = null)
     {
         int blocksLayer = LayerMask.NameToLayer("blocks");
 
@@ -783,7 +793,7 @@ public class LevelManager : MonoBehaviour
 
         Assert.IsNotNull(root);
 
-        GameObject block = root;
+        BasicBlock block = root;
 
         System.Random rnd = new System.Random(seed);
 
@@ -793,14 +803,14 @@ public class LevelManager : MonoBehaviour
         for (int i = 0; i < num; i++)
         {
             BasicBlock.EdgeIndex edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
-            GameObject neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
+            BasicBlock neighbour = block.GetNeighbour(edge);
 
             // find any free edge
             while (neighbour != null)
             {
                 block = neighbour;
                 edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
-                neighbour = block.GetComponent<BasicBlock>().GetNeighbour(edge);
+                neighbour = block.GetNeighbour(edge);
             }
 
             BasicBlock newBlock =
@@ -809,17 +819,17 @@ public class LevelManager : MonoBehaviour
             newBlock.transform.parent = block.transform.parent;
             newBlock.transform.rotation = block.transform.rotation;
             newBlock.transform.position =
-                (Vector2)block.transform.position + block.GetComponent<BasicBlock>().GetEdgeOffset(edge);
+                (Vector2)block.transform.position + block.GetEdgeOffset(edge);
             // mark as already attached and disable rigidbody physics
             newBlock.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             newBlock.GetComponent<Rigidbody2D>().totalForce = Vector2.zero;
-            newBlock.GetComponent<BasicBlock>().attached = true;
+            newBlock.attached = true;
             // add to blocks layer
             // as physics update won't run between object linkage - force physics update
             // that shall update rigidbody after applied transforms
             Physics2D.SyncTransforms();
             // link new block to neighbours
-            int linkedNeighboursCount = newBlock.GetComponent<BasicBlock>().LinkWithNeighbours(blocksLayer);
+            int linkedNeighboursCount = newBlock.LinkWithNeighbours(blocksLayer);
             Assert.IsTrue(linkedNeighboursCount > 0);
             // add block to the blocks layer to allow ray-casting against it
             newBlock.gameObject.layer = blocksLayer;
@@ -852,7 +862,6 @@ public class LevelManager : MonoBehaviour
             }
 
             block.DestroyBlock();
-            Destroy(block.gameObject);
         }
     }
 

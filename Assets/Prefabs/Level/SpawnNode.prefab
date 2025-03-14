@@ -104,6 +104,7 @@ MonoBehaviour:
   sfxOnSpawn: {fileID: 8300000, guid: dd18139c361a47942bd1ba134113281f, type: 3}
   testSpawnIn: 1
   testSpawn: 0
+  testSpawnType: 1
 --- !u!114 &4192747550375175623
 MonoBehaviour:
   m_ObjectHideFlags: 0

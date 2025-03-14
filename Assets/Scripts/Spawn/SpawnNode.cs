@@ -129,17 +129,16 @@ namespace Spawn
             }
             else
             {
-                BasicBlock obj = null;
+                BasicBlock block = null;
                 // animation is over
                 // spawn if there is anything to spawn
                 // the entity is set to null in StopSpawn,
                 // otherwise it is always set
                 if (_spawnEntity != null)
                 {
-                    obj = _spawnEntity.Create();
+                    block = _spawnEntity.Create();
 
-                    obj.transform.position = transform.position;
-                    BasicBlock block = obj.GetComponent<BasicBlock>();
+                    block.transform.position = transform.position;
                     block.gravityStrength = _spawnEntity.BlockStartSpeed();
 
                     AudioManager.Instance.PlaySfx(sfxOnSpawn);
@@ -154,14 +153,14 @@ namespace Spawn
 
                 // invoke on "free"/done callback after
                 // node state update
-                _onSpawnedCallback?.Invoke(this, obj);
+                _onSpawnedCallback?.Invoke(this, block);
             }
         }
 
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
         public float testSpawnIn = 1.0f;
         public bool testSpawn = false;
-        public BlockType.EBlockType testSpawnType;
+        public BlockType.EBlockType testSpawnType = BlockType.EBlockType.Blue;
         
         private void OnValidate()
         {
@@ -169,8 +168,12 @@ namespace Spawn
             {
                 return;
             }
+
+            if (BlockType.EBlockTypeIsColorBlock(testSpawnType))
+            {
+                SpawnEntity(new SpawnBlockEntity(testSpawnType, testSpawnIn, 1));
+            }
             
-            SpawnEntity(new SpawnBlockEntity(testSpawnType, testSpawnIn, 1));
             testSpawn = false;
         }
 #endif // UNITY_EDITOR

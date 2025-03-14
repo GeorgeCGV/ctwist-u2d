@@ -262,10 +262,10 @@ namespace UI.Level
         /// </remarks>
         private void OnUnpause()
         {
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
             pauseMenu.SetActive(false);
             LevelManager.SetPaused(false);
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.DialogDisappear);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.DialogDisappear);
             AudioManager.Instance.PausableSfxPause(false);
         }
 
@@ -277,8 +277,8 @@ namespace UI.Level
         /// </remarks>
         private void OnQuit()
         {
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.DialogDisappear);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.DialogDisappear);
             AudioManager.Instance.StopSfxPausable();
             SceneManager.LoadSceneAsync(0);
             LevelManager.SetPaused(false);
@@ -299,8 +299,8 @@ namespace UI.Level
             else
             {
                 // continue to the next level or retry
-                AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
-                AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.DialogDisappear);
+                AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
+                AudioManager.Instance.PlaySfx(AudioManager.Sfx.DialogDisappear);
                 AudioManager.Instance.StopSfxPausable();
                 LevelLoader.Instance.LoadLevel(nextLevelId);
                 LevelManager.SetPaused(false);

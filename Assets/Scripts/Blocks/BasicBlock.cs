@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -22,8 +23,8 @@ namespace Blocks
     ///  defines methods for overrides.
     /// </remarks>
     [ExecuteInEditMode]
-    [RequireComponent(typeof(PolygonCollider2D))]
-    public class BasicBlock : MonoBehaviour
+    [RequireComponent(typeof(PolygonCollider2D), typeof(Rigidbody2D))]
+    public abstract class BasicBlock : MonoBehaviour
     {
         public enum EdgeIndex
         {
@@ -33,7 +34,9 @@ namespace Blocks
             LeftBottom = 3,
             LeftTop = 4,
             Top = 5,
-        };
+        }
+        
+        public static readonly EdgeIndex[] EdgeIndexes = (EdgeIndex[])Enum.GetValues(typeof(EdgeIndex));
 
         private static readonly Dictionary<EdgeIndex, Vector2> EdgeOffsets = new(6)
         {
@@ -56,6 +59,8 @@ namespace Blocks
 
         [FormerlySerializedAs("GravityStrength")] [SerializeField]
         public float gravityStrength = 1.0f;
+
+        private Rigidbody2D _rigidBody;
 
         /// <summary>
         /// Maps block's <see cref="EdgeIndex"/> to its corresponding <see cref="AnchoredJoint2D"/>.
@@ -287,19 +292,19 @@ namespace Blocks
         /// </summary>
         /// <param name="link">Linked joint.</param>
         /// <returns>Null or a neighbour as GameObject.</returns>
-        private GameObject GetLinkNeighbour(AnchoredJoint2D link)
+        private BasicBlock GetLinkNeighbour(AnchoredJoint2D link)
         {
-            if (link == null)
+            if (link is null)
             {
                 return null;
             }
 
             if (link.gameObject == gameObject)
             {
-                return link.connectedBody.gameObject;
+                return link.connectedBody.gameObject.GetComponent<BasicBlock>();
             }
 
-            return link.gameObject;
+            return link.gameObject.GetComponent<BasicBlock>();
         }
 
         /// <summary>
@@ -317,11 +322,12 @@ namespace Blocks
         /// <param name="linkToUnlink"></param>
         private void Unlink(AnchoredJoint2D linkToUnlink)
         {
-            EdgeIndex[] edges = _links.Keys.ToArray();
-            foreach (EdgeIndex edge in edges)
+            EdgeIndex edge;
+            for (int i = 0; i < EdgeIndexes.Length; i++)
             {
-                AnchoredJoint2D link = _links[edge];
-                if (link == null)
+                edge = EdgeIndexes[i];
+                AnchoredJoint2D link = _links[EdgeIndexes[i]];
+                if (link is null)
                 {
                     continue;
                 }
@@ -365,7 +371,7 @@ namespace Blocks
             int ret = 0;
             foreach (AnchoredJoint2D joint in _links.Values)
             {
-                if (joint != null)
+                if (joint is not null)
                 {
                     ret++;
                 }
@@ -418,9 +424,9 @@ namespace Blocks
         /// <remarks>
         /// Different type of blocks may have different match rules.
         /// </remarks>
-        /// <param name="block">Another block.</param>
+        /// <param name="other">Another block.</param>
         /// <returns>True if matches, otherwise False.</returns>
-        public virtual bool MatchesWith(GameObject block)
+        public virtual bool MatchesWith(BasicBlock other)
         {
             // intentionally blank
             return false;
@@ -441,8 +447,7 @@ namespace Blocks
         protected virtual void Awake()
         {
             _blocksLayer = LayerMask.NameToLayer("blocks");
-            GameObject obj = GameObject.FindGameObjectWithTag("obstructions_tilemap");
-            _obstructionsTilemap = obj?.GetComponent<Tilemap>();
+            _rigidBody = GetComponent<Rigidbody2D>();
         }
 
         /// <summary>
@@ -476,8 +481,7 @@ namespace Blocks
             // object's physics mass is not discarded
             if (!attached)
             {
-                Rigidbody2D rb = GetComponent<Rigidbody2D>();
-                rb.AddForce(GetGravityDirection() * gravityStrength, ForceMode2D.Force);
+                _rigidBody.AddForce(GetGravityDirection() * gravityStrength, ForceMode2D.Force);
             }
         }
 
@@ -507,12 +511,7 @@ namespace Blocks
             // add to all blocks layer
             transform.parent = other.transform.parent;
 
-            // find this block closest edge
-            (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) thisEdge =
-                FindClosestColliderEdge(GetComponent<PolygonCollider2D>(),
-                    other.collider.ClosestPoint(transform.position));
-            Debug.DrawLine(thisEdge.point1, thisEdge.point2, Color.red, 3);
-
+            // find other block closes edge to this block
             (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) otherEdge =
                 FindClosestColliderEdge(other.gameObject.GetComponent<PolygonCollider2D>(),
                     other.collider.ClosestPoint(transform.position));
@@ -525,10 +524,16 @@ namespace Blocks
                 transform.parent = initialParent;
                 return;
             }
+            
+            // find this block closest edge
+            (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) thisEdge =
+                FindClosestColliderEdge(GetComponent<PolygonCollider2D>(),
+                    other.collider.ClosestPoint(transform.position));
+            Debug.DrawLine(thisEdge.point1, thisEdge.point2, Color.red, 3);
 
             // get midpoints
             Vector2 thisEdgeMidpoint = (thisEdge.point1 + thisEdge.point2) / 2;
-            Vector2 otherEdgeMidpoint = (otherEdge.Item1 + otherEdge.Item2) / 2;
+            Vector2 otherEdgeMidpoint = (otherEdge.point1 + otherEdge.point2) / 2;
 
 #if ENABLE_LOGS
             (_, _, EdgeIndex idx) =
@@ -563,18 +568,12 @@ namespace Blocks
             gameObject.layer = _blocksLayer;
 
             // prevent physics to have an effect on the object
-            GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-            GetComponent<Rigidbody2D>().totalForce = Vector2.zero;
+            _rigidBody.bodyType = RigidbodyType2D.Static;
+            _rigidBody.totalForce = Vector2.zero;
 
             // mark as attached
             attached = true;
-
-            Light2D lightComponent = GetComponent<Light2D>();
-            if (lightComponent != null)
-            {
-                Destroy(lightComponent);
-            }
-
+            
             ParticleSystem efx = NewAttachEfx();
             efx.transform.position = otherEdgeMidpoint;
             efx.Play();
@@ -599,44 +598,52 @@ namespace Blocks
         /// Gets neighbour attached to provided edge.
         /// </summary>
         /// <param name="edge">Edge index.</param>
-        /// <returns>Null or a neighbour as GameObject.</returns>
-        public GameObject GetNeighbour(EdgeIndex edge)
+        /// <returns>Null or a neighbour as <see cref="BasicBlock"/>.</returns>
+        public BasicBlock GetNeighbour(EdgeIndex edge)
         {
             return GetLinkNeighbour(_links[edge]);
         }
 
         public void DestroyBlock(bool withEfx = true)
         {
-            EdgeIndex[] edges = _links.Keys.ToArray();
-            foreach (EdgeIndex edge in edges)
+            if (Destroyed)
             {
+                return;
+            }
+            
+            Destroyed = true;
+
+            EdgeIndex edge;
+            for (int i = 0; i < EdgeIndexes.Length; i++)
+            {
+                edge = EdgeIndexes[i];
                 AnchoredJoint2D link = _links[edge];
-                if (link == null)
+                if (link is null)
                 {
                     continue;
                 }
 
                 // remove the link from connected block
-                GameObject other = GetLinkNeighbour(link);
-                other?.GetComponent<BasicBlock>().Unlink(link);
+                BasicBlock other = GetLinkNeighbour(link);
+                other?.Unlink(link);
 
                 // remove it from this block
                 _links[edge] = null;
 
-                // destroy the link object
+                // destroy the joint object
                 Destroy(link);
             }
-
-            Destroyed = true;
-
+            
             if (withEfx)
             {
                 ParticleSystem efx = NewDestroyEfx();
-                if (efx != null)
+                if (efx is not null)
                 {
                     efx.Play();
                 }
             }
+            
+            Destroy(gameObject);
         }
 
         /// <summary>
@@ -688,6 +695,7 @@ namespace Blocks
                 {
                     // not a block
                     Logger.Debug("unexpected object in blocks layer");
+                    continue;
                 }
 #endif
                 PolygonCollider2D neighbourCollider = hitObj.GetComponent<PolygonCollider2D>();
@@ -729,13 +737,20 @@ namespace Blocks
                 GameObject neighbour = entry.Value.Neighbour;
                 FixedJoint2D joint = neighbour.AddComponent<FixedJoint2D>();
 
-                joint.connectedBody = GetComponent<Rigidbody2D>();
+                joint.connectedBody = _rigidBody;
                 joint.breakAction = JointBreakAction2D.Ignore;
                 joint.dampingRatio = 1.0f;
                 joint.frequency = 1;
 
                 neighbour.GetComponent<BasicBlock>().Link(entry.Value.NeighbourEdge, joint);
                 _links[entry.Key] = joint;
+            }
+            
+            // disable light
+            Light2D lightComponent = GetComponent<Light2D>();
+            if (lightComponent != null)
+            {
+                lightComponent.enabled = false;
             }
 
             return neighbours.Count;

@@ -13,10 +13,10 @@ namespace Blocks
     public class StoneBlock : BasicBlock
     {
         [SerializeField]
-        private GameObject efxOnDestroy;
+        private ParticleSystem efxOnDestroy;
 
         [SerializeField]
-        private GameObject efxOnAttach;
+        private ParticleSystem efxOnAttach;
 
         [SerializeField]
         private AudioClip sfxAttach;
@@ -30,7 +30,7 @@ namespace Blocks
             BlockType = EBlockType.Stone;
         }
         
-        public override bool MatchesWith(GameObject obj)
+        public override bool MatchesWith(BasicBlock other)
         {
             // can't be matched
             return false;
@@ -38,20 +38,21 @@ namespace Blocks
 
         protected override ParticleSystem NewDestroyEfx()
         {
-            GameObject efx = Instantiate(efxOnDestroy, transform.position, Quaternion.identity);
-            ParticleSystem particleSys = efx.GetComponent<ParticleSystem>();
-
-            ParticleSystem.MainModule mainModule = particleSys.main;
+            if (!efxOnDestroy)
+            {
+                return null;
+            }
+            // used to be instantiation, replaced by simply using the object
+            // set to null to move object to the scene
+            efxOnDestroy.transform.parent = null;
+            ParticleSystem.MainModule mainModule = efxOnDestroy.main;
             mainModule.startColor = UnityColorFromType(BlockType);
-
-            return particleSys;
+            return efxOnDestroy;
         }
 
         protected override ParticleSystem NewAttachEfx()
         {
-            GameObject efx = Instantiate(efxOnAttach, transform.position, Quaternion.identity);
-
-            return efx.GetComponent<ParticleSystem>();
+            return Instantiate(efxOnAttach, transform.position, Quaternion.identity);
         }
 
         public override AudioClip SfxOnAttach()

@@ -33,6 +33,7 @@ namespace Model
             Pink,
             Black,
             Stone,
+            None
         }
 
         /// <summary>
