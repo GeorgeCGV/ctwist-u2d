@@ -6,24 +6,6 @@
             "id": "df70fa95-8a34-4494-b137-73ab6b9c7d37",
             "actions": [
                 {
-                    "name": "OnPress",
-                    "type": "PassThrough",
-                    "id": "72bded2b-74c6-4c31-8328-bd2cb1a15281",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "OnTouchscreen",
-                    "type": "Value",
-                    "id": "caf23798-6bb3-4e4a-9ecc-0200abcf5ee3",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
                     "name": "OnInput",
                     "type": "Value",
                     "id": "bf954ac0-80cf-41cc-a738-7e8477a829d1",
@@ -34,61 +16,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "6d4407d0-b1bb-48a0-88c9-128f7056634c",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "OnPress",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "Pointer Input",
-                    "id": "862ff83f-71e6-4a0a-a60a-ba4dd0c95282",
-                    "path": "PointerInput",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "OnTouchscreen",
-                    "isComposite": true,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "contact",
-                    "id": "491847dc-266a-48ef-bcfd-196535ef44e9",
-                    "path": "<Touchscreen>/touch0/press",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Touch",
-                    "action": "OnTouchscreen",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "position",
-                    "id": "c6dbda3e-2e61-4f2b-9f01-1f4d1349f41b",
-                    "path": "<Touchscreen>/touch0/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Touch",
-                    "action": "OnTouchscreen",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "Id",
-                    "id": "949c7eb3-b3a5-45df-bcfe-a592fba96bd0",
-                    "path": "<Touchscreen>/touch0/touchId",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Touch",
-                    "action": "OnTouchscreen",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
                 {
                     "name": "MouseAndPen",
                     "id": "fdf4f744-0b3d-4a83-adfd-f1464849ba6c",

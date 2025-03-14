@@ -107,10 +107,8 @@ namespace Controls
         /// </summary>
         private void Update()
         {
-            float absVelocity = Mathf.Abs(_angularVelocity);
-
             // prevent necessary updates if reached min threshold
-            if (absVelocity <= minAngularVelocity)
+            if (Mathf.Abs(_angularVelocity) <= minAngularVelocity)
             {
                 return;
             }
@@ -119,7 +117,7 @@ namespace Controls
             _angularVelocity *= Mathf.Exp(-decayRate * Time.deltaTime);
 
             // stop AV reached min threshold
-            if (absVelocity <= minAngularVelocity)
+            if (Mathf.Abs(_angularVelocity) <= minAngularVelocity || float.IsInfinity(_angularVelocity))
             {
                 _angularVelocity = 0;
             }
@@ -148,26 +146,24 @@ namespace Controls
             Logger.Debug($"Swipe distance {distance} duration {duration} dir {dir}");
 #endif // DEBUG_LOG_INPUT
 
-            // swipe is dead-banded by distance and duration
-            if (duration > 0)
+            // swipe dead-banded for distance and/or duration can be added
+         
+            // compute angle difference and speed
+            Vector2 pivot = _activeBlocks.transform.position;
+            float angleDelta = Vector2.SignedAngle(_pointerPressStartPos - pivot, _pointerPressEndPos - pivot);
+            float speed = distance / duration;
+
+            // apply speed limit
+            if (swipeSpeedLimit > 0)
             {
-                // compute angle difference and speed
-                Vector2 pivot = _activeBlocks.transform.position;
-                float angleDelta = Vector2.SignedAngle(_pointerPressStartPos - pivot, _pointerPressEndPos - pivot);
-                float speed = distance / duration;
-
-                // apply speed limit
-                if (swipeSpeedLimit > 0)
-                {
-                    speed = Mathf.Max(speed, swipeSpeedLimit);
-                }
-
-                // determine new velocity
-                _angularVelocity += angleDelta * speed * sensitivity;
-#if DEBUG_LOG_INPUT
-                Logger.Debug($"Angle delta {angleDelta}, speed {speed}, angularVelocity {angularVelocity}");
-#endif // DEBUG_LOG_INPUT
+                speed = Mathf.Max(speed, swipeSpeedLimit);
             }
+
+            // determine new velocity
+            _angularVelocity += angleDelta * speed * sensitivity;
+#if DEBUG_LOG_INPUT
+            Logger.Debug($"Angle delta {angleDelta}, speed {speed}, angularVelocity {angularVelocity}");
+#endif // DEBUG_LOG_INPUT
         }
 
         /// <summary>
@@ -187,11 +183,12 @@ namespace Controls
                 return;
             }
 
-            // if (!LevelManager.Instance.IsRunning())
-            // {
-            //     return;
-            // }
-
+#if !UNITY_EDITOR
+            if (!LevelManager.Instance.IsRunning())
+            {
+                return;
+            }
+#endif
             if (input.Contact && !_dragging)
             {
                 _dragStartTime = Time.time;
