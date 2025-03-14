@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Blocks.SpecialProperties;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -38,14 +37,27 @@ namespace Blocks
         
         public static readonly EdgeIndex[] EdgeIndexes = (EdgeIndex[])Enum.GetValues(typeof(EdgeIndex));
 
-        private static readonly Dictionary<EdgeIndex, Vector2> EdgeOffsets = new(6)
+        // private static readonly Dictionary<EdgeIndex, Vector2> EdgeOffsets = new(6)
+        // {
+        //     { EdgeIndex.RightTop, new Vector2(0.35f, 0.2f) },
+        //     { EdgeIndex.RightBottom, new Vector2(0.35f, -0.2f) },
+        //     { EdgeIndex.Bottom, new Vector2(0.0f, -0.4f) },
+        //     { EdgeIndex.LeftBottom, new Vector2(-.35f, -0.2f) },
+        //     { EdgeIndex.LeftTop, new Vector2(-0.35f, 0.2f) },
+        //     { EdgeIndex.Top, new Vector2(0.0f, 0.4f) },
+        // };
+
+        /// <summary>
+        /// Maps <see cref="EdgeIndex"/> to the offset.
+        /// </summary>
+        private static readonly Vector2[] EdgeOffsets =
         {
-            { EdgeIndex.RightTop, new Vector2(0.35f, 0.2f) },
-            { EdgeIndex.RightBottom, new Vector2(0.35f, -0.2f) },
-            { EdgeIndex.Bottom, new Vector2(0.0f, -0.4f) },
-            { EdgeIndex.LeftBottom, new Vector2(-.35f, -0.2f) },
-            { EdgeIndex.LeftTop, new Vector2(-0.35f, 0.2f) },
-            { EdgeIndex.Top, new Vector2(0.0f, 0.4f) },
+            new(0.35f, 0.2f),
+            new(0.35f, -0.2f),
+            new(0.0f, -0.4f),
+            new(-.35f, -0.2f),
+            new(-0.35f, 0.2f),
+            new(0.0f, 0.4f)
         };
 
         [SerializeField]
@@ -213,7 +225,7 @@ namespace Blocks
         /// Utility struct used during link process.
         /// See LinkWithNeighbours.
         /// </summary>
-        private struct Linkage
+        private class Linkage
         {
             public EdgeIndex NeighbourEdge;
             public GameObject Neighbour;
@@ -262,10 +274,10 @@ namespace Blocks
         /// </summary>
         protected void DrawEdgeAttachmentRays()
         {
-            foreach (KeyValuePair<EdgeIndex, Vector2> entry in EdgeOffsets)
+            for (int i = 0; i < EdgeOffsets.Length; i++)
             {
                 Debug.DrawRay(transform.position,
-                    transform.TransformDirection(entry.Value).normalized * edgeAttachPositionOffset, Color.yellow);
+                    transform.TransformDirection(EdgeOffsets[i]).normalized * edgeAttachPositionOffset, Color.yellow);
             }
         }
 
@@ -274,9 +286,9 @@ namespace Blocks
         /// </summary>
         protected void DrawNeighbourLinkRays()
         {
-            foreach (KeyValuePair<EdgeIndex, Vector2> entry in EdgeOffsets)
+            for (int i = 0; i < EdgeOffsets.Length; i++)
             {
-                Vector2 start = transform.position + transform.TransformDirection(entry.Value);
+                Vector2 start = transform.position + transform.TransformDirection(EdgeOffsets[i]);
                 Vector2 dir = ((Vector2)transform.position - start).normalized * neighbourRange;
                 Debug.DrawRay(start, dir, Color.red);
             }
@@ -593,7 +605,7 @@ namespace Blocks
         /// <returns></returns>
         public Vector2 GetEdgeOffset(EdgeIndex edge)
         {
-            return transform.TransformDirection(EdgeOffsets[edge]).normalized * edgeAttachPositionOffset;
+            return transform.TransformDirection(EdgeOffsets[(int)edge]).normalized * edgeAttachPositionOffset;
         }
 
         /// <summary>
@@ -678,11 +690,13 @@ namespace Blocks
             // that prevents possible attachment when block collides
             // with antagonistic neighbour side that doesn't have a neighbour set
             // draw directions
-            Dictionary<EdgeIndex, Linkage> neighbours = new Dictionary<EdgeIndex, Linkage>(EdgeOffsets.Count);
-            foreach (KeyValuePair<EdgeIndex, Vector2> entry in EdgeOffsets)
+            
+            // Dictionary<EdgeIndex, Linkage> neighbours = new Dictionary<EdgeIndex, Linkage>(EdgeOffsets.Count);
+            Linkage[] neighbours = new Linkage[EdgeIndexes.Length];
+            for (int i = 0; i < EdgeOffsets.Length; i++)
             {
                 // perform inverse raycast, that avoids hit & stop due to our collider boundary
-                Vector2 start = transform.position + transform.TransformDirection(entry.Value);
+                Vector2 start = transform.position + transform.TransformDirection(EdgeOffsets[i]);
                 Vector2 dir = ((Vector2)transform.position - start).normalized * neighbourRange;
                 Debug.DrawRay(start, dir, Color.yellow, 2);
 
@@ -715,11 +729,10 @@ namespace Blocks
                 if (neighbour.Link(neighbourEdge.edgeIdx) != null)
                 {
                     // edge is occupied, stop processing to prevent invalid state
-                    neighbours.Clear();
-                    break;
+                    return 0;
                 }
 
-                if (neighbours.ContainsKey(entry.Key))
+                if (neighbours[i] != null)
                 {
 #if DEBUG
                     // shall not happen
@@ -729,21 +742,25 @@ namespace Blocks
                     }
 #endif
                     Logger.Debug("unexpected edge conflict on collision");
-                    neighbours.Clear();
-                    break;
+                    return 0;
                 }
 
-                neighbours.Add(entry.Key, new Linkage
+                neighbours[i] = new Linkage
                 {
                     NeighbourEdge = neighbourEdge.edgeIdx,
                     Neighbour = hitObj
-                });
+                };
             }
 
             // attach / link
-            foreach (KeyValuePair<EdgeIndex, Linkage> entry in neighbours)
+            int totalLinks = 0;
+            for (int i = 0; i < neighbours.Length; i++)
             {
-                GameObject neighbour = entry.Value.Neighbour;
+                if (neighbours[i] == null)
+                {
+                    continue;
+                }
+                GameObject neighbour = neighbours[i].Neighbour;
                 FixedJoint2D joint = neighbour.AddComponent<FixedJoint2D>();
 
                 joint.connectedBody = _rigidBody;
@@ -751,8 +768,9 @@ namespace Blocks
                 joint.dampingRatio = 1.0f;
                 joint.frequency = 1;
 
-                neighbour.GetComponent<BasicBlock>().Link(entry.Value.NeighbourEdge, joint);
-                _links[entry.Key] = joint;
+                neighbour.GetComponent<BasicBlock>().Link(neighbours[i].NeighbourEdge, joint);
+                _links[(EdgeIndex)i] = joint;
+                totalLinks++;
             }
             
             // disable light
@@ -762,7 +780,7 @@ namespace Blocks
                 lightComponent.enabled = false;
             }
 
-            return neighbours.Count;
+            return totalLinks;
         }
         
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
