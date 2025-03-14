@@ -476,6 +476,11 @@ public class LevelManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (!IsRunning())
+        {
+            return;
+        }
+        
         List<BasicBlock> floatingBlocks;
 
         // process match related event first
