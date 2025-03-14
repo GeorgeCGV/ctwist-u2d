@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
-using UnityEngine.Tilemaps;
 using Utils;
 using static Model.BlockType;
 using Debug = UnityEngine.Debug;
@@ -106,12 +105,6 @@ namespace Blocks
         /// Is set to True when block is marked for destruction.
         /// </summary>
         public bool Destroyed { get; private set; }
-
-        /// <summary>
-        /// Possible obstruction tilemap present in the level.
-        /// Used here to detect collisions against it.
-        /// </summary>
-        private Tilemap _obstructionsTilemap;
 
         /// <summary>
         /// Layer where all attached blocks are.
@@ -462,33 +455,11 @@ namespace Blocks
         /// </remarks>
         protected virtual void Update()
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && DEBUG_BLOCKS
             DrawCollider();
-
             DrawEdgeAttachmentRays();
-
             DrawNeighbourLinkRays();
 #endif
-
-            // attached blocks check if they collide with obstruction
-            // that can't be done in OnCollisionEnter2D as attached
-            // objects are static
-            if ((_obstructionsTilemap != null) && attached)
-            {
-                // Convert world position to tile coordinates
-                Vector3Int tilePos = _obstructionsTilemap.WorldToCell(transform.position);
-                // Get the tile at that position
-                TileBase tile = _obstructionsTilemap.GetTile(tilePos);
-                // any non-null tile is an obstruction
-                if (tile != null)
-                {
-                    // a more precise approach would be to check
-                    // tile collider against our collider
-                    // but to save on perf. we go simple way
-                    // and consider this block as collided
-                    LevelManager.Instance.OnBlocksObstructionCollision(this);
-                }
-            }
         }
 
         /// <summary>
@@ -748,7 +719,7 @@ namespace Blocks
                 neighbours.Add(entry.Key, new Linkage
                 {
                     NeighbourEdge = neighbourEdge.edgeIdx,
-                    Neighbour = hit.collider.gameObject
+                    Neighbour = hitObj
                 });
             }
 

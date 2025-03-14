@@ -22,17 +22,6 @@ namespace Blocks
             BlockType = EBlockType.Central;
         }
 
-        protected override void Update()
-        {
-            // override as central won't collide with obstructions.
-
-#if UNITY_EDITOR
-            DrawCollider();
-            DrawEdgeAttachmentRays();
-            DrawNeighbourLinkRays();
-#endif
-        }
-
         protected override void FixedUpdate()
         {
             // we don't need gravity in central block
