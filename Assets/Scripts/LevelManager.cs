@@ -13,7 +13,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Utils;
 using static Model.BlockType;
-using Array = System.Array;
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
@@ -320,7 +319,7 @@ public class LevelManager : MonoBehaviour
 
         
         // determine how many stars were earned
-        Assert.AreEqual(3, level.starRewards.Length - 1, "level data has misses starRewards, expected 3");
+        Assert.AreEqual(3, level.starRewards.Length, "level data has misses starRewards, expected 3");
         int starsEarned = 0;
         for (int i = 0; i < 3; i++)
         {
@@ -332,8 +331,8 @@ public class LevelManager : MonoBehaviour
         // try to store achieved score
         bool isHighscore = GameManager.SetLevelScoreChecked(level.ID, totalScore);
         OnGameOver?.Invoke(new LevelResults(baseScore, bonusScores, starsEarned,
-            nextLevelId, GameManager.Instance.IsLastLevel(level.ID),
-            won, isHighscore));
+                                            nextLevelId, GameManager.Instance.IsLastLevel(level.ID),
+                                            won, isHighscore));
     }
 
     private void GameOver(bool won)
@@ -909,17 +908,16 @@ public class LevelManager : MonoBehaviour
 
         float chanceForChainedBlock = level.startBlocksChainedBlockChancePercent * 0.01f;
 
-        Array edges = Enum.GetValues(typeof(BasicBlock.EdgeIndex));
         for (int i = 0; i < num; i++)
         {
-            BasicBlock.EdgeIndex edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
+            BasicBlock.EdgeIndex edge = BasicBlock.EdgeIndexes[rnd.Next(0, BasicBlock.EdgeIndexes.Length)];
             BasicBlock neighbour = block.GetNeighbour(edge);
 
             // find any free edge
             while (neighbour != null)
             {
                 block = neighbour;
-                edge = (BasicBlock.EdgeIndex)edges.GetValue(rnd.Next(0, edges.Length));
+                edge = BasicBlock.EdgeIndexes[rnd.Next(0, BasicBlock.EdgeIndexes.Length)];
                 neighbour = block.GetNeighbour(edge);
             }
 
