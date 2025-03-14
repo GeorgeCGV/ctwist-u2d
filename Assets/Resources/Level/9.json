@@ -1,0 +1,44 @@
+{
+    "seed": 3,
+    "startBlocksNum": 5,
+    "blocksInLevel": ["green", "yellow", "red"],
+    "obstructionIdx": 0,
+    "goal": {
+        "blocks": [
+            {
+                "type": "green",
+                "amount": 3
+            },
+            {
+                "type": "yellow",
+                "amount": 2
+            }
+        ]
+    },
+    "limit": {
+        "spawns": 20
+    },
+    "multiplier": {
+        "decayTime": 1.7,
+        "decayRate": 0.5,
+        "max": 6
+    },
+    "spawn": {
+        "timeMin": 2,
+        "timeMax": 4,
+        "timeDecreasePerTimeSeconds": 2,
+        "timeDecreaseByTimePercent": 5
+    },
+    "block": {
+        "speedMin": 3,
+        "speedMax": 5,
+        "speedIncreasePerTimeLimitPercent": 10,
+        "speedIncreasePerTimeSeconds": 3,
+        "speedIncreaseBySpeedPercent": 15
+    },
+    "starRewards": [
+        7000,
+        7000,
+        7000
+    ]
+}

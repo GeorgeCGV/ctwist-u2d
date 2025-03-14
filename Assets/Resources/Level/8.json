@@ -1,10 +1,15 @@
 {
     "seed": 133,
     "startBlocksNum": 14,
-    "blocksInLevel": ["pink", "black", "green", "yellow"],
+    "blocksInLevel": ["black", "green", "yellow"],
     "obstructionIdx": 2,
     "goal": {
-        "score": 5000
+        "blocks": [
+            {
+                "type": "green",
+                "amount": 6
+            }
+        ]
     },
     "limit": {
         "time": 80

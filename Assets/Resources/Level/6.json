@@ -7,7 +7,7 @@
         "score": 5000
     },
     "limit": {
-        "time": 80
+        "spawn": 27
     },
     "multiplier": {
         "decayTime": 1,

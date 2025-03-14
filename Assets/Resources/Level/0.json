@@ -3,7 +3,7 @@
     "startBlocksNum": 4,
     "startBlocksChainedBlockChancePercent": 0,
     "blocksInLevel": ["blue","red"],
-    "obstructionIdx": -1,
+    "obstructionIdx": 0,
     "goal": {
         "score": 3000
     },

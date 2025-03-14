@@ -4,7 +4,20 @@
     "blocksInLevel": ["red", "blue", "purple", "green", "yellow"],
     "obstructionIdx": 3,
     "goal": {
-        "score": 6000
+        "blocks": [
+            {
+                "type": "green",
+                "amount": 2
+            },
+            {
+                "type": "yellow",
+                "amount": 4
+            },
+            {
+                "type": "black",
+                "amount": 2
+            }
+        ]
     },
     "limit": {
         "time": 90
