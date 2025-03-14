@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -34,7 +35,7 @@ namespace Blocks.SpecialProperties
         /// <param name="config">Configuration.</param>
         public ChainedProperty(ChainedPropertyConfig config)
         {
-            Assert.IsNotNull(config, "missing chained property config");
+            Assert.IsNotNull(config, "missing property config");
             _config = config;
         }
 
@@ -56,10 +57,15 @@ namespace Blocks.SpecialProperties
             renderer.sprite = _config.chainSprite;
         }
 
-        public EMatchPropertyOutcome ProcessMatch(out bool removeProperty)
+        public void ExecuteSpecial(BasicBlock parent, HashSet<BasicBlock> matches)
+        {
+            // empty, no special match execution
+        }
+
+        public EMatchPropertyOutcome Execute(out bool removeProperty)
         {
             // block shall remove this property
-            removeProperty = true;
+            removeProperty = false;
 
             // play sfx, efx, and destroy the chain
             AudioManager.Instance.PlaySfx(_config.sfxOnDestroy);

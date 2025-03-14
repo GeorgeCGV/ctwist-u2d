@@ -51,7 +51,7 @@ namespace Spawn
             BasicBlock block = BlocksFactory.Instance.NewColorBlock(_blockType);
             if (_matchProperty != null)
             {
-                block.SetMatchProperty(_matchProperty);
+                block.MatchProperty = _matchProperty;
             }
 
             return block;

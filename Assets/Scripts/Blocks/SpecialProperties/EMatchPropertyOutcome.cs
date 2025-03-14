@@ -12,13 +12,16 @@
         ContinueNormalMatching,
 
         /// <summary>
-        /// Destroy all blocks of the same block type.
+        /// If returned, then <see cref="IMatchProperty.ExecuteSpecial"/> is invoked.
         /// </summary>
-        DestroyAllOfSameType,
+        SpecialMatchRule,
 
         /// <summary>
-        /// Stops matching process.
+        /// Stops matching process, regardless of other properties.
         /// </summary>
+        /// <remarks>
+        /// Doesn't stop matched block's properties processing.
+        /// </remarks>
         StopMatching,
     }
 }

@@ -107,6 +107,12 @@ namespace Spawn
         private float _chainedPropertyChance;
         
         /// <summary>
+        /// A chance to spawn a block with <see cref="GlowProperty"/>.
+        /// </summary>
+        /// <value>[0.0; 1.0]</value>
+        private float _glowBlockChance;
+        
+        /// <summary>
         /// Callback for the spawn node.
         /// Used to enqueue the spawn node back to
         /// "free"/not busy spawn points.
@@ -132,6 +138,7 @@ namespace Spawn
             _spawnsLeft = data.limit.Variant() == ELimitVariant.SpawnLimit ? data.limit.spawns : SpawnUnlimited;
             _stoneBlockChance = data.spawn.stoneBlockChancePercent * 0.01f;
             _chainedPropertyChance = data.spawn.chainedBlockChancePercent * 0.01f;
+            _glowBlockChance = data.spawn.glowBlockChancePercent * 0.01f;
             _onSpawnedCallback = onSpawned;
             _spawnBatchChance = data.spawn.batchChance;
             _spawnBatchRange = (Math.Max(1, data.spawn.batchMin), Math.Max(1, data.spawn.batchMax + 1));
@@ -226,9 +233,22 @@ namespace Spawn
 
                 // special match property
                 matchProperty = null;
-                if (type != EBlockType.Stone && Random.value <= _chainedPropertyChance)
+                if (type != EBlockType.Stone)
                 {
-                    matchProperty = MatchPropertyFactory.Instance.NewChainedProperty();
+                    float propRoll = Random.value;
+                    if (propRoll < _chainedPropertyChance)
+                    {
+                        matchProperty = MatchPropertyFactory.Instance.NewProperty(MatchPropertyFactory.EMatchProperty.ChainProperty);
+                    }
+                    else
+                    {
+                        // correct glow property probability for the remaining space to guarantee fairness
+                        float adjustedGlowBlockChance = _glowBlockChance / (1f - _chainedPropertyChance);
+                        if (propRoll <= (_chainedPropertyChance + adjustedGlowBlockChance))
+                        {
+                            matchProperty = MatchPropertyFactory.Instance.NewProperty(MatchPropertyFactory.EMatchProperty.GlowProperty);
+                        }
+                    }
                 }
                 
                 _spawnQueue.Enqueue(new SpawnBlockEntity(type, inSeconds, speed, matchProperty));

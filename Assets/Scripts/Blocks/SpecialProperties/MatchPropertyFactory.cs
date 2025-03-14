@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -8,9 +9,23 @@ namespace Blocks.SpecialProperties
     /// </summary>
     public class MatchPropertyFactory : MonoBehaviour
     {
+        [Serializable]
+        public enum EMatchProperty
+        {
+            /// <summary>
+            /// <see cref="ChainedProperty"/>.
+            /// </summary>
+            ChainProperty,
+            /// <summary>
+            /// <see cref="GlowProperty"/>.
+            /// </summary>
+            GlowProperty,
+        }
+        
         public static MatchPropertyFactory Instance { get; private set; }
 
-        [SerializeField] private MatchPropertyFactoryConfig config;
+        [SerializeField]
+        private MatchPropertyFactoryConfig config;
 
         /// <summary>
         /// Setups the factory.
@@ -36,11 +51,19 @@ namespace Blocks.SpecialProperties
         }
 
         /// <summary>
-        /// Instantiates <see cref="ChainedProperty"/>.
+        /// Instantiates <see cref="IMatchProperty"/>.
         /// </summary>
-        public IMatchProperty NewChainedProperty()
+        public IMatchProperty NewProperty(EMatchProperty property)
         {
-            return new ChainedProperty(config.chainedPropertyConfig);
+            switch (property)
+            {
+                case EMatchProperty.ChainProperty:
+                    return new ChainedProperty(config.chainedPropertyConfig);
+                case EMatchProperty.GlowProperty:
+                    return new GlowProperty(config.glowPropertyConfig);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(property), property, null);
+            }
         }
     }
 }

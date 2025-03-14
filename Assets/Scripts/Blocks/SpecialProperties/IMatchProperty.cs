@@ -1,4 +1,6 @@
-﻿namespace Blocks.SpecialProperties
+﻿using System.Collections.Generic;
+
+namespace Blocks.SpecialProperties
 {
     /// <summary>
     /// Special property interface. 
@@ -16,10 +18,21 @@
         void Activate(BasicBlock parent);
 
         /// <summary>
-        /// Called when a match is made on a block with the property.
+        /// Executes special match rule.
         /// </summary>
-        /// <param name="removeProperty">Shall the property be removed?</param>
+        /// <remarks>
+        /// Blocks to destroy must be appended to matches;
+        /// the other way for saving.
+        /// </remarks>
+        /// <param name="parent">Block that has the property.</param>
+        /// <param name="matches">Current matches.</param>
+        void ExecuteSpecial(BasicBlock parent, HashSet<BasicBlock> matches);
+
+        /// <summary>
+        /// Called when a match is made on a block with this property.
+        /// </summary>
+        /// <param name="removeProperty">Shall the property be removed from the block?</param>
         /// <returns>Matching behaviour modification.</returns>
-        EMatchPropertyOutcome ProcessMatch(out bool removeProperty);
+        EMatchPropertyOutcome Execute(out bool removeProperty);
     }
 }

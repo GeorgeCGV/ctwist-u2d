@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Blocks.SpecialProperties
 {
@@ -10,7 +9,10 @@ namespace Blocks.SpecialProperties
                      menuName = "Factory/MatchPropertyFactoryAssetsConfig")]
     public class MatchPropertyFactoryConfig : ScriptableObject
     {
-        [FormerlySerializedAs("ChainedPropertyConfig")] [SerializeField]
+        [SerializeField]
         public ChainedPropertyConfig chainedPropertyConfig;
+        
+        [SerializeField]
+        public GlowPropertyConfig glowPropertyConfig;
     }
 }

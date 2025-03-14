@@ -118,33 +118,32 @@ namespace Blocks
 
         private IMatchProperty _matchProperty;
 
-        /// <summary>
-        /// Set new match property.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="ChainedProperty"/>
-        /// </remarks>
-        /// <param name="matchProperty">Match property.</param>
-        public void SetMatchProperty(IMatchProperty matchProperty)
+        public IMatchProperty MatchProperty
         {
-            Assert.IsNotNull(matchProperty, "matchProperty is null");
-            matchProperty.Activate(this);
-            _matchProperty = matchProperty;
+            get => _matchProperty;
+            set
+            {
+                Assert.IsNotNull(value, "matchProperty is null");
+                value.Activate(this);
+                _matchProperty = value;
+            }
         }
 
         /// <summary>
         /// Processes block's <see cref="IMatchProperty"/> when matched.
         /// </summary>
         /// <returns>Match processing modification.</returns>
-        public EMatchPropertyOutcome ProcessMatchProperties()
+        public EMatchPropertyOutcome CheckMatchProperty()
         {
             EMatchPropertyOutcome outcome = EMatchPropertyOutcome.ContinueNormalMatching;
             
             if (_matchProperty != null)
             {
-                outcome = _matchProperty.ProcessMatch(out bool removeProperty);
+                outcome = _matchProperty.Execute(out bool removeProperty);
                 if (removeProperty)
                 {
+                    Assert.IsFalse(outcome == EMatchPropertyOutcome.SpecialMatchRule, 
+                        "Special match rule requires property to be present for ExecuteSpecial");
                     _matchProperty = null;
                 }
             }
@@ -758,32 +757,38 @@ namespace Blocks
         
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
     
-        public bool toggleChained;
-        
-        public IMatchProperty ActiveProperty;
+        public bool toggleProperty;
+
+        public MatchPropertyFactory.EMatchProperty toggleMatchProperty;
+        private IMatchProperty _activeProperty;
         
         private void OnValidate()
         {
-            if (!toggleChained)
+            if (!toggleProperty)
             {
                 return;
             }
 
-            if (ActiveProperty == null)
+            if (_activeProperty == null)
             {
-                ActiveProperty = MatchPropertyFactory.Instance.NewChainedProperty();
-                ActiveProperty.Activate(this);
+                _activeProperty = MatchPropertyFactory.Instance.NewProperty(toggleMatchProperty);
+                _activeProperty.Activate(this);
             }
             else
             {
-                ActiveProperty.ProcessMatch(out bool removeProperty);
+                EMatchPropertyOutcome outcome = _activeProperty.Execute(out bool removeProperty);
+                if (outcome == EMatchPropertyOutcome.SpecialMatchRule)
+                {
+                    _activeProperty.ExecuteSpecial(this, new ());
+                }
+                
                 if (removeProperty)
                 {
-                    ActiveProperty = null;
+                    _activeProperty = null;
                 }
             }
 
-            toggleChained = false;
+            toggleProperty = false;
         }
 #endif // UNITY_EDITOR
     }
