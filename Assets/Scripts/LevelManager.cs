@@ -182,7 +182,7 @@ public class LevelManager : MonoBehaviour
     /// SFX to play on collision with obstruction.
     /// </summary>
     [SerializeField]
-    private List<AudioClip> sfxOnObstruction;
+    private AudioClip sfxOnObstruction;
 
     /// <summary>
     /// Config that stores available level obstruction tilemaps.
@@ -208,19 +208,6 @@ public class LevelManager : MonoBehaviour
     /// </para>
     /// </remarks>
     private readonly HashSet<BasicBlock> _obstructedToDestroy = new(25);
-
-    /// <summary>
-    /// Invokes <see cref="BasicBlock.DestroyBlock"/> on every block in <see cref="_obstructedToDestroy"/>,
-    /// amd clears the set.
-    /// </summary>
-    private void DestroyObstructedBlocks()
-    {
-        foreach (BasicBlock block in _obstructedToDestroy)
-        {
-            block.DestroyBlock();
-        }
-        _obstructedToDestroy.Clear();
-    }
     
     private int Score
     {
@@ -331,7 +318,9 @@ public class LevelManager : MonoBehaviour
             totalScore += bonusScore;
         }
 
+        
         // determine how many stars were earned
+        Assert.AreEqual(3, level.starRewards.Length - 1, "level data has misses starRewards, expected 3");
         int starsEarned = 0;
         for (int i = 0; i < 3; i++)
         {
@@ -488,71 +477,69 @@ public class LevelManager : MonoBehaviour
 
     private void LateUpdate()
     {
-        // List<BasicBlock> floatingBlocks;
+        List<BasicBlock> floatingBlocks;
+
+        // process match related event first
+        // that allows player to get points
+        // when obstructed blocks were destroyed
+        // by a match (i.e. in some root node)
+        if (_matchPerformedInFrame)
+        {
+            // find floating/disconnected blocks, grant score and destroy them
+            floatingBlocks = GetFloatingBlocks();
+
+            int floatingScore = scoreConfig.scorePerFloating * floatingBlocks.Count * _multiplier.Multiplier;
+            if (floatingScore != 0)
+            {
+                IncrementScore(floatingScore);
+                OnAnnounce?.Invoke("+" + floatingScore, _central.transform.position);
+            }
+
+            foreach (BasicBlock floatingBlock in floatingBlocks)
+            {
+                if (floatingBlock is ColorBlock cb)
+                {
+                    _blocksStats.AddMatched(cb.ColorType, 1);
+                }
+
+                floatingBlock.DestroyBlock();
+            }
+            
+            // notify about matched amounts change
+            OnBlocksStatsUpdate?.Invoke(_blocksStats);
+
+            // the level might get boring when no blocks are present;
+            int centralLinksCount = _central.LinksCount();
+            // however, don't do it for the spawn limit mode
+            if (level.limit.Variant() != ELimitVariant.SpawnLimit)
+            {
+                // spawn if we have <= 1 connected links on the central block
+                if (centralLinksCount <= 2)
+                {
+                    _spawner.SpawnRandomEntities(availableBlocks.Count > 2 ? Random.Range(1, 2) : 1);
+                }
+            }
+
+            _matchPerformedInFrame = false;
+        }
         
+        // only run if there are blocks collided with the obstruction tm (obstacles)
         if (_obstructedToDestroy.Count != 0)
         {
-            // play some random obstruction sfx
-            if ((sfxOnObstruction != null) && (sfxOnObstruction.Count != 0))
+            AudioManager.Instance.PlaySfx(sfxOnObstruction);
+            // first, destroy collided blocks
+            foreach (BasicBlock block in _obstructedToDestroy)
             {
-                AudioManager.Instance.PlaySfx(sfxOnObstruction[0]);
+                block.DestroyBlock();
             }
-            // destroy the root blocks first
-            DestroyObstructedBlocks();
-            // clean floating
-            GetFloatingBlocks(_obstructedToDestroy);
-            DestroyObstructedBlocks();
-            
-            // floatingBlocks = GetFloatingBlocks();
-            // foreach (BasicBlock floatingBlock in floatingBlocks)
-            // {
-            //     floatingBlock.DestroyBlock(false);
-            // }
-        }
-        
-        if (!_matchPerformedInFrame)
-        {
-            return;
-        }
-        
-        // find floating/disconnected blocks, grant score and destroy them
-        GetFloatingBlocks(_obstructedToDestroy);
-        // floatingBlocks = GetFloatingBlocks();
-
-        int floatingScore = scoreConfig.scorePerFloating * _obstructedToDestroy.Count * _multiplier.Multiplier;
-        if (floatingScore != 0)
-        {
-            IncrementScore(floatingScore);
-            OnAnnounce?.Invoke("+" + floatingScore, _central.transform.position);
-        }
-
-        foreach (BasicBlock floatingBlock in _obstructedToDestroy)
-        {
-            if (floatingBlock is ColorBlock cb)
+            _obstructedToDestroy.Clear();
+            // then clean floating
+            floatingBlocks = GetFloatingBlocks();
+            foreach (BasicBlock floatingBlock in floatingBlocks)
             {
-                _blocksStats.AddMatched(cb.ColorType, 1);
-            }
-
-            floatingBlock.DestroyBlock();
-        }
-        _obstructedToDestroy.Clear();
-        
-        // notify about matched amounts change
-        OnBlocksStatsUpdate?.Invoke(_blocksStats);
-
-        // the level might get boring when no blocks are present;
-        int centralLinksCount = _central.LinksCount();
-        // however, don't do it for the spawn limit mode
-        if (level.limit.Variant() != ELimitVariant.SpawnLimit)
-        {
-            // spawn if we have <= 1 connected links on the central block
-            if (centralLinksCount <= 2)
-            {
-                _spawner.SpawnRandomEntities(availableBlocks.Count > 2 ? Random.Range(1, 2) : 1);
+                floatingBlock.DestroyBlock();
             }
         }
-
-        _matchPerformedInFrame = false;
     }
 
     private int ProcessMatches()
@@ -647,13 +634,14 @@ public class LevelManager : MonoBehaviour
     /// <returns>
     /// List of floating block game objects, never <c>null</c>.
     /// </returns>
-    private void GetFloatingBlocks(HashSet<BasicBlock> floatingBlocks)
+    private List<BasicBlock> GetFloatingBlocks()
     {
+        List<BasicBlock> floatingBlocks = new List<BasicBlock>();
         // iterate over all blocks from the central
         // and reset the 'attached' flag
         Queue<BasicBlock> blocks = new();
         blocks.Enqueue(_central);
-
+        
         while (blocks.Count != 0)
         {
             BasicBlock current = blocks.Dequeue();
@@ -664,10 +652,10 @@ public class LevelManager : MonoBehaviour
     
             current.attached = false;
     
-            for (int i = 0; i < BasicBlock.EdgeIndexes.Length; i++)
+            foreach (BasicBlock.EdgeIndex edgeIndex in Enum.GetValues(typeof(BasicBlock.EdgeIndex)))
             {
-                BasicBlock other = current.GetNeighbour(BasicBlock.EdgeIndexes[i]);
-                if (other is null)
+                BasicBlock other = current.GetNeighbour(edgeIndex);
+                if (other == null)
                 {
                     continue;
                 }
@@ -684,7 +672,7 @@ public class LevelManager : MonoBehaviour
         foreach (Transform child in _activeBlocks.transform)
         {
             BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
-            if ((block is null) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
+            if ((block == null) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
             {
                 continue;
             }
@@ -701,65 +689,9 @@ public class LevelManager : MonoBehaviour
                 floatingBlocks.Add(block);
             }
         }
+    
+        return floatingBlocks;
     }
-    // private List<BasicBlock> GetFloatingBlocks()
-    // {
-    //     List<BasicBlock> floatingBlocks = new List<BasicBlock>();
-    //     // iterate over all blocks from the central
-    //     // and reset the 'attached' flag
-    //     Queue<BasicBlock> blocks = new();
-    //     blocks.Enqueue(_central);
-    //     
-    //     while (blocks.Count != 0)
-    //     {
-    //         BasicBlock current = blocks.Dequeue();
-    //         if (current.Destroyed)
-    //         {
-    //             continue;
-    //         }
-    //
-    //         current.attached = false;
-    //
-    //         foreach (BasicBlock.EdgeIndex edgeIndex in Enum.GetValues(typeof(BasicBlock.EdgeIndex)))
-    //         {
-    //             BasicBlock other = current.GetNeighbour(edgeIndex);
-    //             if (other == null)
-    //             {
-    //                 continue;
-    //             }
-    //
-    //             if (other.attached)
-    //             {
-    //                 blocks.Enqueue(other);
-    //             }
-    //         }
-    //     }
-    //
-    //     // iterate over all active blocks and find all blocks that
-    //     // still have 'attached' set
-    //     foreach (Transform child in _activeBlocks.transform)
-    //     {
-    //         BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
-    //         if ((block == null) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
-    //         {
-    //             continue;
-    //         }
-    //
-    //         // invert the attached flag
-    //         // block is floating if we couldn't
-    //         // reach the block from central
-    //         block.attached = !block.attached;
-    //
-    //         // after attached flag inversion
-    //         // it has correct state
-    //         if (!block.attached)
-    //         {
-    //             floatingBlocks.Add(block);
-    //         }
-    //     }
-    //
-    //     return floatingBlocks;
-    // }
     
     // private readonly HashSet<BasicBlock> _obstructedToDestroy = new(FieldBlocksCapacity);
 
@@ -775,11 +707,6 @@ public class LevelManager : MonoBehaviour
         // game over for now
         // protect against subsequent calls due to called from blocks update
         if (_isGameOver)
-        {
-            return;
-        }
-        
-        if (block.Destroyed)
         {
             return;
         }
