@@ -83,7 +83,7 @@ namespace UI.Level
             _elapsedTime = 0;
             _startValue = from;
             _endValue = to;
-            if (sfx != null)
+            if (sfx is not null)
             {
                 if (seconds <= 0)
                 {

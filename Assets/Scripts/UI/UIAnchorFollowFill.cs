@@ -47,8 +47,8 @@ namespace UI
         /// </summary>
         private void Awake()
         {
-            _anchor = GetComponent<RectTransform>();
             Assert.IsNotNull(fillImage, "missing fillImage");
+            _anchor = GetComponent<RectTransform>();
             _image = GetComponent<Image>();
         }
 
@@ -60,11 +60,11 @@ namespace UI
         {
 #if UNITY_EDITOR
             // in case the editor didn't run awake
-            if (_anchor == null)
+            if (_anchor is null)
             {
                 _anchor = GetComponent<RectTransform>();
             }
-            if (_image != null)
+            if (_image is null)
             {
                 _image = GetComponent<Image>();
             }

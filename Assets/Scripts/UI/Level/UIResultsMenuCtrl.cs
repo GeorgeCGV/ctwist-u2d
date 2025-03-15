@@ -203,7 +203,7 @@ namespace UI.Level
                 string reason = _bonusKeys[_lastBonusKeyIdx++];
                 int value = _results.BonusScore[reason];
 
-                if (bonusScorePrefab != null)
+                if (bonusScorePrefab is not null)
                 {
                     GameObject annotation = Instantiate(bonusScorePrefab, transform);
                     annotation.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 600);

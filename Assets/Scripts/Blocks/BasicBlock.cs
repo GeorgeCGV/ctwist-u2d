@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Blocks.SpecialProperties;
 using UnityEngine;
@@ -24,6 +25,15 @@ namespace Blocks
     [RequireComponent(typeof(PolygonCollider2D), typeof(Rigidbody2D))]
     public abstract class BasicBlock : MonoBehaviour
     {
+        public static event Action<BasicBlock> OnBlockDestroyed;
+
+        /// <summary>
+        /// Block edge indexes.
+        /// </summary>
+        /// <remarks>
+        /// Values are used as index, avoid modification;
+        /// or don't forget to modify other arrays like <see cref="BasicBlock.EdgeOffsets"/>.
+        /// </remarks>
         public enum EdgeIndex
         {
             RightTop = 0,
@@ -31,7 +41,7 @@ namespace Blocks
             Bottom = 2,
             LeftBottom = 3,
             LeftTop = 4,
-            Top = 5,
+            Top = 5
         }
         
         public static readonly EdgeIndex[] EdgeIndexes = (EdgeIndex[])Enum.GetValues(typeof(EdgeIndex));
@@ -41,12 +51,12 @@ namespace Blocks
         /// </summary>
         private static readonly Vector2[] EdgeOffsets =
         {
-            new(0.35f, 0.2f),
-            new(0.35f, -0.2f),
-            new(0.0f, -0.4f),
-            new(-.35f, -0.2f),
-            new(-0.35f, 0.2f),
-            new(0.0f, 0.4f)
+            new(0.35f, 0.2f),   // RightTop
+            new(0.35f, -0.2f),  // RightBottom
+            new(0.0f, -0.4f),   // Bottom
+            new(-.35f, -0.2f),  // LeftBottom
+            new(-0.35f, 0.2f),  // LeftTop
+            new(0.0f, 0.4f)     // Top
         };
 
         [SerializeField]
@@ -62,12 +72,13 @@ namespace Blocks
         public float gravityStrength = 1.0f;
 
         private Rigidbody2D _rigidBody;
+        private Light2D _light2D;
 
         /// <summary>
         /// Maps block's <see cref="EdgeIndex"/> to <see cref="Connection"/> on that edge.
         /// </summary>
         private readonly Connection[] _links = {
-            new(), new(), new(), new(), new(), new(),
+            new(), new(), new(), new(), new(), new()
         };
         
         private class Connection
@@ -88,10 +99,9 @@ namespace Blocks
             get => _blockType;
             protected set
             {
-                Light2D lightComponent = GetComponent<Light2D>();
-                if (lightComponent != null)
+                if (_light2D is not null)
                 {
-                    lightComponent.color = UnityColorFromType(value);
+                    _light2D.color = UnityColorFromType(value);
                 }
                 _blockType = value;
             }
@@ -133,26 +143,26 @@ namespace Blocks
                 _matchProperty = value;
             }
         }
-
+        
         /// <summary>
         /// Processes block's <see cref="IMatchProperty"/> when matched.
         /// </summary>
         /// <returns>Match processing modification.</returns>
         public EMatchPropertyOutcome CheckMatchProperty()
         {
-            EMatchPropertyOutcome outcome = EMatchPropertyOutcome.ContinueNormalMatching;
-            
-            if (_matchProperty != null)
+            if (_matchProperty == null)
             {
-                outcome = _matchProperty.Execute(out bool removeProperty);
-                if (removeProperty)
-                {
-                    Assert.IsFalse(outcome == EMatchPropertyOutcome.SpecialMatchRule, 
-                        "Special match rule requires property to be present for ExecuteSpecial");
-                    _matchProperty = null;
-                }
+                return EMatchPropertyOutcome.ContinueNormalMatching;
             }
-
+            
+            EMatchPropertyOutcome outcome = _matchProperty.Execute(out bool removeProperty);
+            if (removeProperty)
+            {
+                Assert.IsFalse(outcome == EMatchPropertyOutcome.SpecialMatchRule, 
+                    "Special match rule requires property to be present for ExecuteSpecial");
+                _matchProperty = null;
+            }
+            
             return outcome;
         }
 
@@ -424,6 +434,7 @@ namespace Blocks
         {
             _blocksLayer = LayerMask.NameToLayer("blocks");
             _rigidBody = GetComponent<Rigidbody2D>();
+            _light2D =  GetComponent<Light2D>();
         }
 
         /// <summary>
@@ -477,8 +488,10 @@ namespace Blocks
                 // don't need to process already attached ones
                 return;
             }
+            
+            GameObject otherObj = other.gameObject;
 
-            if (other.gameObject.layer != _blocksLayer)
+            if (otherObj.layer != _blocksLayer)
             {
                 // don't process if the other block is also a "floating" blocks
                 return;
@@ -489,13 +502,14 @@ namespace Blocks
 
             // find other block closes edge to this block
             (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) otherEdge =
-                FindClosestColliderEdge(other.gameObject.GetComponent<PolygonCollider2D>(),
+                FindClosestColliderEdge(otherObj.GetComponent<PolygonCollider2D>(),
                     other.collider.ClosestPoint(transform.position));
             Debug.DrawLine(otherEdge.point2, otherEdge.point2, Color.green, 3);
 
-            // check if other block's edge is free
+            // check if other block is alive and the edge is free
             // skip collision processing if it is not
-            if (other.gameObject.GetComponent<BasicBlock>().GetNeighbour(otherEdge.edgeIdx) != null)
+            BasicBlock otherObjBlock = otherObj.GetComponent<BasicBlock>();
+            if (otherObjBlock.Destroyed || otherObjBlock.GetNeighbour(otherEdge.edgeIdx) != null)
             {
                 transform.parent = initialParent;
                 return;
@@ -512,19 +526,19 @@ namespace Blocks
             Vector2 otherEdgeMidpoint = (otherEdge.point1 + otherEdge.point2) / 2;
 
 #if ENABLE_LOGS
-            (_, _, EdgeIndex idx) =
-                FindClosestColliderEdge(other.gameObject.GetComponent<PolygonCollider2D>(), otherEdgeMidpoint);
-            Logger.Debug("side (our) " + thisEdge.edgeIdx + " their " + otherEdge.edgeIdx + " computed " + idx);
+            (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) computed =
+                FindClosestColliderEdge(otherObj.GetComponent<PolygonCollider2D>(), otherEdgeMidpoint);
+            Logger.Debug($"side (our) {thisEdge.edgeIdx} their {otherEdge.edgeIdx} computed {computed.edgeIdx}");
 #endif // ENABLE_LOGS
 
             // compute and apply rotation between 2 edge midpoints
             Vector2 dir1 = ((Vector2)transform.position - thisEdgeMidpoint).normalized;
-            Vector2 dir2 = (otherEdgeMidpoint - (Vector2)other.gameObject.transform.position).normalized;
+            Vector2 dir2 = (otherEdgeMidpoint - (Vector2)otherObj.transform.position).normalized;
             Quaternion rotation = Quaternion.FromToRotation(dir1, dir2);
             transform.rotation *= rotation;
 
             // set correct position
-            transform.position = (Vector2)other.gameObject.transform.position + dir2 * edgeAttachPositionOffset;
+            transform.position = (Vector2)otherObj.transform.position + dir2 * edgeAttachPositionOffset;
 
             if (LinkWithNeighbours(_blocksLayer) == 0)
             {
@@ -571,7 +585,18 @@ namespace Blocks
         /// <returns>Null or a neighbour as <see cref="BasicBlock"/>.</returns>
         public BasicBlock GetNeighbour(EdgeIndex edge)
         {
-            return _links[(int)edge]?.Neighbour;
+            return _links[(int)edge].Neighbour;
+        }
+        
+        /// <summary>
+        /// Gets neighbour attached to provided edge.
+        /// </summary>
+        /// <param name="edge">Edge index.</param>
+        /// <returns>Null or a neighbour as <see cref="BasicBlock"/>.</returns>
+        public BasicBlock GetNeighbour(int edge)
+        {
+            Assert.IsTrue(edge >= 0 && edge < _links.Length, "invalid edge index");
+            return _links[edge].Neighbour;
         }
 
         /// <summary>
@@ -588,7 +613,6 @@ namespace Blocks
                 return;
             }
             
-            Destroyed = true;
             EdgeIndex edge;
             for (int i = 0; i < EdgeIndexes.Length; i++)
             {
@@ -619,6 +643,8 @@ namespace Blocks
                 }
             }
             
+            Destroyed = true;
+            OnBlockDestroyed?.Invoke(this);
             Destroy(gameObject);
         }
 
@@ -666,10 +692,13 @@ namespace Blocks
 
                 GameObject hitObj = hit.collider.gameObject;
                 BasicBlock neighbour = hitObj.GetComponent<BasicBlock>();
+                if (neighbour.Destroyed)
+                {
+                    continue;
+                }
 #if DEBUG
                 if (!neighbour)
                 {
-                    // not a block
                     Logger.Debug("unexpected object in blocks layer");
                     continue;
                 }
@@ -729,10 +758,9 @@ namespace Blocks
             }
             
             // disable light
-            Light2D lightComponent = GetComponent<Light2D>();
-            if (lightComponent is not null)
+            if (_light2D is not null)
             {
-                lightComponent.enabled = false;
+                _light2D.enabled = false;
             }
 
             return totalLinks;
@@ -762,7 +790,7 @@ namespace Blocks
                 EMatchPropertyOutcome outcome = _activeProperty.Execute(out bool removeProperty);
                 if (outcome == EMatchPropertyOutcome.SpecialMatchRule)
                 {
-                    _activeProperty.ExecuteSpecial(this, new ());
+                    _activeProperty.ExecuteSpecial(this, new HashSet<BasicBlock>());
                 }
                 
                 if (removeProperty)

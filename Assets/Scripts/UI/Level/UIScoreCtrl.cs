@@ -48,7 +48,7 @@ namespace UI.Level
         {
             // play bump animation if present
             UILabelBumpAnimator bumpAnimator = label.GetComponent<UILabelBumpAnimator>();
-            if (bumpAnimator != null)
+            if (bumpAnimator is not null)
             {
                 bumpAnimator.enabled = true;
             }

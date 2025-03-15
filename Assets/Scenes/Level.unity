@@ -27010,46 +27010,48 @@ MonoBehaviour:
   envAnimator: {fileID: 1453179009}
   level:
     seed: 0
-    obstructionIdx: 0
-    blocksInLevel: []
-    startBlocksNum: 0
-    startBlocksChainedBlockChancePercent: 0
+    obstructionIdx: 3
+    blocksInLevel:
+    - Red
+    - Blue
+    startBlocksNum: 25
+    startBlocksChainedBlockChancePercent: 10
     goal:
-      score: 0
+      score: 9999
       blocks: []
     limit:
-      time: 1
+      time: 0
       spawns: 0
     spawn:
       batchChance: 0
       batchMin: 0
       batchMax: 0
-      timeMin: 0
-      timeMax: 0
+      timeMin: 2
+      timeMax: 3
       timeDecreasePerTimeLimitPercent: 0
-      timeDecreasePerTimeSeconds: 0
-      timeDecreaseByTimePercent: 0
-      stoneBlockChancePercent: 0
-      chainedBlockChancePercent: 0
-      glowBlockChancePercent: 0
+      timeDecreasePerTimeSeconds: 1
+      timeDecreaseByTimePercent: 10
+      stoneBlockChancePercent: 10
+      chainedBlockChancePercent: 2
+      glowBlockChancePercent: 5
     block:
-      speedMin: 0
-      speedMax: 0
+      speedMin: 2
+      speedMax: 3
       speedIncreasePerTimeLimitPercent: 0
-      speedIncreasePerTimeSeconds: 0
-      speedIncreaseBySpeedPercent: 0
+      speedIncreasePerTimeSeconds: 0.5
+      speedIncreaseBySpeedPercent: 10
     multiplier:
       decayTime: 0
       decayRate: 0
       max: 0
-    starRewards: 
+    starRewards: f4010000f4010000f4010000
   scoreConfig: {fileID: 11400000, guid: 0d08571074f2d084d8ac134c153afe69, type: 2}
   availableBlocks: 01000000
   obstructionTmParent: {fileID: 418289023}
   sfxOnObstruction: {fileID: 8300000, guid: edf9aeeb496949447abfcb2471b0322a, type: 3}
   obstructionTilemaps: {fileID: 11400000, guid: 7bbd906956a76f840b32cacdbe5b6f34, type: 2}
-  testSeed: 0
-  testSpawnNum: 10
+  testSeed: 18
+  testSpawnNum: 37
   testRecreateStartupBlocks: 0
 --- !u!4 &1617644880
 Transform:

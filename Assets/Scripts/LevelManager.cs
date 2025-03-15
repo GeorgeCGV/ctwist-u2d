@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Blocks;
 using Blocks.SpecialProperties;
 using Configs;
@@ -13,7 +12,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Utils;
 using static Model.BlockType;
-using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(MultiplierHandler), typeof(Spawner))]
@@ -122,6 +120,15 @@ public class LevelManager : MonoBehaviour
     private readonly HashSet<BasicBlock> _notAttachedBlocks = new();
 
     /// <summary>
+    /// Stores spawned but not yet attached blocks.
+    /// </summary>
+    /// <remarks>
+    /// Managing references to attached blocks helps to avoid expensive
+    /// calls during blocks iteration.
+    /// </remarks>
+    private readonly HashSet<BasicBlock> _attachedBlocks = new(FieldBlocksCapacity);
+
+    /// <summary>
     /// Blocks stats.
     /// </summary>
     private readonly BlocksStats _blocksStats = new(Enum.GetValues(typeof(EBlockType)).Length);
@@ -189,8 +196,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField]
     private ObstructionPrefabsConfig obstructionTilemaps;
     
-    #endregion
-    
     /// <summary>
     /// Stores blocks that collided with obstructions and must be destroyed.
     /// </summary>
@@ -208,6 +213,63 @@ public class LevelManager : MonoBehaviour
     /// </remarks>
     private readonly HashSet<BasicBlock> _obstructedToDestroy = new(25);
     
+    #endregion
+    
+    /// <summary>
+    /// Traverses blocks starting from start block.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Uses BFS.
+    /// </para>
+    /// <para>
+    /// Ignores destroyed blocks.
+    /// </para>
+    /// </remarks>
+    /// <param name="startBlock">Starting block.</param>
+    /// <param name="visitedBlocks">Visited blocks following provided condition.</param>
+    /// <param name="condition">
+    /// Optional condition to check the blocks based on some criteria, can be Null.
+    /// <para>
+    /// Takes current block and its neighbour as parameters. Returns True, if neighbour shall be visited.
+    /// </para>
+    /// </param>
+    public static void TraverseBlocks(BasicBlock startBlock, HashSet<BasicBlock> visitedBlocks,
+                                      Func<BasicBlock, BasicBlock, bool> condition = null)
+    {
+        // Stopwatch traverseStopwatch = Stopwatch.StartNew();
+
+        Queue<BasicBlock> blocks = new();
+
+        blocks.Enqueue(startBlock);
+        visitedBlocks.Add(startBlock);
+
+        while (blocks.Count != 0)
+        {
+            BasicBlock current = blocks.Dequeue();
+            for (int edgeIndex = 0; edgeIndex < BasicBlock.EdgeIndexes.Length; edgeIndex++)
+            {
+                BasicBlock other = current.GetNeighbour(edgeIndex);
+                if (other is null || visitedBlocks.Contains(other) || other.Destroyed)
+                {
+                    continue;
+                }
+                
+                bool shouldAdd = condition == null || condition(current, other);
+                if (!shouldAdd)
+                {
+                    continue;
+                }
+                
+                blocks.Enqueue(other);
+                visitedBlocks.Add(other);
+            }
+        }
+        
+        // traverseStopwatch.Stop();
+        // Debug.Log($"TraverseBlocks {traverseStopwatch.ElapsedTicks} ticks {traverseStopwatch.ElapsedMilliseconds} ms");
+    }
+        
     private int Score
     {
         // no need for getter, avoid extra fn. call
@@ -264,14 +326,14 @@ public class LevelManager : MonoBehaviour
     {
         return IsStarted() && !IsPaused() && !_isGameOver;
     }
-
+    
     private IEnumerator GameOverDelayed(bool won)
     {
+        DestroyAllBlocks();
+
         // delay to give effects some time
         yield return new WaitForSeconds(1);
         
-        DestroyAllBlocks();
-
         // the music can be stopped to not interfere
         // with won / lost sfx.
         AudioManager.Instance.StopMusic();
@@ -316,7 +378,6 @@ public class LevelManager : MonoBehaviour
         {
             totalScore += bonusScore;
         }
-
         
         // determine how many stars were earned
         Assert.AreEqual(3, level.starRewards.Length, "level data has misses starRewards, expected 3");
@@ -365,7 +426,7 @@ public class LevelManager : MonoBehaviour
             minutes = Mathf.FloorToInt(timeDiffInSeconds / 60);
 
             // 10 seconds clip
-            if (!_onNearTimeoutStarted && (timeDiffInSeconds <= nearTimeoutTime))
+            if (!_onNearTimeoutStarted && timeDiffInSeconds <= nearTimeoutTime)
             {
                 _onNearTimeoutStarted = true;
                 AudioManager.Instance.PlaySfxPausable(sfxOnNearTimeout);
@@ -391,6 +452,7 @@ public class LevelManager : MonoBehaviour
         else
         {
             Instance = this;
+            BasicBlock.OnBlockDestroyed += OnBlockDestroyed;
             _isLevelStarted = false;
             _isGameOver = false;
             _score = 0;
@@ -432,12 +494,14 @@ public class LevelManager : MonoBehaviour
             int matchesTarget = level.goal.blocks.Length;
             foreach (BlocksGoal blocksGoal in level.goal.blocks)
             {
-                if (_blocksStats.Matched.TryGetValue(blocksGoal.ParsedType, out int currentMatches))
+                if (!_blocksStats.Matched.TryGetValue(blocksGoal.ParsedType, out int currentMatches))
                 {
-                    if (currentMatches >= blocksGoal.amount)
-                    {
-                        matchesTarget--;
-                    }
+                    continue;
+                }
+                
+                if (currentMatches >= blocksGoal.amount)
+                {
+                    matchesTarget--;
                 }
             }
 
@@ -476,12 +540,14 @@ public class LevelManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        
+#if !UNITY_EDITOR // allow late update for editor tests
         if (!IsRunning())
         {
             return;
         }
-        
-        List<BasicBlock> floatingBlocks;
+#endif
+        List<BasicBlock> floatingBlocks = new();
 
         // process match related event first
         // that allows player to get points
@@ -490,7 +556,7 @@ public class LevelManager : MonoBehaviour
         if (_matchPerformedInFrame)
         {
             // find floating/disconnected blocks, grant score and destroy them
-            floatingBlocks = GetFloatingBlocks();
+            GetFloatingBlocks(floatingBlocks);
 
             int floatingScore = scoreConfig.scorePerFloating * floatingBlocks.Count * _multiplier.Multiplier;
             if (floatingScore != 0)
@@ -525,9 +591,11 @@ public class LevelManager : MonoBehaviour
             }
 
             _matchPerformedInFrame = false;
+            floatingBlocks.Clear();
         }
         
-        // only run if there are blocks collided with the obstruction tm (obstacles)
+        // only run if there are any blocks collided
+        // with an obstacle/obstruction tm this frame
         if (_obstructedToDestroy.Count != 0)
         {
             AudioManager.Instance.PlaySfx(sfxOnObstruction);
@@ -538,7 +606,7 @@ public class LevelManager : MonoBehaviour
             }
             _obstructedToDestroy.Clear();
             // then clean floating
-            floatingBlocks = GetFloatingBlocks();
+            GetFloatingBlocks(floatingBlocks);
             foreach (BasicBlock floatingBlock in floatingBlocks)
             {
                 floatingBlock.DestroyBlock();
@@ -607,8 +675,15 @@ public class LevelManager : MonoBehaviour
         // before level fully starts. Therefore, we shall remove
         // dangling subscription
         UILevelCoordinator.OnGameStartAllAnimationsDone -= OnLevelStart;
+        // subscribed in awake
+        BasicBlock.OnBlockDestroyed -= OnBlockDestroyed;
     }
-    
+
+    private void OnBlockDestroyed(BasicBlock block)
+    {
+        _attachedBlocks.Remove(block);
+    }
+
     #endregion Unity
 
     /// <summary>
@@ -635,66 +710,24 @@ public class LevelManager : MonoBehaviour
     /// <remarks>
     /// Floating blocks - previously attached blocks that lost connection to the central block.
     /// </remarks>
-    /// <returns>
-    /// List of floating block game objects, never <c>null</c>.
-    /// </returns>
-    private List<BasicBlock> GetFloatingBlocks()
+    private void GetFloatingBlocks(List<BasicBlock> floatingBlocks)
     {
-        List<BasicBlock> floatingBlocks = new List<BasicBlock>();
-        // iterate over all blocks from the central
-        // and reset the 'attached' flag
-        Queue<BasicBlock> blocks = new();
-        blocks.Enqueue(_central);
+        HashSet<BasicBlock> visitedBlocks = new();
         
-        while (blocks.Count != 0)
-        {
-            BasicBlock current = blocks.Dequeue();
-            if (current.Destroyed)
-            {
-                continue;
-            }
-    
-            current.attached = false;
-    
-            foreach (BasicBlock.EdgeIndex edgeIndex in Enum.GetValues(typeof(BasicBlock.EdgeIndex)))
-            {
-                BasicBlock other = current.GetNeighbour(edgeIndex);
-                if (other == null)
-                {
-                    continue;
-                }
-    
-                if (other.attached)
-                {
-                    blocks.Enqueue(other);
-                }
-            }
-        }
-    
-        // iterate over all active blocks and find all blocks that
+        // iterate over all blocks from the central
+        TraverseBlocks(_central, visitedBlocks);  
+
+        // iterate over all attached blocks and find all blocks that
         // still have 'attached' set
-        foreach (Transform child in _activeBlocks.transform)
+        foreach (BasicBlock attachedBlock in _attachedBlocks)
         {
-            BasicBlock block = child.gameObject.GetComponent<BasicBlock>();
-            if ((block == null) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
+            if (attachedBlock.Destroyed || visitedBlocks.Contains(attachedBlock))
             {
                 continue;
             }
-    
-            // invert the attached flag
-            // block is floating if we couldn't
-            // reach the block from central
-            block.attached = !block.attached;
-    
-            // after attached flag inversion
-            // it has correct state
-            if (!block.attached)
-            {
-                floatingBlocks.Add(block);
-            }
+            attachedBlock.attached = false;
+            floatingBlocks.Add(attachedBlock);
         }
-    
-        return floatingBlocks;
     }
     
     // private readonly HashSet<BasicBlock> _obstructedToDestroy = new(FieldBlocksCapacity);
@@ -720,52 +753,6 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Looks for matches.
-    /// </summary>
-    /// <remarks>
-    /// Uses BFS.
-    /// </remarks>
-    /// <param name="start">Starting block.</param>
-    /// <param name="matches">Hashset of found matches.</param>
-    private void FindMatches(BasicBlock start, HashSet<BasicBlock> matches)
-    {
-        Stopwatch findMatchesStopwatch = Stopwatch.StartNew();
-        
-        Queue<BasicBlock> blocks = new();
-        blocks.Enqueue(start);
-        
-        matches.Add(start);
-
-        while (blocks.Count != 0)
-        {
-            BasicBlock current = blocks.Dequeue();
-
-            foreach (BasicBlock.EdgeIndex edgeIndex in Enum.GetValues(typeof(BasicBlock.EdgeIndex)))
-            {
-                BasicBlock other = current.GetNeighbour(edgeIndex);
-                if (other == null)
-                {
-                    continue;
-                }
-
-                if (matches.Contains(other))
-                {
-                    continue;
-                }
-
-                if (current.MatchesWith(other))
-                {
-                    blocks.Enqueue(other);
-                    matches.Add(other);
-                }
-            }
-        }
-        
-        findMatchesStopwatch.Stop();
-        Debug.Log($"FindMatches {findMatchesStopwatch.ElapsedTicks} ticks {findMatchesStopwatch.ElapsedMilliseconds} ms");
-    }
-
-    /// <summary>
     /// Handles block collision event.
     /// </summary>
     /// <remarks>
@@ -779,8 +766,11 @@ public class LevelManager : MonoBehaviour
         AudioManager.Instance.PlaySfx(attachedBlock.SfxOnAttach());
         
         _notAttachedBlocks.Remove(attachedBlock);
+        _attachedBlocks.Add(attachedBlock);
 
-        FindMatches(attachedBlock, _matches);
+        // iterate over all blocks from the attachedBlock
+        TraverseBlocks(attachedBlock, _matches, (block, neighbour) => block.MatchesWith(neighbour));  
+        // FindMatches(attachedBlock, _matches);
 
         int matchedAmount = _matches.Count;
         Logger.Debug($"Got {matchedAmount} matches");
@@ -836,18 +826,37 @@ public class LevelManager : MonoBehaviour
             Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
         }
 
+#if UNITY_EDITOR 
+        // allows onValidate to start the level with Editor's data
+        if (data == null)
+        {
+            level.ParseInternal();
+        }
+        else
+        {
+            level = data;
+        }
+#else
+        Assert.IsNotNull(data, "LevelData is null");
         level = data;
+#endif
 
         // create obstructions
         if (level.obstructionIdx >= 0)
         {
-            GameObject tilemap = obstructionTilemaps.obstructionTilemapPrefabs[data.obstructionIdx];
-            Assert.IsTrue(tilemap != null && tilemap.GetComponent<ObstacleCollisionDetector>() != null,
+            Assert.IsNotNull(obstructionTilemaps, "missing obstructionTilemaps");
+            Assert.IsNotNull(obstructionTmParent, "missing obstructionTmParent");
+            Assert.IsTrue(level.obstructionIdx >= 0 && level.obstructionIdx < obstructionTilemaps.obstructionTilemapPrefabs.Count, 
+                 "level requires obstruction idx that is not present");
+            
+            GameObject tilemap = obstructionTilemaps.obstructionTilemapPrefabs[level.obstructionIdx];
+            Assert.IsTrue(tilemap?.GetComponent<ObstacleCollisionDetector>() != null,
                 "missing obstruction tilemap; must have ObstacleCollisionDetector script");
+            
             Instantiate(tilemap, obstructionTmParent.transform);
         }
 
-        Assert.IsFalse((level.ParsedBlocksInLevel == null) || (level.ParsedBlocksInLevel.Length == 0),
+        Assert.IsFalse(level.ParsedBlocksInLevel == null || level.ParsedBlocksInLevel.Length == 0,
             "level must have blocks");
         availableBlocks.AddRange(level.ParsedBlocksInLevel);
 
@@ -877,7 +886,7 @@ public class LevelManager : MonoBehaviour
         Instantiate(efxOnStart, _central.transform.position, Quaternion.identity).Play();
 
         // enable blocks layer render
-        if (Camera.main != null)
+        if (Camera.main is not null)
         {
             Camera.main.cullingMask |= 1 << LayerMask.NameToLayer("blocks");
         }
@@ -937,6 +946,7 @@ public class LevelManager : MonoBehaviour
             newBlock.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
             newBlock.GetComponent<Rigidbody2D>().totalForce = Vector2.zero;
             newBlock.attached = true;
+            _attachedBlocks.Add(newBlock);
             // add to blocks layer
             // as physics update won't run between object linkage - force physics update
             // that shall update rigidbody after applied transforms
@@ -964,12 +974,12 @@ public class LevelManager : MonoBehaviour
     /// <summary>
     /// Destroy all blocks (spawned, attached, floating) except <see cref="CentralBlock"/>.
     /// </summary>
-    private void DestroyAllBlocks()
+    private static void DestroyAllBlocks()
     {
         BasicBlock[] allObjects = FindObjectsByType<BasicBlock>(FindObjectsSortMode.None);
         foreach (BasicBlock block in allObjects)
         {
-            if ((!block) || (block is CentralBlock) || (!block.gameObject.activeInHierarchy) || block.Destroyed)
+            if (!block || block is CentralBlock || !block.gameObject.activeInHierarchy || block.Destroyed)
             {
                 continue;
             }
@@ -989,7 +999,7 @@ public class LevelManager : MonoBehaviour
         {
             return;
         }
-
+        
         testSeed++;
         DestroyAllBlocks();
         CreateStartupBlocks(testSeed, testSpawnNum);

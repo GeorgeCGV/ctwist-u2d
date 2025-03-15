@@ -166,25 +166,27 @@ public class LevelLoader : MonoBehaviour
     /// </remarks>
     private void OnLoadScreenAppearAnimationDone()
     {
-        if (_levelId >= 0)
+        if (_levelId < 0)
         {
-            // load level data
-            _levelData = LoadLevelData(_levelId);
-            if (_levelData == null)
-            {
-                // abort, hide load screen
-                _levelId = LevelIdxAborted;
-                _animator.SetTrigger(AnimatorTriggerClose);
-                return;
-            }
-
-            // subscribe to the scene manager before starting
-            // scene loading, that allows us to know
-            // when the scene has loaded
-            SceneManager.sceneLoaded += OnSceneLoaded;
-            // start scene load
-            StartCoroutine(ChangeScene(LevelSceneIdx));
+            return;
         }
+        
+        // load level data
+        _levelData = LoadLevelData(_levelId);
+        if (_levelData == null)
+        {
+            // abort, hide load screen
+            _levelId = LevelIdxAborted;
+            _animator.SetTrigger(AnimatorTriggerClose);
+            return;
+        }
+
+        // subscribe to the scene manager before starting
+        // scene loading, that allows us to know
+        // when the scene has loaded
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        // start scene load
+        StartCoroutine(ChangeScene(LevelSceneIdx));
     }
 
     /// <summary>
@@ -210,17 +212,18 @@ public class LevelLoader : MonoBehaviour
     /// </remarks>
     private void OnLoadScreenDisappearAnimationDone()
     {
-        if (_levelId == LevelIdxOk)
+        switch (_levelId)
         {
-            // handle level loaded state
-            _canvas.enabled = false;
-            // pass control to level manager
-            LevelManager.Instance.OnLevelSceneLoaded(_levelData);
-        }
-        else if (_levelId == LevelIdxAborted)
-        {
-            // handle level load aborted state
-            _canvas.enabled = false;
+            case LevelIdxOk:
+                // handle level loaded state
+                _canvas.enabled = false;
+                // pass control to level manager
+                LevelManager.Instance.OnLevelSceneLoaded(_levelData);
+                break;
+            case LevelIdxAborted:
+                // handle level load aborted state
+                _canvas.enabled = false;
+                break;
         }
     }
         

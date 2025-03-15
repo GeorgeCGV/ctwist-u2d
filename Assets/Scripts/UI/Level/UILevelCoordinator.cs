@@ -98,6 +98,8 @@ namespace UI.Level
         /// </remarks>
         [SerializeField]
         private TextMeshProUGUI lvlLabel;
+        
+        private Canvas _canvas;
 
         /// <summary>
         /// Checks that critical references are set.
@@ -113,6 +115,8 @@ namespace UI.Level
             Assert.IsNotNull(resultsCtrl, "missing results controller");
             Assert.IsNotNull(goalCtrl, "missing goal controller");
             Assert.IsNotNull(limitCtrl, "missing limit controller");
+            
+            _canvas = GetComponent<Canvas>();
         }
 
         private void OnEnable()
@@ -142,21 +146,22 @@ namespace UI.Level
         /// <param name="pos">World position.</param>
         private void HandleAnnounce(string text, Vector2 pos)
         {
-            if (Camera.main == null)
+            var mainCamera = Camera.main;
+            if (mainCamera is null)
             {
                 // we won't be able to convert to screen point in such case
                 return;
             }
 
             // convert world position to screen position
-            Vector2 screenPosition = Camera.main.WorldToScreenPoint(pos);
+            Vector2 screenPosition = mainCamera.WorldToScreenPoint(pos);
             // convert screen position to UI local position
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                GetComponent<Canvas>().transform as RectTransform,
-                screenPosition, GetComponent<Canvas>().worldCamera, out Vector2 uiPosition);
+                _canvas.transform as RectTransform,
+                screenPosition, _canvas.worldCamera, out Vector2 uiPosition);
 
             // instantiate with Canvas as parent
-            GameObject annotation = Instantiate(annotationPrefab, GetComponent<Canvas>().transform);
+            GameObject annotation = Instantiate(annotationPrefab, _canvas.transform);
             annotation.GetComponent<UISelfDestroyAnnotationFadeOut>().Init(text);
             // render behind pause panel
             annotation.transform.SetSiblingIndex(4);
