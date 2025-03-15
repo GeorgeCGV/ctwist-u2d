@@ -65,7 +65,7 @@ namespace Blocks.SpecialProperties
         public EMatchPropertyOutcome Execute(out bool removeProperty)
         {
             // block shall remove this property
-            removeProperty = false;
+            removeProperty = true;
 
             // play sfx, efx, and destroy the chain
             AudioManager.Instance.PlaySfx(_config.sfxOnDestroy);
