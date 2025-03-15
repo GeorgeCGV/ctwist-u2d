@@ -21,7 +21,13 @@ namespace Blocks
             attached = true;
             BlockType = EBlockType.Central;
         }
-
+        
+        public override bool MatchesWith(BasicBlock other)
+        {
+            // can't be matched
+            return false;
+        }
+        
         protected override void FixedUpdate()
         {
             // we don't need gravity in central block
