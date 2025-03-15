@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Blocks.SpecialProperties;
 using UnityEngine;
@@ -37,16 +36,6 @@ namespace Blocks
         
         public static readonly EdgeIndex[] EdgeIndexes = (EdgeIndex[])Enum.GetValues(typeof(EdgeIndex));
 
-        // private static readonly Dictionary<EdgeIndex, Vector2> EdgeOffsets = new(6)
-        // {
-        //     { EdgeIndex.RightTop, new Vector2(0.35f, 0.2f) },
-        //     { EdgeIndex.RightBottom, new Vector2(0.35f, -0.2f) },
-        //     { EdgeIndex.Bottom, new Vector2(0.0f, -0.4f) },
-        //     { EdgeIndex.LeftBottom, new Vector2(-.35f, -0.2f) },
-        //     { EdgeIndex.LeftTop, new Vector2(-0.35f, 0.2f) },
-        //     { EdgeIndex.Top, new Vector2(0.0f, 0.4f) },
-        // };
-
         /// <summary>
         /// Maps <see cref="EdgeIndex"/> to the offset.
         /// </summary>
@@ -75,21 +64,19 @@ namespace Blocks
         private Rigidbody2D _rigidBody;
 
         /// <summary>
-        /// Maps block's <see cref="EdgeIndex"/> to its corresponding <see cref="AnchoredJoint2D"/>.
+        /// Maps block's <see cref="EdgeIndex"/> to <see cref="Connection"/> on that edge.
         /// </summary>
-        /// <remarks>
-        /// Edge that is connected to another block won't be <c>null</c>.
-        /// </remarks>
-        private readonly Dictionary<EdgeIndex, AnchoredJoint2D> _links = new(6)
-        {
-            { EdgeIndex.RightTop, null },
-            { EdgeIndex.RightBottom, null },
-            { EdgeIndex.Bottom, null },
-            { EdgeIndex.LeftBottom, null },
-            { EdgeIndex.LeftTop, null },
-            { EdgeIndex.Top, null },
+        private readonly Connection[] _links = {
+            new(), new(), new(), new(), new(), new(),
         };
-
+        
+        private class Connection
+        {
+            public AnchoredJoint2D Joint;
+            public BasicBlock Neighbour;
+            public EdgeIndex NeighbourEdgeIndex;
+        }
+        
         private EBlockType _blockType;
 
         /// <summary>
@@ -130,6 +117,12 @@ namespace Blocks
 
         private IMatchProperty _matchProperty;
 
+        /// <summary>
+        /// Get/Set match property.
+        /// </summary>
+        /// <remarks>
+        /// Invokes <see cref="IMatchProperty.Activate"/>.
+        /// </remarks>
         public IMatchProperty MatchProperty
         {
             get => _matchProperty;
@@ -294,29 +287,9 @@ namespace Blocks
             }
         }
         
- #endif // UNITY_EDITOR
+#endif // UNITY_EDITOR
         
         #endregion Editor
-
-        /// <summary>
-        /// Gets linked neighbour (if any).
-        /// </summary>
-        /// <param name="link">Linked joint.</param>
-        /// <returns>Null or a neighbour as GameObject.</returns>
-        private BasicBlock GetLinkNeighbour(AnchoredJoint2D link)
-        {
-            if (link is null)
-            {
-                return null;
-            }
-
-            if (link.gameObject == gameObject)
-            {
-                return link.connectedBody.gameObject.GetComponent<BasicBlock>();
-            }
-
-            return link.gameObject.GetComponent<BasicBlock>();
-        }
 
         /// <summary>
         /// Gets gravity direction, constantly applied in UpdateFixed.
@@ -328,69 +301,58 @@ namespace Blocks
         }
 
         /// <summary>
-        /// Removes link (joint) from the block links.
+        /// Removes this block's edge link to another block.
         /// </summary>
         /// <remarks>
         /// Doesn't destroy the joint object.
         /// </remarks>
-        /// <param name="linkToUnlink"></param>
-        private void Unlink(AnchoredJoint2D linkToUnlink)
+        /// <param name="edge">Edge index.</param>
+        private void Unlink(EdgeIndex edge)
         {
-            EdgeIndex edge;
-            for (int i = 0; i < EdgeIndexes.Length; i++)
-            {
-                edge = EdgeIndexes[i];
-                AnchoredJoint2D link = _links[EdgeIndexes[i]];
-                if (link is null)
-                {
-                    continue;
-                }
-
-                if (link == linkToUnlink)
-                {
-                    _links[edge] = null;
-                    // each edge has individual links
-                    // break when found and removed
-                    break;
-                }
-            }
+            Connection link = _links[(int)edge];
+            link.Neighbour = null;
+            link.Joint = null;
         }
 
         /// <summary>
-        /// Sets provided joint as edge link.
+        /// Links this block's edge to another block at edge with joint.
         /// </summary>
-        /// <param name="edgeIdx">Edge index.</param>
-        /// <param name="joint">AnchoredJoint2D</param>
-        private void Link(EdgeIndex edgeIdx, AnchoredJoint2D joint)
+        /// <param name="edge">Edge index.</param>
+        /// <param name="otherBlock">Block that creates a link.</param>
+        /// <param name="otherBlockEdge">Edge of the other block where this is linked to.</param>
+        /// <param name="joint">Physical link.</param>
+        private void Link(EdgeIndex edge, BasicBlock otherBlock, EdgeIndex otherBlockEdge, AnchoredJoint2D joint)
         {
-            _links[edgeIdx] = joint;
+            Connection link = _links[(int)edge];
+            link.Neighbour = otherBlock;
+            link.Joint = joint;
+            link.NeighbourEdgeIndex = otherBlockEdge;
         }
 
         /// <summary>
-        /// Gets a link at provided edge.
+        /// Checks if link exists at provided edge.
         /// </summary>
-        /// <param name="edgeIdx">Edge index.</param>
-        /// <returns>AnchoredJoint2D or null.</returns>
-        private AnchoredJoint2D Link(EdgeIndex edgeIdx)
+        /// <param name="edge">Edge index.</param>
+        /// <returns>True if link is set, otherwise False.</returns>
+        private bool HasLink(EdgeIndex edge)
         {
-            return _links[edgeIdx];
+            return _links[(int)edge].Joint is not null;
         }
 
         /// <summary>
-        /// Returns the amount of links this block has.
+        /// Counts amount of set links the block has.
         /// </summary>
         /// <returns>Amount of links.</returns>
         public int LinksCount()
         {
             int ret = 0;
-            foreach (AnchoredJoint2D joint in _links.Values)
+            for (int i = 0; i < _links.Length; i++)
             {
-                if (joint is not null)
+                if (_links[i] is not null)
                 {
                     ret++;
                 }
             }
-
             return ret;
         }
         
@@ -561,12 +523,6 @@ namespace Blocks
             Quaternion rotation = Quaternion.FromToRotation(dir1, dir2);
             transform.rotation *= rotation;
 
-            // float angle11 = Mathf.Atan2(dir1.y, dir1.x) * Mathf.Rad2Deg;
-            // float angle22 = Mathf.Atan2(dir2.y, dir2.x) * Mathf.Rad2Deg;
-            // float rotationDifference = angle22 - angle11;
-            // Logger.Debug("rotationDifference " + rotationDifference);
-            // transform.Rotate(0, 0, rotationDifference);
-
             // set correct position
             transform.position = (Vector2)other.gameObject.transform.position + dir2 * edgeAttachPositionOffset;
 
@@ -615,7 +571,7 @@ namespace Blocks
         /// <returns>Null or a neighbour as <see cref="BasicBlock"/>.</returns>
         public BasicBlock GetNeighbour(EdgeIndex edge)
         {
-            return GetLinkNeighbour(_links[edge]);
+            return _links[(int)edge]?.Neighbour;
         }
 
         /// <summary>
@@ -633,26 +589,25 @@ namespace Blocks
             }
             
             Destroyed = true;
-
             EdgeIndex edge;
             for (int i = 0; i < EdgeIndexes.Length; i++)
             {
-                edge = EdgeIndexes[i];
-                AnchoredJoint2D link = _links[edge];
-                if (link is null)
+                edge = (EdgeIndex)i;
+                if (!HasLink(edge))
                 {
                     continue;
                 }
 
                 // remove the link from connected block
-                BasicBlock other = GetLinkNeighbour(link);
-                other?.Unlink(link);
+                BasicBlock other = _links[i].Neighbour;
+                AnchoredJoint2D joint = _links[i].Joint;
+                other.Unlink(_links[i].NeighbourEdgeIndex);
 
                 // remove it from this block
-                _links[edge] = null;
+                Unlink(edge);
 
                 // destroy the joint object
-                Destroy(link);
+                Destroy(joint);
             }
             
             if (withEfx)
@@ -690,8 +645,6 @@ namespace Blocks
             // that prevents possible attachment when block collides
             // with antagonistic neighbour side that doesn't have a neighbour set
             // draw directions
-            
-            // Dictionary<EdgeIndex, Linkage> neighbours = new Dictionary<EdgeIndex, Linkage>(EdgeOffsets.Count);
             Linkage[] neighbours = new Linkage[EdgeIndexes.Length];
             for (int i = 0; i < EdgeOffsets.Length; i++)
             {
@@ -726,7 +679,7 @@ namespace Blocks
                 (Vector2 closestPoint1, Vector2 closestPoint2, EdgeIndex edgeIdx) neighbourEdge =
                     FindClosestColliderEdge(neighbourCollider, hit.collider.ClosestPoint(transform.position));
 
-                if (neighbour.Link(neighbourEdge.edgeIdx) != null)
+                if (neighbour.HasLink(neighbourEdge.edgeIdx))
                 {
                     // edge is occupied, stop processing to prevent invalid state
                     return 0;
@@ -760,22 +713,24 @@ namespace Blocks
                 {
                     continue;
                 }
-                GameObject neighbour = neighbours[i].Neighbour;
-                FixedJoint2D joint = neighbour.AddComponent<FixedJoint2D>();
+                GameObject neighbourObj = neighbours[i].Neighbour;
+                BasicBlock neighbour = neighbourObj.GetComponent<BasicBlock>();
+                FixedJoint2D joint = neighbourObj.AddComponent<FixedJoint2D>();
 
                 joint.connectedBody = _rigidBody;
                 joint.breakAction = JointBreakAction2D.Ignore;
                 joint.dampingRatio = 1.0f;
                 joint.frequency = 1;
 
-                neighbour.GetComponent<BasicBlock>().Link(neighbours[i].NeighbourEdge, joint);
-                _links[(EdgeIndex)i] = joint;
+                neighbour.Link(neighbours[i].NeighbourEdge, this, (EdgeIndex)i, joint);
+                Link((EdgeIndex)i, neighbour, neighbours[i].NeighbourEdge, joint);
+                
                 totalLinks++;
             }
             
             // disable light
             Light2D lightComponent = GetComponent<Light2D>();
-            if (lightComponent != null)
+            if (lightComponent is not null)
             {
                 lightComponent.enabled = false;
             }
