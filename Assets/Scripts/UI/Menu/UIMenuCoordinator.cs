@@ -78,9 +78,9 @@ namespace UI.Menu
         private static void PanelAction(Animator panelAnimator, bool open)
         {
             panelAnimator.gameObject.SetActive(open);
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
             panelAnimator.SetTrigger(open ? AnimatorTriggerOpen : AnimatorTriggerClose);
-            AudioManager.Instance.PlaySfx(sfxKey: open ? AudioManager.Sfx.DialogAppear : AudioManager.Sfx.DialogDisappear);
+            AudioManager.Instance.PlaySfx(open ? AudioManager.Sfx.DialogAppear : AudioManager.Sfx.DialogDisappear);
         }
 
         /// <summary>

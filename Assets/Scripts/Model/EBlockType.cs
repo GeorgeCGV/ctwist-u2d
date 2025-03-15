@@ -32,8 +32,7 @@ namespace Model
             Purple,
             Pink,
             Black,
-            Stone,
-            None
+            Stone
         }
 
         /// <summary>

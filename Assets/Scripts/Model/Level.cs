@@ -171,7 +171,7 @@ namespace Model
                 return EGoalVariant.Score;
             }
 
-            if ((blocks != null) && (blocks.Length < 4))
+            if (blocks != null && blocks.Length < 4)
             {
                 return EGoalVariant.Blocks;
             }
@@ -228,12 +228,7 @@ namespace Model
                 return ELimitVariant.TimeLimit;
             }
 
-            if (spawns > 0)
-            {
-                return ELimitVariant.SpawnLimit;
-            }
-
-            return ELimitVariant.NoLimit;
+            return spawns > 0 ? ELimitVariant.SpawnLimit : ELimitVariant.NoLimit;
         }
     }
 

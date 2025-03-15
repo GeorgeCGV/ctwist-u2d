@@ -127,7 +127,7 @@ namespace Utils
                 else
                 {
                     Logger.Debug($"Not supported aspect {_currentAspect} rounded to {roundedAspect}");
-                    // try to approximate based on y = a * x^b + c
+                    // approximate based on y = a * x^b + c
                     _camera.orthographicSize = 4.639f * Mathf.Pow(roundedAspect, -1.081f) + 0.202f;
                 }
             }

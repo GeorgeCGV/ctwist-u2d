@@ -62,7 +62,7 @@ namespace Controls
             {
                 Contact = context.ReadValueAsButton(Contact),
                 InputId = context.ReadValue<int>(Id),
-                Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position),
+                Position = context.ReadValue<Vector2, Vector2MagnitudeComparer>(Position)
             };
         }
 

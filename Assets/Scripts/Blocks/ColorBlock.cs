@@ -71,7 +71,7 @@ namespace Blocks
         
         public override bool MatchesWith(BasicBlock other)
         {
-            return (other != null) && (other.BlockType == BlockType);
+            return other.BlockType == BlockType;
         }
 
         protected override ParticleSystem NewDestroyEfx()

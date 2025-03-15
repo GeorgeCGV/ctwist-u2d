@@ -193,7 +193,7 @@ namespace UI.Level
         private void HandleBeforeGameStarts(LevelData data)
         {
             // set level id
-            lvlLabel.text = "Level " + (data.ID + 1).ToString();
+            lvlLabel.text = $"Level {data.ID + 1}";
             // init goal(s)
             goalCtrl.Init(data.goal);
             // init limit(s)
@@ -248,10 +248,10 @@ namespace UI.Level
         private void OnPause()
         {
             AudioManager.Instance.PausableSfxPause(true);
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
             LevelManager.SetPaused(true);
             pauseMenu.SetActive(true);
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.DialogAppear);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.DialogAppear);
         }
 
         /// <summary>

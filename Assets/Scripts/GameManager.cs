@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
     /// <returns>True if the leve is final, otherwise False.</returns>
     public bool IsLastLevel(int levelId)
     {
-        return levelId == (availableLevelsAmount - 1);
+        return levelId == availableLevelsAmount - 1;
     }
 
     #region Unity
@@ -100,18 +100,19 @@ public class GameManager : MonoBehaviour
 
     public static int GetLevelStars(int levelId)
     {
-        return PlayerPrefs.GetInt("stars" + levelId, 0);
+        return PlayerPrefs.GetInt($"stars{levelId}", 0);
     }
 
     public static void SetLevelStars(int levelId, int stars)
     {
         // update level stars, but only if earned more than before
-        int previouslyEarnedAmount = PlayerPrefs.GetInt("stars" + levelId, 0);
-        if (stars > previouslyEarnedAmount)
+        int previouslyEarnedAmount = PlayerPrefs.GetInt($"stars{levelId}", 0);
+        if (stars <= previouslyEarnedAmount)
         {
-            PlayerPrefs.SetInt("stars" + levelId, stars);
-            PlayerPrefs.Save();
+            return;
         }
+        PlayerPrefs.SetInt($"stars{levelId}", stars);
+        PlayerPrefs.Save();
     }
 
     /// <summary>
@@ -123,18 +124,17 @@ public class GameManager : MonoBehaviour
     public static bool SetLevelScoreChecked(int levelId, int score)
     {
         // update level stars, but only if earned more than before
-        int previouslyEarnedAmount = PlayerPrefs.GetInt("score" + levelId, 0);
+        int previouslyEarnedAmount = PlayerPrefs.GetInt($"score{levelId}", 0);
 
-        if (score > previouslyEarnedAmount)
+        if (score <= previouslyEarnedAmount)
         {
-            PlayerPrefs.SetInt("score" + levelId, score);
-            PlayerPrefs.Save();
-            return true;
+            return false;
         }
-
-        return false;
+        
+        PlayerPrefs.SetInt($"score{levelId}", score);
+        PlayerPrefs.Save();
+        return true;
     }
-
 
     public static bool IsMusicOn()
     {

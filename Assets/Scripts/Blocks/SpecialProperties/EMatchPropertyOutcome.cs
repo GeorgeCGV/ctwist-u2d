@@ -22,6 +22,6 @@
         /// <remarks>
         /// Doesn't stop matched block's properties processing.
         /// </remarks>
-        StopMatching,
+        StopMatching
     }
 }

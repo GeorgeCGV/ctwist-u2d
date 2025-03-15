@@ -67,18 +67,20 @@ namespace UI.Menu
             // activate/deactivate play button if level is unlocked/locked
             playButton.interactable = unlocked;
 
-            if (unlocked)
+            if (!unlocked)
             {
-                // get level stars
-                int starsAmount = GameManager.GetLevelStars(id);
-                for (int i = 0; i < starsAmount; i++)
-                {
-                    stars[i].SetActive(true);
-                }
-
-                // highlight level that is unlocked and has no stars
-                highlight.SetActive(starsAmount == 0);
+                return;
             }
+            
+            // get level stars
+            int starsAmount = GameManager.GetLevelStars(id);
+            for (int i = 0; i < starsAmount; i++)
+            {
+                stars[i].SetActive(true);
+            }
+
+            // highlight level that is unlocked and has no stars
+            highlight.SetActive(starsAmount == 0);
         }
 
         /// <summary>
@@ -89,7 +91,7 @@ namespace UI.Menu
         /// </remarks>
         private void OnPlay()
         {
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.BtnClick);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.BtnClick);
             LevelLoader.Instance.LoadLevel(id);
         }
     }

@@ -43,7 +43,7 @@ namespace Blocks.SpecialProperties
 
         public void Activate(BasicBlock parent)
         {
-            _chain = new(GetType().Name)
+            _chain = new GameObject(GetType().Name)
             {
                 transform =
                 {

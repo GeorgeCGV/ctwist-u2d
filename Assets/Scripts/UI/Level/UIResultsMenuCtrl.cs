@@ -133,7 +133,7 @@ namespace UI.Level
             _animator.SetInteger(AnimatorStarsProp, results.EarnedStars);
             _animator.SetTrigger(AnimatorShowTriggerProp);
 
-            AudioManager.Instance.PlaySfx(sfxKey: AudioManager.Sfx.DialogAppear);
+            AudioManager.Instance.PlaySfx(AudioManager.Sfx.DialogAppear);
         }
 
         /// <summary>

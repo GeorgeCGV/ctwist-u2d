@@ -221,7 +221,7 @@ public class AudioManager : MonoBehaviour
                 clip = sfxDialogDisappear;
                 break;
             default:
-                Logger.Debug("No SFX found for key " + sfxKey);
+                Logger.Debug($"No SFX found for key {sfxKey}");
                 return;
         }
 

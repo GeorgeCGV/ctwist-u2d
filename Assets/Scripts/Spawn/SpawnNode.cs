@@ -159,7 +159,7 @@ namespace Spawn
 
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
         public float testSpawnIn = 1.0f;
-        public bool testSpawn = false;
+        public bool testSpawn;
         public BlockType.EBlockType testSpawnType = BlockType.EBlockType.Blue;
         
         private void OnValidate()

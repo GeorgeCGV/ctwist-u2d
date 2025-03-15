@@ -227,7 +227,7 @@ namespace Spawn
                 }
 
                 // enqueue new spawn entity
-                EBlockType type = (_stoneBlockChance > 0) && (Random.value <= _stoneBlockChance)
+                EBlockType type = _stoneBlockChance > 0 && Random.value <= _stoneBlockChance
                     ? EBlockType.Stone
                     : LevelManager.Instance.GetRandomColorTypeFromAvailable();
 
@@ -309,7 +309,7 @@ namespace Spawn
 
             // try to schedule spawn entities to nodes
             // as many as we have in the queue
-            while ((_freeSpawnNodes.Count != 0) && (_spawnQueue.Count != 0))
+            while (_freeSpawnNodes.Count != 0 && _spawnQueue.Count != 0)
             {
                 int rndFreeNodeIdx = Random.Range(0, _freeSpawnNodes.Count);
 

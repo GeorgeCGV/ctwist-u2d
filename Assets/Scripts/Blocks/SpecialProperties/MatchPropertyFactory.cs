@@ -19,7 +19,7 @@ namespace Blocks.SpecialProperties
             /// <summary>
             /// <see cref="GlowProperty"/>.
             /// </summary>
-            GlowProperty,
+            GlowProperty
         }
         
         public static MatchPropertyFactory Instance { get; private set; }

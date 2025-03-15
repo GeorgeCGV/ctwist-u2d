@@ -34,8 +34,8 @@ namespace Model
         public BlocksStats(int blockTypesLength)
         {
             Assert.IsTrue(blockTypesLength > 0, "the amount of blocks shall be > 0");
-            Matched = new(blockTypesLength);
-            TotalSpawned = new(blockTypesLength);
+            Matched = new Dictionary<EBlockType, int>(blockTypesLength);
+            TotalSpawned = new Dictionary<EBlockType, int>(blockTypesLength);
             TotalSpawnedBlocksAmount = 0;
         }
 

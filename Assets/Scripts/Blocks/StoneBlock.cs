@@ -26,7 +26,6 @@ namespace Blocks
         protected override void Awake()
         {
             base.Awake();
-            
             BlockType = EBlockType.Stone;
         }
         

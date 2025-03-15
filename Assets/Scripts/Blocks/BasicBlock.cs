@@ -128,7 +128,7 @@ namespace Blocks
             get => _matchProperty;
             set
             {
-                Assert.IsNotNull(value, "matchProperty is null");
+                Assert.IsNotNull(value, "set matchProperty can't be null");
                 value.Activate(this);
                 _matchProperty = value;
             }
