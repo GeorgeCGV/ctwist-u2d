@@ -4,6 +4,7 @@ using Model;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering.Universal;
+using Random = UnityEngine.Random;
 
 namespace Spawn
 {
@@ -139,8 +140,10 @@ namespace Spawn
                     block = _spawnEntity.Create();
 
                     block.transform.position = transform.position;
-                    block.gravityStrength = _spawnEntity.BlockStartSpeed();
-
+                    block.gravityStrength = _spawnEntity.BlockStartSpeed() * 0.25f;
+                    block.AddStartSpeed(_spawnEntity.BlockStartSpeed());
+                    float torque = _spawnEntity.BlockStartSpeed() * 0.2f;
+                    block.AddTorque(Random.Range(-torque, torque));
                     AudioManager.Instance.PlaySfx(sfxOnSpawn);
                     _spawnEntity = null;
                 }
@@ -159,6 +162,7 @@ namespace Spawn
 
 #if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
         public float testSpawnIn = 1.0f;
+        public float testSpawnBlockSpeed = 1.0f;
         public bool testSpawn;
         public BlockType.EBlockType testSpawnType = BlockType.EBlockType.Blue;
         
@@ -171,7 +175,7 @@ namespace Spawn
 
             if (BlockType.EBlockTypeIsColorBlock(testSpawnType))
             {
-                SpawnEntity(new SpawnBlockEntity(testSpawnType, testSpawnIn, 1));
+                SpawnEntity(new SpawnBlockEntity(testSpawnType, testSpawnIn, testSpawnBlockSpeed));
             }
             
             testSpawn = false;

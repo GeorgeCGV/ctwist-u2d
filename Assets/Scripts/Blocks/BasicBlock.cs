@@ -124,6 +124,16 @@ namespace Blocks
         /// Layer where all attached blocks are.
         /// </summary>
         private int _blocksLayer;
+       
+        public void AddStartSpeed(float value)
+        {
+            _rigidBody.AddForce(GetGravityDirection() * value, ForceMode2D.Impulse);
+        }
+        
+        public void AddTorque(float value)
+        {
+            _rigidBody.AddTorque(value, ForceMode2D.Impulse);
+        }
 
         private IMatchProperty _matchProperty;
 
@@ -466,7 +476,7 @@ namespace Blocks
         {
             // as long as the block is not attached apply gravitation force
             // object's physics mass is not discarded
-            if (!attached)
+            if (!attached && !Destroyed)
             {
                 _rigidBody.AddForce(GetGravityDirection() * gravityStrength, ForceMode2D.Force);
             }

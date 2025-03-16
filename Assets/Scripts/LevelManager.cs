@@ -820,26 +820,16 @@ public class LevelManager : MonoBehaviour
     /// </remarks>
     public void OnLevelSceneLoaded(LevelData data)
     {
+        AudioManager.Instance.StopMusic();
+
         // disable blocks layer render
         if (Camera.main != null)
         {
             Camera.main.cullingMask &= ~(1 << LayerMask.NameToLayer("blocks"));
         }
 
-#if UNITY_EDITOR 
-        // allows onValidate to start the level with Editor's data
-        if (data == null)
-        {
-            level.ParseInternal();
-        }
-        else
-        {
-            level = data;
-        }
-#else
         Assert.IsNotNull(data, "LevelData is null");
         level = data;
-#endif
 
         // create obstructions
         if (level.obstructionIdx >= 0)
