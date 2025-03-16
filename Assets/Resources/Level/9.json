@@ -27,7 +27,8 @@
         "timeMin": 2,
         "timeMax": 4,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 5
+        "timeDecreaseByTimePercent": 5,
+        "chainedBlockChancePercent": 15
     },
     "block": {
         "speedMin": 3,

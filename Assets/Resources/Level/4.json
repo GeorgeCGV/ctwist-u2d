@@ -22,7 +22,9 @@
         "timeMax": 3,
         "timeDecreasePerTimeLimitPercent": 30,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 25
+        "timeDecreaseByTimePercent": 25,
+        "glowBlockChancePercent": 6,
+        "stoneBlockChancePercent": 5
     },
     "block": {
         "speedMin": 3,

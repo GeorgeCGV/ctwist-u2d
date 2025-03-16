@@ -7,7 +7,7 @@
         "score": 6000
     },
     "limit": {
-        "time": 90
+        "spawn": 32
     },
     "multiplier": {
         "decayTime": 1,
@@ -22,7 +22,8 @@
         "timeMax": 3,
         "timeDecreasePerTimeLimitPercent": 30,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 25
+        "timeDecreaseByTimePercent": 25,
+        "glowBlockChancePercent": 6
     },
     "block": {
         "speedMin": 3,

@@ -35,7 +35,9 @@
         "timeMax": 3,
         "timeDecreasePerTimeLimitPercent": 30,
         "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 25
+        "timeDecreaseByTimePercent": 25,
+        "glowBlockChancePercent": 5,
+        "chainedBlockChancePercent": 10
     },
     "block": {
         "speedMin": 3,

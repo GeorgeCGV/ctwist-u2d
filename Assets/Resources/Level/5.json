@@ -1,39 +1,37 @@
 {
-    "seed": 3,
-    "startBlocksNum": 7,
-    "blocksInLevel": ["red", "blue", "purple", "green", "yellow"],
-    "obstructionIdx": 3,
+    "seed": 19,
+    "startBlocksNum": 10,
+    "blocksInLevel": ["blue", "red", "green"],
+    "obstructionIdx": 1,
     "goal": {
-        "score": 6000
+        "score": 3000
     },
     "limit": {
-        "time": 90
+        "spawn": 25
     },
     "multiplier": {
-        "decayTime": 1,
-        "decayRate": 0.1,
+        "decayTime": 1.5,
+        "decayRate": 0.5,
         "max": 6
     },
     "spawn": {
-        "batchChance": 0.4,
+        "batchChance": 0.15,
         "batchMin": 1,
         "batchMax": 2,
         "timeMin": 1.5,
         "timeMax": 3,
-        "timeDecreasePerTimeLimitPercent": 30,
-        "timeDecreasePerTimeSeconds": 2,
-        "timeDecreaseByTimePercent": 25
+        "timeDecreasePerTimeLimitPercent": 25,
+        "timeDecreaseByTimePercent": 35
     },
     "block": {
-        "speedMin": 3,
+        "speedMin": 3.5,
         "speedMax": 6,
-        "speedIncreasePerTimeLimitPercent": 15,
-        "speedIncreasePerTimeSeconds": 3,
-        "speedIncreaseBySpeedPercent": 15
+        "speedIncreasePerTimeLimitPercent": 10,
+        "speedIncreaseBySpeedPercent": 45
     },
     "starRewards": [
         1000,
-        2500,
-        6000
+        1500,
+        3000
     ]
 }
