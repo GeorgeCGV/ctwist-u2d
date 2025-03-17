@@ -140,7 +140,7 @@ namespace Spawn
                     block = _spawnEntity.Create();
 
                     block.transform.position = transform.position;
-                    block.gravityStrength = _spawnEntity.BlockStartSpeed() * 0.25f;
+                    block.gravityStrength = _spawnEntity.BlockStartSpeed() * 0.5f;
                     block.AddStartSpeed(_spawnEntity.BlockStartSpeed());
                     float torque = _spawnEntity.BlockStartSpeed() * 0.2f;
                     block.AddTorque(Random.Range(-torque, torque));
