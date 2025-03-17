@@ -546,9 +546,11 @@ namespace Blocks
             // get midpoints
             Vector2 thisEdgeMidpoint = (thisEdge.point1 + thisEdge.point2) / 2;
             Vector2 otherEdgeMidpoint = (otherEdge.point1 + otherEdge.point2) / 2;
+            
             // compute and apply rotation between 2 edge midpoints
             Vector2 dir1 = ((Vector2)transform.position - thisEdgeMidpoint).normalized;
             Vector2 dir2 = (otherEdgeMidpoint - (Vector2)otherObj.transform.position).normalized;
+            
             Quaternion rotation = Quaternion.FromToRotation(dir1, dir2);
             transform.rotation *= rotation;
             // set correct position
@@ -682,12 +684,8 @@ namespace Blocks
         public int LinkWithNeighbours(int layer)
         {
             // as the block is now placed, check neighbours
-            // add ourselves (this block) to all of them
-            // however, when something prevents us from doing so
-            // don't collide...
-            // that prevents possible attachment when block collides
-            // with antagonistic neighbour side that doesn't have a neighbour set
-            // draw directions
+            // link this block with neighbours
+            // don't collide if something prevents us from doing so
             Linkage[] neighbours = new Linkage[EdgeIndexes.Length];
             for (int i = 0; i < EdgeOffsets.Length; i++)
             {
