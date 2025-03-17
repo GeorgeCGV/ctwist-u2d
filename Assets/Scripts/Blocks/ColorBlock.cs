@@ -69,6 +69,13 @@ namespace Blocks
 
         #region Block Overrides
         
+        protected override void Awake()
+        {
+            base.Awake();
+            // AnimatorColorIntParam is 0 be default 
+            BlockType = EBlockType.Red;
+        }
+        
         public override bool MatchesWith(BasicBlock other)
         {
             return other.BlockType == BlockType;
