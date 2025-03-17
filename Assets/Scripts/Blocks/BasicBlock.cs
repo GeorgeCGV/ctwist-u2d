@@ -81,6 +81,9 @@ namespace Blocks
             new(), new(), new(), new(), new(), new()
         };
         
+        /// <summary>
+        /// Stores block's edge link/connection to another block.
+        /// </summary>
         private class Connection
         {
             public AnchoredJoint2D Joint;
@@ -457,7 +460,7 @@ namespace Blocks
         /// </remarks>
         protected virtual void Update()
         {
-#if UNITY_EDITOR && DEBUG_BLOCKS
+#if UNITY_EDITOR
             DrawCollider();
             DrawEdgeAttachmentRays();
             DrawNeighbourLinkRays();
@@ -488,68 +491,69 @@ namespace Blocks
         /// <param name="other"></param>
         protected virtual void OnCollisionEnter2D(Collision2D other)
         {
-            // store origin parent for possible restoration
-            Transform initialParent = transform.parent;
-            Vector3 initialPosition = transform.position;
-            Quaternion initialRotation = transform.rotation;
-
             if (attached)
             {
                 // don't need to process already attached ones
                 return;
             }
-            
-            GameObject otherObj = other.gameObject;
 
+            GameObject otherObj = other.gameObject;
             if (otherObj.layer != _blocksLayer)
             {
-                // don't process if the other block is also a "floating" blocks
+                // don't process if collided object is not a block
                 return;
             }
 
-            // add to all blocks layer
-            transform.parent = other.transform.parent;
-
+            // get all contact points
+            List<ContactPoint2D> contacts = new List<ContactPoint2D>();
+            int contactsCount = other.GetContacts(contacts);
+            if (contactsCount == 0)
+            {
+                // shall not happen
+                return;
+            }
+            // compute avg collision point
+            Vector2 avgContactPos = Vector2.zero;
+            for (int i = 0; i < contactsCount; i++)
+            {
+                avgContactPos += contacts[i].point;
+            }
+            avgContactPos /= contactsCount;
+            
+            // store origin parent for possible restoration
+            Transform initialParent = transform.parent;
+            Vector3 initialPosition = transform.position;
+            Quaternion initialRotation = transform.rotation;
+            
             // find other block closes edge to this block
             (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) otherEdge =
-                FindClosestColliderEdge(otherObj.GetComponent<PolygonCollider2D>(),
-                    other.collider.ClosestPoint(transform.position));
-            Debug.DrawLine(otherEdge.point2, otherEdge.point2, Color.green, 3);
+                FindClosestColliderEdge((PolygonCollider2D)other.collider, avgContactPos);
+            Debug.DrawLine(otherEdge.point1, otherEdge.point2, Color.magenta, 3);
 
             // check if other block is alive and the edge is free
             // skip collision processing if it is not
             BasicBlock otherObjBlock = otherObj.GetComponent<BasicBlock>();
-            if (otherObjBlock.Destroyed || otherObjBlock.GetNeighbour(otherEdge.edgeIdx) != null)
+            if (otherObjBlock.Destroyed || otherObjBlock.GetNeighbour(otherEdge.edgeIdx) is not null)
             {
-                transform.parent = initialParent;
                 return;
             }
             
             // find this block closest edge
             (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) thisEdge =
-                FindClosestColliderEdge(GetComponent<PolygonCollider2D>(),
-                    other.collider.ClosestPoint(transform.position));
+                FindClosestColliderEdge(GetComponent<PolygonCollider2D>(), avgContactPos);
             Debug.DrawLine(thisEdge.point1, thisEdge.point2, Color.red, 3);
 
             // get midpoints
             Vector2 thisEdgeMidpoint = (thisEdge.point1 + thisEdge.point2) / 2;
             Vector2 otherEdgeMidpoint = (otherEdge.point1 + otherEdge.point2) / 2;
-
-#if ENABLE_LOGS
-            (Vector2 point1, Vector2 point2, EdgeIndex edgeIdx) computed =
-                FindClosestColliderEdge(otherObj.GetComponent<PolygonCollider2D>(), otherEdgeMidpoint);
-            Logger.Debug($"side (our) {thisEdge.edgeIdx} their {otherEdge.edgeIdx} computed {computed.edgeIdx}");
-#endif // ENABLE_LOGS
-
             // compute and apply rotation between 2 edge midpoints
             Vector2 dir1 = ((Vector2)transform.position - thisEdgeMidpoint).normalized;
             Vector2 dir2 = (otherEdgeMidpoint - (Vector2)otherObj.transform.position).normalized;
             Quaternion rotation = Quaternion.FromToRotation(dir1, dir2);
             transform.rotation *= rotation;
-
             // set correct position
             transform.position = (Vector2)otherObj.transform.position + dir2 * edgeAttachPositionOffset;
-
+            
             if (LinkWithNeighbours(_blocksLayer) == 0)
             {
                 // not able to attach, revert block state
@@ -558,20 +562,23 @@ namespace Blocks
                 transform.rotation = initialRotation;
                 return;
             }
-
+                        
+            // add to activeBLocks parent
+            transform.parent = other.transform.parent;
+            // add to all blocks layer
             gameObject.layer = _blocksLayer;
 
             // prevent physics to have an effect on the object
             _rigidBody.bodyType = RigidbodyType2D.Static;
             _rigidBody.totalForce = Vector2.zero;
-
+            
             // mark as attached
             attached = true;
             
             ParticleSystem efx = NewAttachEfx();
             efx.transform.position = otherEdgeMidpoint;
             efx.Play();
-
+            
             // run match check and scoring
             LevelManager.Instance.OnBlocksAttach(this);
         }
