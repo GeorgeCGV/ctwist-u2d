@@ -39,3 +39,8 @@ University-related activities requires explicit written permission from the auth
   **Creator:** cynicmusic
   **Link:** [https://opengameart.org/content/icy-realm-seven-and-eight](https://opengameart.org/content/icy-realm-seven-and-eight)
   **License:** CC0
+
+- **Name:** Dramatic Trailer Boom with Tension
+  **Creator:** modusmogulus
+  **Link:** [https://freesound.org/people/modusmogulus/sounds/785948/](https://freesound.org/people/modusmogulus/sounds/785948/)
+  **License:** CC0
