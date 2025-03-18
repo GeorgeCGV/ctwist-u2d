@@ -4,25 +4,26 @@ using UnityEngine;
 namespace UI.Level
 {
     /// <summary>
-    /// Object self destructs after fading out.
+    /// Object self-destructs after moving past the screen height.
     /// </summary>
     /// <remarks>
     /// Used for in-game annotations and results view bonus scores.
-    /// The label starts with alpha set to 1.0 (255) that fades
-    /// to 0.0 (0) over set duration. The <c>GameObject</c> is destroyed
-    /// when animation is done.
     /// </remarks>
     [RequireComponent(typeof(TextMeshProUGUI))]
-    public class UISelfDestroyAnnotationFadeOut : MonoBehaviour
+    public class UISelfDestroyAnnotation : MonoBehaviour
     {
         [SerializeField, Min(0.1f)]
         private float duration = 2.0f;
 
+        [SerializeField]
+        private bool animate;
+        
         private TextMeshProUGUI _label;
 
         private float _elapsedTime;
-        private const float StartValue = 255;
-        private const float EndValue = 0;
+        private float _startY;
+        private float _endY;
+        private Vector2 _position;
 
         /// <summary>
         /// /// The game pauses by modifying the timeScale,
@@ -44,6 +45,12 @@ namespace UI.Level
             duration = seconds <= 0 ? duration : seconds;
             _elapsedTime = 0.0f;
             _useUnscaledTime = useUnscaledTime;
+            if (animate)
+            {
+                _position = transform.position;
+                _startY = _position.y;
+                _endY = _startY + Screen.height + _label.preferredHeight;
+            }
         }
 
         /// <summary>
@@ -52,7 +59,6 @@ namespace UI.Level
         private void Awake()
         {
             _label = GetComponent<TextMeshProUGUI>();
-            _label.alpha = StartValue;
         }
 
         private void Update()
@@ -60,11 +66,15 @@ namespace UI.Level
             if (_elapsedTime < duration)
             {
                 _elapsedTime += _useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-                _label.alpha = Mathf.Lerp(StartValue, EndValue, _elapsedTime / duration);
+                
+                if (animate)
+                {
+                    _position.y =  Mathf.Lerp(_startY, _endY, Mathf.Clamp01(_elapsedTime / duration));
+                    transform.position = _position;
+                }
             }
             else
             {
-                _label.alpha = EndValue;
                 Destroy(gameObject);
             }
         }

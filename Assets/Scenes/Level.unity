@@ -20526,6 +20526,7 @@ MonoBehaviour:
   rightBtnLbl: {fileID: 1970500138}
   counterAnimator: {fileID: 10427266}
   sfxStarAppear: {fileID: 8300000, guid: bb22c97426219764c9a82b633ded6d3a, type: 3}
+  testAnnotation: 0
 --- !u!1 &1115640942
 GameObject:
   m_ObjectHideFlags: 0

@@ -39,7 +39,7 @@ namespace UI.Level
         /// <summary>
         /// Self-destructing label prefab to show bonus score points.
         /// </summary>
-        /// <see cref="UISelfDestroyAnnotationFadeOut"/>
+        /// <see cref="UISelfDestroyAnnotation"/>
         [SerializeField]
         private GameObject bonusScorePrefab;
 
@@ -183,6 +183,17 @@ namespace UI.Level
         }
 
         /// <summary>
+        /// Creates new annotation label object using <see cref="bonusScorePrefab"/>.
+        /// </summary>
+        /// <param name="text">Text to display.</param>
+        private void CreateAnnotation(string text)
+        {
+            Assert.IsNotNull(bonusScorePrefab, "missing bonusScorePrefab");
+            GameObject annotation = Instantiate(bonusScorePrefab, transform);
+            annotation.GetComponent<UISelfDestroyAnnotation>().Init(text, 3, true);
+        }
+
+        /// <summary>
         /// Callback from counterAnimator when it is done.
         /// Used to restart counter animations for bonus points.
         /// </summary>
@@ -202,13 +213,7 @@ namespace UI.Level
             {
                 string reason = _bonusKeys[_lastBonusKeyIdx++];
                 int value = _results.BonusScore[reason];
-
-                if (bonusScorePrefab is not null)
-                {
-                    GameObject annotation = Instantiate(bonusScorePrefab, transform);
-                    annotation.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 600);
-                    annotation.GetComponent<UISelfDestroyAnnotationFadeOut>().Init($"{reason} {value}", 1.0f, true);
-                }
+                CreateAnnotation($"{reason} {value}");
 
                 counterAnimator.Animate(value, _bonusKeys != null ? OnCounterAnimationDone : null);
             }
@@ -224,5 +229,21 @@ namespace UI.Level
         {
             AudioManager.Instance.PlaySfx(sfxStarAppear);
         }
+        
+#if UNITY_EDITOR // simple way to extend editor without adding a ton of extra code
+        public bool testAnnotation;
+        
+        private void OnValidate()
+        {
+            if (!testAnnotation)
+            {
+                return;
+            }
+
+            CreateAnnotation($"Test: +10000");
+            
+            testAnnotation = false;
+        }
+#endif // UNITY_EDITOR
     }
 }

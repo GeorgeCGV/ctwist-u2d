@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2216222200870404587}
   - component: {fileID: 7664917135588043234}
   m_Layer: 5
-  m_Name: AnnotationFadeOut
+  m_Name: ScoreAnnotation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

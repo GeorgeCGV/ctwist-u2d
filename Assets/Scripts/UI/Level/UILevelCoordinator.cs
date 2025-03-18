@@ -140,7 +140,7 @@ namespace UI.Level
         /// game announcements (like +X score).
         /// </summary>
         /// <remarks>
-        /// <see cref="UISelfDestroyAnnotationFadeOut"/>
+        /// <see cref="UISelfDestroyAnnotation"/>
         /// </remarks>
         /// <param name="text">Text.</param>
         /// <param name="pos">World position.</param>
@@ -162,7 +162,7 @@ namespace UI.Level
 
             // instantiate with Canvas as parent
             GameObject annotation = Instantiate(annotationPrefab, _canvas.transform);
-            annotation.GetComponent<UISelfDestroyAnnotationFadeOut>().Init(text);
+            annotation.GetComponent<UISelfDestroyAnnotation>().Init(text);
             // render behind pause panel
             annotation.transform.SetSiblingIndex(4);
             annotation.GetComponent<RectTransform>().anchoredPosition = uiPosition;
