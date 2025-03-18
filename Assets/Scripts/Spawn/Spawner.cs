@@ -223,7 +223,7 @@ namespace Spawn
                 else
                 {
                     inSeconds = Mathf.Min(Random.Range(_nextSpawnTime - 0.5f, _nextSpawnTime + 0.5f), 0.1f);
-                    speed = Mathf.Min(Random.Range(_blockSpeed - 1f, _blockSpeed + 1f));
+                    speed = Mathf.Min(Random.Range(_blockSpeed - 0.25f, _blockSpeed + 0.25f));
                 }
 
                 // enqueue new spawn entity
