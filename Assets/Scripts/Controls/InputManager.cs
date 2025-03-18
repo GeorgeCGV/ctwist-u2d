@@ -211,8 +211,9 @@ namespace Controls
                 Vector2 pointerCurrentPos = _camera.ScreenToWorldPoint(input.Position);
                 Vector2 pivot = _activeBlocks.transform.position;
                 float angleDelta = Vector2.SignedAngle(_pointerPressStartPos - pivot, pointerCurrentPos - pivot);
+                // prevent rapid andle change (i.e. pivot crossing)
+                angleDelta = Mathf.Clamp(angleDelta, -2, 2);
                 _angularVelocity += angleDelta * dragSensitivity;
-
                 // update start position, as swipe shall happen from that point
                 _pointerPressStartPos = pointerCurrentPos;
             }
