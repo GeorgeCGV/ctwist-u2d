@@ -371,7 +371,7 @@ namespace Blocks
             int ret = 0;
             for (int i = 0; i < _links.Length; i++)
             {
-                if (_links[i] is not null)
+                if (_links[i].Neighbour is not null)
                 {
                     ret++;
                 }
