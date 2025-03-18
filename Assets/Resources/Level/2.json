@@ -7,7 +7,7 @@
         "score": 3000
     },
     "limit": {
-        "time": 35
+        "time": 45
     },
     "multiplier": {
         "decayTime": 1.5,
@@ -18,16 +18,16 @@
         "batchChance": 0.15,
         "batchMin": 1,
         "batchMax": 2,
-        "timeMin": 1.5,
-        "timeMax": 3,
+        "timeMin": 2,
+        "timeMax": 4,
         "timeDecreasePerTimeLimitPercent": 25,
         "timeDecreaseByTimePercent": 35
     },
     "block": {
-        "speedMin": 3.5,
-        "speedMax": 6,
+        "speedMin": 3,
+        "speedMax": 3.7,
         "speedIncreasePerTimeLimitPercent": 10,
-        "speedIncreaseBySpeedPercent": 45
+        "speedIncreaseBySpeedPercent": 25
     },
     "starRewards": [
         1000,

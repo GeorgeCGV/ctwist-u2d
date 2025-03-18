@@ -4,10 +4,7 @@
     "blocksInLevel": ["green", "yellow", "red"],
     "obstructionIdx": 0,
     "goal": {
-        "score": 3000
-    },
-    "limit": {
-        "spawns": 10
+        "score": 4500
     },
     "multiplier": {
         "decayTime": 1.7,
@@ -22,14 +19,13 @@
     },
     "block": {
         "speedMin": 3,
-        "speedMax": 5,
-        "speedIncreasePerTimeLimitPercent": 10,
+        "speedMax": 3.7,
         "speedIncreasePerTimeSeconds": 3,
-        "speedIncreaseBySpeedPercent": 15
+        "speedIncreaseBySpeedPercent": 20
     },
     "starRewards": [
-        7000,
-        7000,
-        7000
+        4500,
+        4500,
+        4500
     ]
 }

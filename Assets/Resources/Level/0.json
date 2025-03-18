@@ -1,28 +1,25 @@
 {
     "seed": 1,
     "startBlocksNum": 4,
-    "startBlocksChainedBlockChancePercent": 0,
     "blocksInLevel": ["blue","red"],
     "obstructionIdx": 0,
     "goal": {
         "score": 3000
     },
     "multiplier": {
-        "decayTime": 2,
+        "decayTime": 3,
         "decayRate": 0.25,
         "max": 6
     },
     "spawn": {
-        "timeMin": 2,
+        "timeMin": 3,
         "timeMax": 4,
-        "timeDecreasePerTimeLimitPercent": 20,
         "timeDecreasePerTimeSeconds": 2,
         "timeDecreaseByTimePercent": 5
     },
     "block": {
-        "speedMin": 4,
-        "speedMax": 4,
-        "speedIncreasePerTimeLimitPercent": 10,
+        "speedMin": 3,
+        "speedMax": 3.7,
         "speedIncreasePerTimeSeconds": 3,
         "speedIncreaseBySpeedPercent": 15
     },

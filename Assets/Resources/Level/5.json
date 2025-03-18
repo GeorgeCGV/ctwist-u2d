@@ -4,30 +4,32 @@
     "blocksInLevel": ["blue", "red", "green"],
     "obstructionIdx": 1,
     "goal": {
-        "score": 3000
-    },
-    "limit": {
-        "spawn": 25
+        "blocks": [
+            {
+                "type": "red",
+                "amount": 6
+            }
+        ]
     },
     "multiplier": {
         "decayTime": 1.5,
-        "decayRate": 0.5,
+        "decayRate": 0.3,
         "max": 6
     },
     "spawn": {
         "batchChance": 0.15,
         "batchMin": 1,
         "batchMax": 2,
-        "timeMin": 1.5,
-        "timeMax": 3,
+        "timeMin": 2,
+        "timeMax": 4,
         "timeDecreasePerTimeLimitPercent": 25,
         "timeDecreaseByTimePercent": 35
     },
     "block": {
-        "speedMin": 3.5,
-        "speedMax": 6,
+        "speedMin": 3,
+        "speedMax": 4,
         "speedIncreasePerTimeLimitPercent": 10,
-        "speedIncreaseBySpeedPercent": 45
+        "speedIncreaseBySpeedPercent": 15
     },
     "starRewards": [
         1000,
