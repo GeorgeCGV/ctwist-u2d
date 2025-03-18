@@ -20,7 +20,7 @@ namespace Configs
         [SerializeField]
         public int scoreBaseForTimeLimit = 1000;
         [SerializeField]
-        public int scoreBaseTimeFactorForSpawnsLimit = 10;
+        public float scoreBaseTimeFactorForSpawnsLimit = 0.02f;
         [SerializeField]
         public float scoreTimeLimitBonusFactor = 3.0f;
         [SerializeField]
@@ -83,7 +83,7 @@ namespace Configs
         /// <param name="elapsedTime">Level's elapsed time.</param>
         /// <param name="totalSpawned">Amount of spawned blocks during gameplay.</param>
         /// <param name="spawnsLimit">Spawns limit.</param>
-        /// <returns>Bonus scores.</returns>
+        /// <returns>Bonus scores, can be 0.</returns>
         public int ComputeBonusForSpawnLimit(float elapsedTime, int totalSpawned, int spawnsLimit)
         {
             if (spawnsLimit <= 0)
