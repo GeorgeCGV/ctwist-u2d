@@ -71,7 +71,7 @@ namespace UI.Menu
             {
                 return;
             }
-            
+
             // get level stars
             int starsAmount = GameManager.GetLevelStars(id);
             for (int i = 0; i < starsAmount; i++)
@@ -80,7 +80,9 @@ namespace UI.Menu
             }
 
             // highlight level that is unlocked and has no stars
-            highlight.SetActive(starsAmount == 0);
+            highlight.SetActive(starsAmount == 0 ||
+                                GameManager.CurrentLevelId() == id &&
+                                !GameManager.Instance.IsLastLevel(id));
         }
 
         /// <summary>
