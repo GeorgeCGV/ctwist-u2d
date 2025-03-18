@@ -46,7 +46,10 @@ public class LevelManager : MonoBehaviour
 
     [SerializeField]
     public AudioClip backgroundMusic;
-
+    
+    [SerializeField]
+    public AudioClip sfxOnMoreBlocks;
+    
     [SerializeField]
     public AudioClip sfxOnStart;
 
@@ -267,7 +270,7 @@ public class LevelManager : MonoBehaviour
         }
         
         // traverseStopwatch.Stop();
-        // Debug.Log($"TraverseBlocks {traverseStopwatch.ElapsedTicks} ticks {traverseStopwatch.ElapsedMilliseconds} ms");
+        // Logger.Debug($"TraverseBlocks {traverseStopwatch.ElapsedTicks} ticks {traverseStopwatch.ElapsedMilliseconds} ms");
     }
         
     private int Score
@@ -363,9 +366,13 @@ public class LevelManager : MonoBehaviour
             else if (level.limit.Variant() == ELimitVariant.SpawnLimit)
             {
                 // from elapsed time and spawns/moves left
-                bonusScores["+Moves"] = scoreConfig.ComputeBonusForSpawnLimit(_elapsedTime,
+                int movesBonus = scoreConfig.ComputeBonusForSpawnLimit(_elapsedTime,
                     _blocksStats.TotalSpawnedBlocksAmount,
                     level.limit.spawns);
+                if (movesBonus > 0)
+                {
+                    bonusScores["+Moves"] = movesBonus;
+                }
             }
         }
         else
@@ -467,16 +474,13 @@ public class LevelManager : MonoBehaviour
             Assert.IsNotNull(_multiplier, "missing multiplier component");
         }
     }
-    private void Update()
+
+    /// <summary>
+    /// Checks if reached level goals.
+    /// </summary>
+    /// <returns>True if achieved a goal, otherwise False.</returns>
+    private bool CheckGoals()
     {
-        if (!IsRunning())
-        {
-            return;
-        }
-
-        _elapsedTime += Time.deltaTime;
-
-        // check win conditions
         EGoalVariant goal = level.goal.Variant();
         if (goal == EGoalVariant.Score)
         {
@@ -484,8 +488,7 @@ public class LevelManager : MonoBehaviour
             if (_score >= level.goal.score)
             {
                 // won
-                GameOver(true);
-                return;
+                return true;
             }
         }
         else if (goal == EGoalVariant.Blocks)
@@ -508,19 +511,26 @@ public class LevelManager : MonoBehaviour
             if (matchesTarget == 0)
             {
                 // won
-                GameOver(true);
-                return;
+                return true;
             }
         }
 
-        // process level limit(s) condition(s)
+        return false;
+    }
+
+    /// <summary>
+    /// Checks if reached level limit.
+    /// </summary>
+    /// <returns>True if reached a limit, otherwise False.</returns>
+    private bool CheckLimits()
+    {
         ELimitVariant limit = level.limit.Variant();
         if (limit == ELimitVariant.TimeLimit)
         {
             if (IsTimeLimitReached())
             {
                 // lost due to timeout
-                GameOver(false);
+                return true;
             }
         }
         else if (limit == ELimitVariant.SpawnLimit)
@@ -532,9 +542,46 @@ public class LevelManager : MonoBehaviour
                 if (_notAttachedBlocks.Count == 0)
                 {
                     // lost due to no more spawns/moves
-                    GameOver(false);
+                   return true;
                 }
             }
+        }
+        
+        return false;
+    }
+    
+    
+    private void Update()
+    {
+        if (!IsRunning())
+        {
+            return;
+        }
+
+        _elapsedTime += Time.deltaTime;
+
+        // process goals
+        if (CheckGoals())
+        {
+            GameOver(true);
+            return;
+        }
+
+        // process level limit(s) condition(s)
+        if (CheckLimits())
+        {
+            GameOver(false);
+            return;
+        }
+        
+        // the level might get boring when no blocks are present;
+        // create some blocks if central has none
+        int centralLinksCount = _central.LinksCount();
+        if (centralLinksCount == 0)
+        {
+            CreateStartupBlocks((int)Time.deltaTime, Random.Range(2, 7));
+            Instantiate(efxOnStart, _central.transform.position, Quaternion.identity).Play();
+            AudioManager.Instance.PlaySfx(sfxOnMoreBlocks);
         }
     }
 
@@ -577,23 +624,11 @@ public class LevelManager : MonoBehaviour
             
             // notify about matched amounts change
             OnBlocksStatsUpdate?.Invoke(_blocksStats);
-
-            // the level might get boring when no blocks are present;
-            int centralLinksCount = _central.LinksCount();
-            // however, don't do it for the spawn limit mode
-            if (level.limit.Variant() != ELimitVariant.SpawnLimit)
-            {
-                // spawn if we have <= 1 connected links on the central block
-                if (centralLinksCount <= 2)
-                {
-                    _spawner.SpawnRandomEntities(availableBlocks.Count > 2 ? Random.Range(1, 2) : 1);
-                }
-            }
-
+            
             _matchPerformedInFrame = false;
             floatingBlocks.Clear();
         }
-        
+
         // only run if there are any blocks collided
         // with an obstacle/obstruction tm this frame
         if (_obstructedToDestroy.Count != 0)
@@ -808,7 +843,7 @@ public class LevelManager : MonoBehaviour
         _matchPerformedInFrame = true;
         
         // onAttachStopwatch.Stop();
-        // Debug.Log($"onAttach {onAttachStopwatch.ElapsedTicks} ticks {onAttachStopwatch.ElapsedMilliseconds} ms");
+        // Logger.Debug($"onAttach {onAttachStopwatch.ElapsedTicks} ticks {onAttachStopwatch.ElapsedMilliseconds} ms");
     }
 
     /// <summary>
@@ -848,6 +883,7 @@ public class LevelManager : MonoBehaviour
 
         Assert.IsFalse(level.ParsedBlocksInLevel == null || level.ParsedBlocksInLevel.Length == 0,
             "level must have blocks");
+        availableBlocks.Clear(); // clear blocks set in the Editor 
         availableBlocks.AddRange(level.ParsedBlocksInLevel);
 
         _spawner.Init(level, OnSpawnedBlock);
@@ -982,18 +1018,23 @@ public class LevelManager : MonoBehaviour
     public int testSeed;
     public int testSpawnNum;
     public bool testRecreateStartupBlocks;
+    public bool testDestroyAllBlocks;
 
     private void OnValidate()
     {
-        if (!testRecreateStartupBlocks)
+        if (testRecreateStartupBlocks)
         {
-            return;
+            testSeed++;
+            DestroyAllBlocks();
+            CreateStartupBlocks(testSeed, testSpawnNum);
+            testRecreateStartupBlocks = false;
         }
-        
-        testSeed++;
-        DestroyAllBlocks();
-        CreateStartupBlocks(testSeed, testSpawnNum);
-        testRecreateStartupBlocks = false;
+
+        if (testDestroyAllBlocks)
+        {
+            DestroyAllBlocks();
+            testDestroyAllBlocks  = false;
+        }
     }
 #endif // UNITY_EDITOR
 }

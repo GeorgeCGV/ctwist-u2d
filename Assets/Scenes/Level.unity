@@ -27012,6 +27012,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   efxOnStart: {fileID: 4663014793187382286, guid: a9a62cf3b1c8b6249bbc8733a28aa365, type: 3}
   backgroundMusic: {fileID: 8300000, guid: 127dc90fd9d96834bbdedf890be3165d, type: 3}
+  sfxOnMoreBlocks: {fileID: 8300000, guid: 1a0bcd284acd29843b7ffc6882b1f4f7, type: 3}
   sfxOnStart: {fileID: 8300000, guid: 82593e5490d3c414b81e84be1bbfc12a, type: 3}
   sfxOnLost: {fileID: 8300000, guid: 1536f3c6237b54542aa5b4f8a15800a4, type: 3}
   sfxOnWin: {fileID: 8300000, guid: 968f5e3b8a7a12a40808f4a1bbe1e148, type: 3}
@@ -27063,13 +27064,14 @@ MonoBehaviour:
       max: 0
     starRewards: f4010000f4010000f4010000
   scoreConfig: {fileID: 11400000, guid: 0d08571074f2d084d8ac134c153afe69, type: 2}
-  availableBlocks: 01000000
+  availableBlocks: 06000000070000000400000003000000
   obstructionTmParent: {fileID: 418289023}
   sfxOnObstruction: {fileID: 8300000, guid: edf9aeeb496949447abfcb2471b0322a, type: 3}
   obstructionTilemaps: {fileID: 11400000, guid: 7bbd906956a76f840b32cacdbe5b6f34, type: 2}
-  testSeed: 18
-  testSpawnNum: 37
+  testSeed: 3
+  testSpawnNum: 7
   testRecreateStartupBlocks: 0
+  testDestroyAllBlocks: 0
 --- !u!4 &1617644880
 Transform:
   m_ObjectHideFlags: 0
