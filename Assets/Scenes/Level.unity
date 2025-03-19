@@ -26744,11 +26744,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35bc1a6f6d513284588c434e6a444129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sensitivity: 0.6
-  dragSensitivity: 7
-  decayRate: 2.7
+  sensitivity: 6
+  dragSensitivity: 10
+  decayRate: 1.2
   minAngularVelocity: 0.01
-  swipeSpeedLimit: 30
+  swipeSpeedLimit: 40
 --- !u!114 &1608167287
 MonoBehaviour:
   m_ObjectHideFlags: 0
