@@ -28,7 +28,7 @@ namespace UI.Level
         /// <param name="currentAmount">Current matches amount.</param>
         public void UpdateMatchesLeft(int currentAmount)
         {
-            label.text = Math.Max(_targetMatches - currentAmount, 0).ToString();
+            label.text = $"{Math.Max(_targetMatches - currentAmount, 0)}";
         }
 
         /// <summary>

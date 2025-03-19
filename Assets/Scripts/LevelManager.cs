@@ -493,6 +493,13 @@ public class LevelManager : MonoBehaviour
         }
         else if (goal == EGoalVariant.Blocks)
         {
+#if !UNITY_EDITOR
+            // hack: fix block goals label update
+            // outside of unity it doesn't go to 0
+            // after the match has updated it in the LateUpdate;
+            // re-setting it here works as in the Editor...
+            OnBlocksStatsUpdate?.Invoke(_blocksStats);
+#endif
             // check for all match goals to be complete
             int matchesTarget = level.goal.blocks.Length;
             foreach (BlocksGoal blocksGoal in level.goal.blocks)
@@ -571,17 +578,6 @@ public class LevelManager : MonoBehaviour
         if (CheckLimits())
         {
             GameOver(false);
-            return;
-        }
-        
-        // the level might get boring when no blocks are present;
-        // create some blocks if central has none
-        int centralLinksCount = _central.LinksCount();
-        if (centralLinksCount == 0)
-        {
-            CreateStartupBlocks((int)Time.deltaTime, Random.Range(2, 7));
-            Instantiate(efxOnStart, _central.transform.position, Quaternion.identity).Play();
-            AudioManager.Instance.PlaySfx(sfxOnMoreBlocks);
         }
     }
 
@@ -627,6 +623,16 @@ public class LevelManager : MonoBehaviour
             
             _matchPerformedInFrame = false;
             floatingBlocks.Clear();
+            
+        
+            // the level might get boring when no blocks are present;
+            // create some blocks if central has none
+            if (_central.LinksCount() == 0)
+            {
+                CreateStartupBlocks((int)Time.deltaTime, Random.Range(2, 7));
+                Instantiate(efxOnStart, _central.transform.position, Quaternion.identity).Play();
+                AudioManager.Instance.PlaySfx(sfxOnMoreBlocks);
+            }
         }
 
         // only run if there are any blocks collided
